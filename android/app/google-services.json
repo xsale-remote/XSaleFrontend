@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "16381147492",
+    "project_id": "x-sale-da7c4",
+    "storage_bucket": "x-sale-da7c4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:16381147492:android:68268c316b3904125c6271",
+        "android_client_info": {
+          "package_name": "com.Xsale"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDk6BS5XObs9ogm6mOXlmm_PrhNJ_aySsU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

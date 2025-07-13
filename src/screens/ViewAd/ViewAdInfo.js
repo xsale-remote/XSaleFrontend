@@ -266,6 +266,7 @@ const ViewAdInfo = ({navigation, route}) => {
   };
 
   const handleChat = async () => {
+    setChatLoading(true);
     try {
       if (!userData) {
         ToastAndroid.showWithGravityAndOffset(
@@ -627,7 +628,7 @@ const ViewAdInfo = ({navigation, route}) => {
               )}
             </View>
 
-            <View style={{width: '100%', marginBottom: 20 ,  marginTop : 10}}>
+            <View style={{width: '100%', marginBottom: 20, marginTop: 10}}>
               <BannerAd
                 size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
                 unitId={'ca-app-pub-9372794286829313/7614063803'}
@@ -674,7 +675,7 @@ const ViewAdInfo = ({navigation, route}) => {
                 // label={'Chat'}
                 label={
                   chatLoading ? (
-                    <ActivityIndicator size={'small'} color={colors.black} />
+                    <ActivityIndicator size={'small'} color={colors.black} style={{alignSelf : "center"}}/>
                   ) : (
                     'Chat'
                   )
@@ -683,11 +684,13 @@ const ViewAdInfo = ({navigation, route}) => {
                 style={[
                   {
                     width: '45%',
-                    backgroundColor: 'transparent',
+                    backgroundColor: 'white',
                     borderWidth: 1,
                   },
                 ]}
                 onPress={handleChat}
+                isLoading={chatLoading}
+                loaderColor={colors.black}
               />
 
               <Button

@@ -458,7 +458,7 @@ const Location = ({navigation, route}) => {
           Other Location
         </Text>
       </View>
-      <View style={{width: '100%', borderWidth:1}}>
+      <View style={{width: '100%'}}>
         <BannerAd
           size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
           unitId={'ca-app-pub-9372794286829313/8312337303'}

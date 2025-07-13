@@ -978,19 +978,20 @@ const SubCategory = ({navigation, route}) => {
               numColumns={3}
             />
           )}
+
+          <View style={{width: '100%'}}>
+            <BannerAd
+              size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+              unitId={'ca-app-pub-9372794286829313/9740150801'}
+              onAdFailedToLoad={error => {
+                console.log('Ad failed to load:', error);
+              }}
+              onAdLoaded={() => {
+                console.log('Ad loaded successfully');
+              }}
+            />
+          </View>
         </View>
-      </View>
-      <View style={{width: '100%' , borderWidth : 1}}>
-        <BannerAd
-          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          unitId={'ca-app-pub-9372794286829313/9740150801'}
-          onAdFailedToLoad={error => {
-            console.log('Ad failed to load:', error);
-          }}
-          onAdLoaded={() => {
-            console.log('Ad loaded successfully');
-          }}
-        />
       </View>
     </SafeAreaView>
   );

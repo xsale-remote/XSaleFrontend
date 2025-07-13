@@ -303,6 +303,7 @@ const ChageInfo = ({navigation}) => {
             )
           }
           disable={profileUploading ? true : false}
+          isLoading={loading}
         />
         <UploadModal
           label={'Upload Image'}

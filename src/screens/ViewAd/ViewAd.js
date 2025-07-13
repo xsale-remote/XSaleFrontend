@@ -2444,10 +2444,10 @@ const ViewAd = ({navigation, route}) => {
             </View>
           )}
 
-          <View style={{width: '100%', marginBottom: 20, marginTop : 10}}>
+          <View style={{width: '100%', marginBottom: 20, marginTop: 10}}>
             <BannerAd
               size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-              unitId={'ca-app-pub-9372794286829313/7614063803'}
+              unitId={'ca-app-pub-9372794286829313/2903257633'}
               onAdFailedToLoad={error => {
                 console.log('Ad failed to load:', error);
               }}
@@ -2489,6 +2489,7 @@ const ViewAd = ({navigation, route}) => {
               textStyle={[styles.fwBold, styles.ts18]}
               onPress={checkPaymentVerification}
               disable={isLoading}
+              isLoading={isLoading}
             />
           </View>
         </View>

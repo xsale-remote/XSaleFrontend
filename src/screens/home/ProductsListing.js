@@ -914,7 +914,7 @@ const ProductsListing = ({navigation, route}) => {
 
 
   const modifiedSubCategory = [...subCategoryItems.flat()];
-  const subCategoryIntervalue = 8;
+  const subCategoryIntervalue = 6;
   for (
     let i = subCategoryIntervalue;
     i < modifiedSubCategory.length;

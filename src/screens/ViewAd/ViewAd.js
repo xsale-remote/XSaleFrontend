@@ -24,6 +24,7 @@ import {formatPriceIndian} from '../../utils/function.js';
 import {RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET} from '../../utils/env';
 import RazorpayCheckout from 'react-native-razorpay';
 import {getUserInfo} from '../../utils/function.js';
+import analytics from '@react-native-firebase/analytics';
 
 const {height, width} = Dimensions.get('window');
 const adUnitId = __DEV__
@@ -2152,26 +2153,43 @@ const ViewAd = ({navigation, route}) => {
       const options = {
         description: 'Order Payment',
         currency: 'INR',
-        key: RAZORPAY_KEY_ID, // Replace with your API key
-        amount: amount, // Amount in paise (e.g., 100.00 INR = 10000 paise)
+        key: RAZORPAY_KEY_ID,
+        amount: amount,
         name: 'XSale',
         prefill: {
-          contact: userNumber, // Optional
-          name: userName, // Optional
+          contact: userNumber,
+          name: userName,
         },
-        theme: {color: '#fff'}, // Optional
-        // method: 'upi',
+        theme: {color: '#fff'},
         method: {upi: true},
       };
 
+      // new code
       RazorpayCheckout.open(options)
-        .then(data => {
-          // Handle success
-          createItem();
-          console.log(`Success: ${data.razorpay_payment_id}`);
+        .then(async data => {
+
+          await analytics().logEvent('listing_fee_payment', {
+            value: 29.0, 
+            currency: 'INR',
+            category : categoryName
+          });
+
+          try {
+            await createItem();
+            await analytics().logEvent('upload_item', {
+              category: 'listing',
+              item_category: itemDetails.categoryName,
+              location: `${itemDetails.itemLatitude},${itemDetails.itemLongitude}`,
+              payment_required: true,
+            });
+          } catch (err) {
+            console.error('Item creation failed after payment:', err);
+            alert(
+              'Payment successful, but item upload failed. Please try again.',
+            );
+          }
         })
         .catch(error => {
-          // Handle failure
           console.log(error, 'this is error');
           console.log(`Error: ${error.code} | ${error.description}`);
           alert('Payment not completed. Your ad could not be uploaded.');

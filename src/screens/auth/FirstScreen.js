@@ -8,6 +8,7 @@ import UpdateModal from '../../component/shared/UpdateModal';
 import {get, post} from '../../utils/requestBuilder';
 import messaging from '@react-native-firebase/messaging';
 import EncryptedStorage from 'react-native-encrypted-storage';
+import { Settings, AppEventsLogger} from 'react-native-fbsdk-next';
 
 const FirstScreen = ({navigation}) => {
   const [currentVersion, setCurrentVersion] = useState('');
@@ -23,6 +24,12 @@ const FirstScreen = ({navigation}) => {
       console.log(`error while getting token ${error}`);
     }
   };
+
+ useEffect(() => {
+    Settings.initializeSDK();
+    AppEventsLogger.logEvent("fb_mobile_activate_app");
+  }, []);
+
 
   useEffect(() => {
     getToken();

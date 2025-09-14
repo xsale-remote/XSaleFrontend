@@ -14,8 +14,8 @@ android {
         applicationId "com.Xsale"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 7
-        versionName "1.4"
+        versionCode 15
+        versionName "1.5.4"
     }
     signingConfigs {
         debug {
@@ -48,6 +48,7 @@ android {
 }
 
 dependencies {
+    implementation('com.facebook.android:facebook-android-sdk:16.3.0') 
     implementation("com.facebook.react:react-android")
     implementation("com.facebook.react:flipper-integration")
     implementation(platform("com.google.firebase:firebase-bom:33.0.0"))

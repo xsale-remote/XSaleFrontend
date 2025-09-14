@@ -622,18 +622,15 @@ const MyAdsCard = ({
     <Pressable
       style={[{height: 125, overflow: 'hidden'}, styles.fdRow, cardStyle]}>
       <View style={[{width: '30%', backgroundColor: colors.black}]}>
-        <FastImage
-          source={{
-            uri: firstImage,
-            cache: FastImage.cacheControl.web,
-            priority: FastImage.priority.normal,
-          }}
+
+        <Image
+          source={{uri: firstImage}}
           style={{
             height: '100%',
             width: '90%',
             resizeMode: 'contain',
             tintColor: !firstImage ? colors.white : null,
-            alignSelf : "center"
+            alignSelf: 'center',
           }}
         />
       </View>

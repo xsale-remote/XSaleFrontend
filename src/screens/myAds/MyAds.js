@@ -321,57 +321,6 @@ const MyAds = ({navigation, route}) => {
         ]}>
         My Ads
       </Text>
-
-      {/* <View
-        style={[
-          styles.fdRow,
-          styles.mt12,
-          styles.pdh8,
-          {
-            height: 50,
-            width: '100%',
-            justifyContent: 'space-between',
-          },
-        ]}>
-        <TouchableOpacity onPress={() => setSelectedCategory('Ads')}>
-          <Animated.View
-            style={[
-              animatedStyle(adsButtonAnim),
-              {
-                flex: 1,
-                marginHorizontal: 8,
-                height: '90%',
-                justifyContent: 'center',
-                alignItems: 'center',
-                borderRadius: 12,
-                width: 150,
-              },
-            ]}>
-            <Animated.Text style={animatedTextStyle(adsButtonAnim)}>
-              Ads
-            </Animated.Text>
-          </Animated.View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setSelectedCategory('Buy Premium')}>
-          <Animated.View
-            style={[
-              animatedStyle(premiumButtonAnim),
-              {
-                flex: 1,
-                marginHorizontal: 8,
-                height: '90%',
-                justifyContent: 'center',
-                alignItems: 'center',
-                borderRadius: 12,
-                width: 150,
-              },
-            ]}>
-            <Animated.Text style={animatedTextStyle(premiumButtonAnim)}>
-              Buy Premium
-            </Animated.Text>
-          </Animated.View>
-        </TouchableOpacity>
-      </View> */}
       <View
         style={[
           {

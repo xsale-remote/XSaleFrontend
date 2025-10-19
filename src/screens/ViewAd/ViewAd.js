@@ -27,9 +27,6 @@ import {getUserInfo} from '../../utils/function.js';
 import analytics from '@react-native-firebase/analytics';
 
 const {height, width} = Dimensions.get('window');
-const adUnitId = __DEV__
-  ? TestIds.ADAPTIVE_BANNER
-  : 'ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyyyyyy';
 const ViewAd = ({navigation, route}) => {
   const itemDetails = route.params;
   const [isLoading, setIsLoading] = useState(false);
@@ -2167,11 +2164,10 @@ const ViewAd = ({navigation, route}) => {
       // new code
       RazorpayCheckout.open(options)
         .then(async data => {
-
           await analytics().logEvent('listing_fee_payment', {
-            value: 29.0, 
+            value: 29.0,
             currency: 'INR',
-            category : categoryName
+            category: categoryName,
           });
 
           try {
@@ -2331,8 +2327,21 @@ const ViewAd = ({navigation, route}) => {
               {itemDetails.fullAddress}
             </Text>
           </View>
+          <View style={[styles.mt20]}>
+            <BannerAd
+              unitId={`ca-app-pub-9372794286829313/3411561192`}
+              size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
+              onAdFailedToLoad={error => {
+                console.log('Ad failed to load:', error);
+              }}
+              onAdLoaded={() => {
+                console.log('Ad loaded successfully');
+              }}
+            />
+          </View>
+
           <View style={[styles.mt12]}>
-            <Text style={[styles.ts17, {color: colors.black}]}>
+            <Text style={[styles.ts17, styles.h2, {color: colors.black}]}>
               Additional Details
             </Text>
 
@@ -2484,16 +2493,6 @@ const ViewAd = ({navigation, route}) => {
               name={itemDetails.userName}
               customerId={itemDetails.userId}
               userImage={profilePicture}
-            />
-            <BannerAd
-              unitId={`ca-app-pub-9372794286829313/3411561192`}
-              size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
-              onAdFailedToLoad={error => {
-                console.log('Ad failed to load:', error);
-              }}
-              onAdLoaded={() => {
-                console.log('Ad loaded successfully');
-              }}
             />
             <Button
               label={

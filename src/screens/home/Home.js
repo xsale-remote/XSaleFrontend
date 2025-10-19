@@ -27,9 +27,6 @@ import {BannerAd, TestIds, BannerAdSize} from 'react-native-google-mobile-ads';
 import {Button} from 'react-native-share';
 import messaging from "@react-native-firebase/messaging"
 
-const adUnitId = __DEV__
-  ? TestIds.ADAPTIVE_BANNER
-  : 'ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyyyyyy';
 
 const Home = ({navigation}) => {
   const [homeAds, setHomeAds] = useState([]);

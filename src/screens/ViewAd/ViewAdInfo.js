@@ -24,13 +24,16 @@ import {Button} from '../../component/shared';
 import Video from 'react-native-video';
 import {SellerProfile} from '../../component/viewAd.js';
 import {getUserInfo} from '../../utils/function.js';
-import {BannerAd, TestIds, BannerAdSize} from 'react-native-google-mobile-ads';
+import {
+  BannerAd,
+  TestIds,
+  BannerAdSize,
+  InterstitialAd,
+  AdEventType,
+} from 'react-native-google-mobile-ads';
 import {formatPriceIndian} from '../../utils/function.js';
 
 const {height, width} = Dimensions.get('window');
-const adUnitId = __DEV__
-  ? TestIds.ADAPTIVE_BANNER
-  : 'ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyyyyyy';
 
 const ViewAdInfo = ({navigation, route}) => {
   const {adId, likeFunction, parentId, userId, isLiked, useChildren, forHome} =
@@ -177,11 +180,44 @@ const ViewAdInfo = ({navigation, route}) => {
             styles.pdh16,
             {width: widthRef.current, height: height * 0.27},
           ]}
-          onPress={() =>
-            navigation.navigate('AdsMedia', {
-              mediaUriArray: mediaArray,
-            })
-          }>
+          onPress={() => {
+            const interstitialAdUnitId =
+              'ca-app-pub-9372794286829313/2109975439';
+            const interstitial =
+              InterstitialAd.createForAdRequest(interstitialAdUnitId);
+
+            const unsubscribe = interstitial.addAdEventListener(
+              AdEventType.LOADED,
+              () => {
+                interstitial.show();
+              },
+            );
+
+            const unsubscribeClose = interstitial.addAdEventListener(
+              AdEventType.CLOSED,
+              () => {
+                unsubscribe();
+                unsubscribeClose();
+                navigation.navigate('AdsMedia', {
+                  mediaUriArray: mediaArray,
+                });
+              },
+            );
+
+            const unsubscribeError = interstitial.addAdEventListener(
+              AdEventType.ERROR,
+              () => {
+                unsubscribe();
+                unsubscribeClose();
+                unsubscribeError();
+                navigation.navigate('AdsMedia', {
+                  mediaUriArray: mediaArray,
+                });
+              },
+            );
+
+            interstitial.load();
+          }}>
           <Video
             source={{uri: item}}
             style={{width: '80%', height: '80%', alignSelf: 'center'}}
@@ -199,11 +235,44 @@ const ViewAdInfo = ({navigation, route}) => {
             styles.pdh16,
             {width: widthRef.current, height: height * 0.27},
           ]}
-          onPress={() =>
-            navigation.navigate('AdsMedia', {
-              mediaUriArray: mediaArray,
-            })
-          }>
+          onPress={() => {
+            const interstitialAdUnitId =
+              'ca-app-pub-9372794286829313/2109975439';
+            const interstitial =
+              InterstitialAd.createForAdRequest(interstitialAdUnitId);
+
+            const unsubscribe = interstitial.addAdEventListener(
+              AdEventType.LOADED,
+              () => {
+                interstitial.show();
+              },
+            );
+
+            const unsubscribeClose = interstitial.addAdEventListener(
+              AdEventType.CLOSED,
+              () => {
+                unsubscribe();
+                unsubscribeClose();
+                navigation.navigate('AdsMedia', {
+                  mediaUriArray: mediaArray,
+                });
+              },
+            );
+
+            const unsubscribeError = interstitial.addAdEventListener(
+              AdEventType.ERROR,
+              () => {
+                unsubscribe();
+                unsubscribeClose();
+                unsubscribeError();
+                navigation.navigate('AdsMedia', {
+                  mediaUriArray: mediaArray,
+                });
+              },
+            );
+
+            interstitial.load();
+          }}>
           <Image
             source={{uri: item}}
             style={{width: '100%', height: '100%', alignSelf: 'center'}}
@@ -266,6 +335,39 @@ const ViewAdInfo = ({navigation, route}) => {
   };
 
   const handleChat = async () => {
+    const interstitialAdUnitId = 'ca-app-pub-9372794286829313/5873126475';
+    const interstitial =
+      InterstitialAd.createForAdRequest(interstitialAdUnitId);
+
+    // Load the interstitial ad
+    interstitial.load();
+
+    // Add event listener for the ad
+    const unsubscribe = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        interstitial.show();
+      },
+    );
+
+    // Listen for when the ad is closed or error occurs, then navigate to chat
+    const unsubscribeClose = interstitial.addAdEventListener(
+      AdEventType.CLOSED,
+      () => {
+        unsubscribe();
+        unsubscribeClose();
+      },
+    );
+
+    const unsubscribeError = interstitial.addAdEventListener(
+      AdEventType.ERROR,
+      () => {
+        unsubscribe();
+        unsubscribeClose();
+        unsubscribeError();
+      },
+    );
+
     setChatLoading(true);
     try {
       if (!userData) {
@@ -336,23 +438,140 @@ const ViewAdInfo = ({navigation, route}) => {
     setChatLoading(false);
   };
 
+  // const handleCall = phoneNumber => {
+  //   let phoneUrl = `tel:${phoneNumber}`;
+  //   const interstitialAdUnitId = 'ca-app-pub-9372794286829313/6171481709';
+  //   const interstitial =
+  //     InterstitialAd.createForAdRequest(interstitialAdUnitId);
+
+  //   // Load the interstitial ad
+  //   interstitial.load();
+
+  //   // Add event listener for the ad
+  //   const unsubscribe = interstitial.addAdEventListener(
+  //     AdEventType.LOADED,
+  //     () => {
+  //       interstitial.show();
+  //     },
+  //   );
+
+  //   // Listen for when the ad is closed or error occurs, then navigate to chat
+  //   const unsubscribeClose = interstitial.addAdEventListener(
+  //     AdEventType.CLOSED,
+  //     () => {
+  //       unsubscribe();
+  //       unsubscribeClose();
+  //     },
+  //   );
+
+  //   const unsubscribeError = interstitial.addAdEventListener(
+  //     AdEventType.ERROR,
+  //     () => {
+  //       unsubscribe();
+  //       unsubscribeClose();
+  //       unsubscribeError();
+  //     },
+  //   );
+
+  //   try {
+  //     if (!userData) {
+  //       ToastAndroid.showWithGravityAndOffset(
+  //         'You are not logged in, please login first',
+  //         ToastAndroid.LONG,
+  //         ToastAndroid.BOTTOM,
+  //         25,
+  //         50,
+  //       );
+  //     } else {
+  //       Linking.canOpenURL(phoneUrl)
+  //         .then(supported => {
+  //           // if (!supported) {
+  //           //   console.log("Can't handle url: " + phoneUrl);
+  //           // } else {
+  //           // }
+  //           return Linking.openURL(phoneUrl);
+  //         })
+  //         .catch(err => console.error('An error occurred', err));
+  //     }
+  //   } catch (error) {
+  //     console.log('error while calling user');
+  //   }
+  // };
+
   const handleCall = phoneNumber => {
     let phoneUrl = `tel:${phoneNumber}`;
-    try {
+    const interstitialAdUnitId = 'ca-app-pub-9372794286829313/6171481709';
+    const interstitial =
+      InterstitialAd.createForAdRequest(interstitialAdUnitId);
+
+    // Function to open the phone dialer
+    const openPhoneApp = () => {
       Linking.canOpenURL(phoneUrl)
         .then(supported => {
-          // if (!supported) {
-          //   console.log("Can't handle url: " + phoneUrl);
-          // } else {
-          // }
-          return Linking.openURL(phoneUrl);
+          if (supported) {
+            Linking.openURL(phoneUrl);
+          } else {
+            console.log("Can't handle url: " + phoneUrl);
+          }
         })
-        .catch(err => console.error('An error occurred', err));
-    } catch (error) {
-      console.log('error while calling user');
-    }
-  };
+        .catch(err => console.error('Error opening phone app', err));
+    };
 
+    // Load the interstitial ad
+    interstitial.load();
+
+    // Add event listener for ad loaded event to show ad
+    const unsubscribeLoad = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        interstitial.show();
+      },
+    );
+
+    // After ad is closed, check login and open phone app
+    const unsubscribeClose = interstitial.addAdEventListener(
+      AdEventType.CLOSED,
+      () => {
+        unsubscribeLoad();
+        unsubscribeClose();
+        unsubscribeError();
+
+        if (!userData) {
+          ToastAndroid.showWithGravityAndOffset(
+            'You are not logged in, please login first',
+            ToastAndroid.LONG,
+            ToastAndroid.BOTTOM,
+            25,
+            50,
+          );
+        } else {
+          openPhoneApp();
+        }
+      },
+    );
+
+    // On ad error, also open phone app so user is not blocked
+    const unsubscribeError = interstitial.addAdEventListener(
+      AdEventType.ERROR,
+      () => {
+        unsubscribeLoad();
+        unsubscribeClose();
+        unsubscribeError();
+
+        if (!userData) {
+          ToastAndroid.showWithGravityAndOffset(
+            'You are not logged in, please login first',
+            ToastAndroid.LONG,
+            ToastAndroid.BOTTOM,
+            25,
+            50,
+          );
+        } else {
+          openPhoneApp();
+        }
+      },
+    );
+  };
   return (
     <SafeAreaView style={[styles.pdt16, {flex: 1}]}>
       {loading ? (
@@ -486,10 +705,16 @@ const ViewAdInfo = ({navigation, route}) => {
                 </Text>
               </View>
               <View style={[styles.mt12]}>
-                <Text style={[styles.ts17, {color: colors.black}]}>
+                <View style={[styles.mt8, styles.mb12]}>
+                  <BannerAd
+                    unitId={'ca-app-pub-9372794286829313/9854241697'}
+                    size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
+                  />
+                </View>
+
+                <Text style={[styles.ts17, styles.h2, {color: colors.black}]}>
                   Additional Details
                 </Text>
-
                 <View style={[styles.pdt8, styles.mt4]}>
                   {Object.entries(additionalInformation).map(([key, value]) => {
                     // Determine the display text for age and height
@@ -529,6 +754,19 @@ const ViewAdInfo = ({navigation, route}) => {
                     );
                   })}
                 </View>
+              </View>
+
+              <View style={{width: '100%', marginBottom: 20, marginTop: 10 }}>
+                <BannerAd
+                  size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+                  unitId={'ca-app-pub-9372794286829313/7614063803'}
+                  onAdFailedToLoad={error => {
+                    console.log('Ad failed to load:', error);
+                  }}
+                  onAdLoaded={() => {
+                    console.log('Ad loaded successfully');
+                  }}
+                />
               </View>
 
               {/*  for disclaimer */}
@@ -628,19 +866,6 @@ const ViewAdInfo = ({navigation, route}) => {
               )}
             </View>
 
-            <View style={{width: '100%', marginBottom: 20, marginTop: 10}}>
-              <BannerAd
-                size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-                unitId={'ca-app-pub-9372794286829313/7614063803'}
-                onAdFailedToLoad={error => {
-                  console.log('Ad failed to load:', error);
-                }}
-                onAdLoaded={() => {
-                  console.log('Ad loaded successfully');
-                }}
-              />
-            </View>
-
             <View style={[, styles.mb28, styles.mt8, styles.pdh16]}>
               <Text style={[styles.ts18, {color: colors.black}]}>
                 Seller Profile
@@ -650,13 +875,6 @@ const ViewAdInfo = ({navigation, route}) => {
                 name={userDetails?.userName}
                 customerId={userDetails?._id}
                 userImage={userDetails?.profilePicture}
-              />
-            </View>
-
-            <View>
-              <BannerAd
-                unitId={'ca-app-pub-9372794286829313/9854241697'}
-                size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
               />
             </View>
           </ScrollView>
@@ -675,7 +893,11 @@ const ViewAdInfo = ({navigation, route}) => {
                 // label={'Chat'}
                 label={
                   chatLoading ? (
-                    <ActivityIndicator size={'small'} color={colors.black} style={{alignSelf : "center"}}/>
+                    <ActivityIndicator
+                      size={'small'}
+                      color={colors.black}
+                      style={{alignSelf: 'center'}}
+                    />
                   ) : (
                     'Chat'
                   )

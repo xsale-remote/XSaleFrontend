@@ -1,6 +1,5 @@
 import {base_url} from './env';
 import EncryptedStorage from 'react-native-encrypted-storage';
-// get api call function
 
 import axios from 'axios';
 
@@ -33,7 +32,7 @@ export const get = async (url, useToken = false) => {
 };
 
 // patch api call function
-export const patch = async (url, body, token = true, name) => {
+export const patch = async (url, body, token = true) => {
   try {
     let headers = new Headers();
     headers.append('x-encrypted-key', tenantId);
@@ -59,7 +58,7 @@ export const patch = async (url, body, token = true, name) => {
       return {status: response.status, response};
     }
   } catch (error) {
-    console.log(name, ' :', error);
+    console.log("Post request builder error: " , error);
   }
 };
 

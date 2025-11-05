@@ -10,24 +10,208 @@ import {
   Dimensions,
   Pressable,
   ActivityIndicator,
+  StyleSheet,
+  Modal,
+  Alert,
 } from 'react-native';
 import colors from '../../assets/colors';
 import styles from '../../assets/styles';
 import icons from '../../assets/icons';
-import {Button} from '../../component/shared';
+import {Button, RateUsModal} from '../../component/shared';
 import {SellerProfile} from '../../component/viewAd.js';
 import {post} from '../../utils/requestBuilder.js';
 import Video from 'react-native-video';
 import {ProductUploadModal} from '../../component/Home';
-import {BannerAd, BannerAdSize, TestIds} from 'react-native-google-mobile-ads';
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+  RewardedAd,
+  RewardedAdEventType,
+} from 'react-native-google-mobile-ads';
 import {formatPriceIndian} from '../../utils/function.js';
 import {RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET} from '../../utils/env';
 import RazorpayCheckout from 'react-native-razorpay';
 import {getUserInfo} from '../../utils/function.js';
 import analytics from '@react-native-firebase/analytics';
+import {useNavigation} from '@react-navigation/native';
 
 const {height, width} = Dimensions.get('window');
+
+
+
+const RewardModal = ({
+  visible,
+  onClose,
+  rewardData,
+  adViewCount,
+  onAdView,
+  onDirectPayment,
+}) => {
+  const requiredViews = rewardData?.requiredViews || 5;
+  const discountedAmount = rewardData?.discountedAmount || 0;
+  const originalAmount = rewardData?.originalAmount || 2900;
+
+  const discountUnlocked = discountedAmount > 0 && adViewCount >= requiredViews;
+
+  const discountedPriceInRupees = discountedAmount / 100;
+  const originalPriceInRupees = originalAmount / 100;
+
+  const buttonText = discountUnlocked
+    ? `Upload for ₹${discountedPriceInRupees}`
+    : `Pay ₹${originalPriceInRupees} Instead`;
+
+  const modalText = discountUnlocked
+    ? `Your price is now ₹${discountedPriceInRupees}! Click below to upload your ad.`
+    : `Watch ${requiredViews} short ads and upload your ad for just ₹${discountedPriceInRupees} instead of ₹${originalPriceInRupees}!`;
+
+  return (
+    <Modal visible={visible} transparent animationType="slide">
+      <View style={modalStyle.modalOverlay}>
+        <View style={modalStyle.modalContainer}>
+          <Text style={modalStyle.modalTitle}>🎉 Special Offer! 🎉</Text>
+
+          <Text style={modalStyle.modalText}>{modalText}</Text>
+
+          {!discountUnlocked && (
+            <Text style={modalStyle.progressText}>
+              Progress: {adViewCount} / {requiredViews} ads watched
+            </Text>
+          )}
+
+          <View style={modalStyle.buttonContainer}>
+            {!discountUnlocked && (
+              <TouchableOpacity
+                style={modalStyle.watchAdButton}
+                onPress={onAdView}>
+                <Text style={modalStyle.buttonText}>
+                  Watch Ad ({adViewCount}/{requiredViews})
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            {discountUnlocked && (
+              <TouchableOpacity
+                style={modalStyle.payButton}
+                onPress={onDirectPayment}>
+                <Text style={modalStyle.buttonText}>{buttonText}</Text>
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity style={modalStyle.cancelButton} onPress={onClose}>
+              <Text style={modalStyle.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+const modalStyle = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  modalText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 15,
+    color: '#666',
+    lineHeight: 22,
+  },
+  highlight: {
+    color: '#FF6B35',
+    fontWeight: 'bold',
+  },
+  progressText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+    fontWeight: '500',
+  },
+  buttonContainer: {
+    width: '100%',
+  },
+  watchAdButton: {
+    backgroundColor: '#4CAF50',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+  },
+  payButton: {
+    backgroundColor: '#2196F3',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+  },
+  cancelButton: {
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: '#f8f8f8',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  cancelButtonText: {
+    color: '#666',
+    fontWeight: '500',
+  },
+});
+
 const ViewAd = ({navigation, route}) => {
+    // const navigation = useNavigation();
   const itemDetails = route.params;
   const [isLoading, setIsLoading] = useState(false);
   const [categoryName, setCategoryName] = useState('');
@@ -37,8 +221,16 @@ const ViewAd = ({navigation, route}) => {
   const [mediaUriArray, setMediaUriArray] = useState([]);
   const [profilePicture, setProfilePicture] = useState('');
   const [adUploaded, setAdUploaded] = useState(false);
+  const [showRateModal, setShowRateModal] = useState(false);
   const [userName, setUserName] = useState('');
   const [userNumber, setUserNumber] = useState('');
+
+  //
+  const [showRewardModal, setShowRewardModal] = useState(false);
+  const [rewardData, setRewardData] = useState(null);
+  const [adViewCount, setAdViewCount] = useState(0);
+  const [currentResponseData, setCurrentResponseData] = useState(null);
+  const [currentPrice, setCurrentPrice] = useState(0);
 
   useEffect(() => {
     getUserData();
@@ -2145,31 +2337,54 @@ const ViewAd = ({navigation, route}) => {
     return formattedText;
   };
 
-  const initiateUPIPayment = async (amount, order_id) => {
+  const checkPaymentVerification = async () => {
+    setIsLoading(true);
+    try {
+      const body = {
+        itemLatitude: itemDetails.itemLatitude,
+        itemLongitude: itemDetails.itemLongitude,
+        categoryName: itemDetails.categoryName,
+      };
+      const {response, status} = await post(
+        'api/v1/payment/check/payment',
+        body,
+        true,
+      );
+
+      if (status === 200) {
+        const responseData = response.response;
+        setCurrentResponseData(responseData);
+
+        if (responseData.payment) {
+          initiateUPIPayment(responseData.amount, responseData);
+        }
+      }
+    } catch (error) {
+      console.error('error while checking payment verification ', error);
+    }
+    setIsLoading(false);
+  };
+
+  const initiateUPIPayment = async (amount, responseData = null) => {
     try {
       const options = {
         description: 'Order Payment',
         currency: 'INR',
         key: RAZORPAY_KEY_ID,
-        amount: amount,
+        amount,
         name: 'XSale',
-        prefill: {
-          contact: userNumber,
-          name: userName,
-        },
+        prefill: {contact: userNumber, name: userName},
         theme: {color: '#fff'},
         method: {upi: true},
       };
 
-      // new code
       RazorpayCheckout.open(options)
-        .then(async data => {
+        .then(async () => {
           await analytics().logEvent('listing_fee_payment', {
-            value: 29.0,
+            value: amount / 100,
             currency: 'INR',
             category: categoryName,
           });
-
           try {
             await createItem();
             await analytics().logEvent('upload_item', {
@@ -2177,62 +2392,108 @@ const ViewAd = ({navigation, route}) => {
               item_category: itemDetails.categoryName,
               location: `${itemDetails.itemLatitude},${itemDetails.itemLongitude}`,
               payment_required: true,
+              payment_amount: amount / 100,
             });
           } catch (err) {
-            console.error('Item creation failed after payment:', err);
             alert(
               'Payment successful, but item upload failed. Please try again.',
             );
           }
         })
         .catch(error => {
-          console.log(error, 'this is error');
-          console.log(`Error: ${error.code} | ${error.description}`);
-          alert('Payment not completed. Your ad could not be uploaded.');
+          const rewardData = responseData || currentResponseData;
+          if (rewardData?.isReward) {
+            setRewardData({
+              requiredViews: rewardData.rewardViewsRequired || 5,
+              discountedAmount: rewardData.rewardAmount,
+              originalAmount: rewardData.amount,
+            });
+            setShowRewardModal(true);
+            setAdViewCount(0);
+          } else {
+            alert('Payment not completed. Your ad could not be uploaded.');
+          }
         });
     } catch (error) {
       console.error('Error initiating payment:', error);
     }
   };
 
-  const checkPaymentVerification = async () => {
-    setIsLoading(true);
-    try {
-      const url = `api/v1/payment/check/payment`;
-      const body = {
-        itemLatitude: itemDetails.itemLatitude,
-        itemLongitude: itemDetails.itemLongitude,
-        categoryName: itemDetails.categoryName,
-      };
-      const {response, status} = await post(url, body, true);
-      console.log(
-        response,
-        status,
-        'this is response of the payment verification',
-      );
-      if (status === 200) {
-        const responseData = response.response;
-        const {amount, order_id, payment} = responseData;
-        console.log(responseData, 'this is is payabale');
-        // if (isPayable) {
-        //   initiateUPIPayment(amount);
-        // } else if (!isPayable) {
-        //   createItem();
-        // }
-        if (payment) {
-          initiateUPIPayment(amount);
-        } else if (!payment) {
-          createItem();
+  const showRewardedAd = () => {
+    const rewardedAdUnitId = 'ca-app-pub-9372794286829313/2160297504';
+    const rewarded = RewardedAd.createForAdRequest(rewardedAdUnitId, {
+      requestNonPersonalizedAdsOnly: true,
+    });
+
+    const unsubscribe = rewarded.addAdEventsListener(
+      async ({type, payload}) => {
+        switch (type) {
+          case RewardedAdEventType.LOADED:
+            rewarded.show();
+            break;
+
+          case RewardedAdEventType.EARNED_REWARD:
+            const newCount = adViewCount + 1;
+            setAdViewCount(newCount);
+
+            if (newCount >= 5) {
+              // DON'T close modal and DON'T call Razorpay
+              // Just update rewardData with discounted price
+              setRewardData({
+                requiredViews: 5,
+                discountedAmount: currentResponseData.rewardAmount, 
+                originalAmount: currentResponseData.amount, 
+                currentAmount: currentResponseData.rewardAmount, 
+              });
+              setAdViewCount(0);
+            } else {
+              Alert.alert(`Great! You have watched ${newCount} of 1 ads.`);
+            }
+            break;
+
+          case RewardedAdEventType.CLOSED:
+            break;
+
+          case RewardedAdEventType.ERROR:
+            console.log('Rewarded Ad Error: ', payload);
+            Alert.alert('Ad Error', 'Failed to load ad.');
+            break;
+
+          default:
+            break;
         }
-      }
-    } catch (error) {
-      console.log('error while checking payment verification ', error);
+      },
+    );
+
+    rewarded.load();
+
+    return () => {
+      unsubscribe();
+    };
+  };
+
+  const handleDirectPayment = () => {
+    setShowRewardModal(false);
+
+    const amountToPay =
+      rewardData?.discountedAmount || rewardData?.originalAmount;
+
+    if (amountToPay) {
+      initiateUPIPayment(amountToPay, currentResponseData);
     }
-    setIsLoading(false);
   };
 
   return (
     <SafeAreaView style={[styles.pdt16, {flex: 1}]}>
+      <RewardModal
+        visible={showRewardModal}
+        onClose={() => setShowRewardModal(false)}
+        rewardData={rewardData}
+        adViewCount={adViewCount}
+        onAdView={showRewardedAd}
+        onDirectPayment={handleDirectPayment}
+      />
+
       <View
         style={[
           styles.fdRow,
@@ -2245,7 +2506,23 @@ const ViewAd = ({navigation, route}) => {
           <Image source={icons.arrow_back} style={[styles.icon36]} />
         </TouchableOpacity>
       </View>
-      {adUploaded && <ProductUploadModal />}
+      {/* {adUploaded && <ProductUploadModal />} */}
+
+      {adUploaded && (
+        <ProductUploadModal
+          onClose={() => {
+            setAdUploaded(false);
+            setShowRateModal(true);
+          }}
+        />
+      )}
+
+      {showRateModal && (
+        <RateUsModal
+          visible={showRateModal}
+          onClose={() => navigation.replace('Home')}
+        />
+      )}
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={[{height: height * 2}]}>

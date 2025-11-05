@@ -6,7 +6,7 @@ import icons from '../../assets/icons';
 import {Button} from '../shared';
 import {useNavigation} from '@react-navigation/native';
 
-const ProductUploadModal = () => {
+const ProductUploadModal = ({onClose}) => {
   const navigation = useNavigation();
   return (
     <Modal
@@ -64,7 +64,9 @@ const ProductUploadModal = () => {
             <Button
               label={'Okay'}
               style={[styles.mt20]}
-              onPress={() => navigation.replace('Home')}
+              // onPress={() => navigation.replace('Home')}
+                onPress={onClose}
+              
             />
           </View>
         </View>

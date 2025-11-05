@@ -1,7 +1,8 @@
 import {NavigationContainer} from '@react-navigation/native';
+import React, { useEffect, useRef } from 'react';
+import {AppState} from 'react-native';
 import {StatusBar, Platform, PermissionsAndroid, Linking} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {useEffect} from 'react';
 import {
   Home,
   AllCategories,
@@ -50,7 +51,7 @@ import {
   CameraLense,
   OtherElectronics,
 } from './src/screens/addNewListing/Electronics';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Bull,
   Sheep_Goat,
@@ -73,62 +74,63 @@ import {MobileAds} from 'react-native-google-mobile-ads';
 import messaging from '@react-native-firebase/messaging';
 
 const Stack = createNativeStackNavigator();
+import {enableScreens} from "react-native-screens";
+
+enableScreens()
 const App = () => {
+  const NAVIGATION_IDS = ['Chats'];
 
-  const NAVIGATION_IDS = ["Chats"];
-
-function buildDeepLinkFromNotificationData(data){
-  const navigationId = data?.navigationId;
-  if (!NAVIGATION_IDS.includes(navigationId)) {
-    console.warn('Unverified navigationId', navigationId)
+  function buildDeepLinkFromNotificationData(data) {
+    const navigationId = data?.navigationId;
+    if (!NAVIGATION_IDS.includes(navigationId)) {
+      console.warn('Unverified navigationId', navigationId);
+      return null;
+    }
+    if (navigationId === 'Chats') {
+      return 'myapp://Chats';
+    }
     return null;
   }
-  if (navigationId === 'Chats') {
-    return 'myapp://Chats';
-  }
-  return null
-}
 
-
-const linking = {
-  prefixes: ["myapp://"],
-  config: {
-    screens  : {
-      Chats : "Chats"
-    }
-  },
-  async getInitialURL() {
-    const url = await Linking.getInitialURL();
-    if (typeof url === 'string') {
-      return url;
-    }
-    //getInitialNotification: When the application is opened from a quit state.
-    const message = await messaging().getInitialNotification();
-    const deeplinkURL = buildDeepLinkFromNotificationData(message?.data);
-    if (typeof deeplinkURL === 'string') {
-      return deeplinkURL;
-    }
-  },
-  subscribe(listener) {
-    const onReceiveURL = ({url}) => listener(url);
-
-    // Listen to incoming links from deep linking
-    const linkingSubscription = Linking.addEventListener('url', onReceiveURL);
-
-    //onNotificationOpenedApp: When the application is running, but in the background.
-    const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
-      const url = buildDeepLinkFromNotificationData(remoteMessage.data)
+  const linking = {
+    prefixes: ['myapp://'],
+    config: {
+      screens: {
+        Chats: 'Chats',
+      },
+    },
+    async getInitialURL() {
+      const url = await Linking.getInitialURL();
       if (typeof url === 'string') {
-        listener(url)
+        return url;
       }
-    });
+      //getInitialNotification: When the application is opened from a quit state.
+      const message = await messaging().getInitialNotification();
+      const deeplinkURL = buildDeepLinkFromNotificationData(message?.data);
+      if (typeof deeplinkURL === 'string') {
+        return deeplinkURL;
+      }
+    },
+    subscribe(listener) {
+      const onReceiveURL = ({url}) => listener(url);
 
-    return () => {
-      linkingSubscription.remove();
-      unsubscribe();
-    };
-  }
-};
+      // Listen to incoming links from deep linking
+      const linkingSubscription = Linking.addEventListener('url', onReceiveURL);
+
+      //onNotificationOpenedApp: When the application is running, but in the background.
+      const unsubscribe = messaging().onNotificationOpenedApp(remoteMessage => {
+        const url = buildDeepLinkFromNotificationData(remoteMessage.data);
+        if (typeof url === 'string') {
+          listener(url);
+        }
+      });
+
+      return () => {
+        linkingSubscription.remove();
+        unsubscribe();
+      };
+    },
+  };
 
   useEffect(() => {
     MobileAds()
@@ -145,15 +147,16 @@ const linking = {
     return unsubscribe;
   }, []);
 
-
   messaging().setBackgroundMessageHandler(async remoteMessage => {
     console.log('Message handled in the background!', remoteMessage);
   });
 
+  const appState = useRef(AppState.currentState);
+
   StatusBar.setBackgroundColor('black');
   return (
     <SocketProvider>
-      <NavigationContainer linking={linking} >
+      <NavigationContainer linking={linking}>
         <Stack.Navigator
           screenOptions={{headerShown: false}}
           initialRouteName="FirstScreen">

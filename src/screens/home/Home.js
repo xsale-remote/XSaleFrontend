@@ -23,10 +23,9 @@ import {getUserInfo} from '../../utils/function';
 import {AdsCard} from '../../component/shared';
 import {useFocusEffect} from '@react-navigation/native';
 import Geolocation from 'react-native-geolocation-service';
-import {BannerAd, TestIds, BannerAdSize} from 'react-native-google-mobile-ads';
+import {BannerAd, TestIds, BannerAdSize } from 'react-native-google-mobile-ads';
 import {Button} from 'react-native-share';
 import messaging from "@react-native-firebase/messaging"
-
 
 const Home = ({navigation}) => {
   const [homeAds, setHomeAds] = useState([]);

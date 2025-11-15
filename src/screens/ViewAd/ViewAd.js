@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,15 +13,16 @@ import {
   StyleSheet,
   Modal,
   Alert,
+  Linking
 } from 'react-native';
 import colors from '../../assets/colors';
 import styles from '../../assets/styles';
 import icons from '../../assets/icons';
-import {Button, RateUsModal} from '../../component/shared';
-import {SellerProfile} from '../../component/viewAd.js';
-import {post} from '../../utils/requestBuilder.js';
+import { Button, RateUsModal, PayUWebViewModal } from '../../component/shared';
+import { SellerProfile } from '../../component/viewAd.js';
+import { post } from '../../utils/requestBuilder.js';
 import Video from 'react-native-video';
-import {ProductUploadModal} from '../../component/Home';
+import { ProductUploadModal } from '../../component/Home';
 import {
   BannerAd,
   BannerAdSize,
@@ -29,14 +30,14 @@ import {
   RewardedAd,
   RewardedAdEventType,
 } from 'react-native-google-mobile-ads';
-import {formatPriceIndian} from '../../utils/function.js';
-import {RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET} from '../../utils/env';
+import { formatPriceIndian } from '../../utils/function.js';
+import { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } from '../../utils/env';
 import RazorpayCheckout from 'react-native-razorpay';
-import {getUserInfo} from '../../utils/function.js';
+import { getUserInfo } from '../../utils/function.js';
 import analytics from '@react-native-firebase/analytics';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
-const {height, width} = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
 
 
@@ -210,8 +211,8 @@ const modalStyle = StyleSheet.create({
   },
 });
 
-const ViewAd = ({navigation, route}) => {
-    // const navigation = useNavigation();
+const ViewAd = ({ navigation, route }) => {
+  // const navigation = useNavigation();
   const itemDetails = route.params;
   const [isLoading, setIsLoading] = useState(false);
   const [categoryName, setCategoryName] = useState('');
@@ -231,6 +232,8 @@ const ViewAd = ({navigation, route}) => {
   const [adViewCount, setAdViewCount] = useState(0);
   const [currentResponseData, setCurrentResponseData] = useState(null);
   const [currentPrice, setCurrentPrice] = useState(0);
+  const [showPayUModal, setShowPayUModal] = useState(false);
+  const [payuPayload, setPayuPayload] = useState(null);
 
   useEffect(() => {
     getUserData();
@@ -299,7 +302,7 @@ const ViewAd = ({navigation, route}) => {
     setCurrentIndex(Math.round(x / widthRef.current));
   };
 
-  const renderItem = ({item, index}) => {
+  const renderItem = ({ item, index }) => {
     const fileExtension = item.split('.').pop().toLowerCase();
     const isVideo = fileExtension === 'mp4';
     const isImage = ['jpg', 'jpeg', 'png'].includes(fileExtension);
@@ -310,7 +313,7 @@ const ViewAd = ({navigation, route}) => {
         <Pressable
           style={[
             styles.pdh16,
-            {width: widthRef.current, height: height * 0.27},
+            { width: widthRef.current, height: height * 0.27 },
           ]}
           onPress={() =>
             navigation.navigate('AdsMedia', {
@@ -318,8 +321,8 @@ const ViewAd = ({navigation, route}) => {
             })
           }>
           <Video
-            source={{uri: item}}
-            style={{width: '80%', height: '80%', alignSelf: 'center'}}
+            source={{ uri: item }}
+            style={{ width: '80%', height: '80%', alignSelf: 'center' }}
             resizeMode="contain"
             paused={index === currentIndex ? false : true}
           />
@@ -331,7 +334,7 @@ const ViewAd = ({navigation, route}) => {
         <Pressable
           style={[
             styles.pdh16,
-            {width: widthRef.current, height: height * 0.27},
+            { width: widthRef.current, height: height * 0.27 },
           ]}
           onPress={() =>
             navigation.navigate('AdsMedia', {
@@ -339,8 +342,8 @@ const ViewAd = ({navigation, route}) => {
             })
           }>
           <Image
-            source={{uri: item}}
-            style={{width: '100%', height: '100%', alignSelf: 'center'}}
+            source={{ uri: item }}
+            style={{ width: '100%', height: '100%', alignSelf: 'center' }}
             resizeMode="contain"
           />
         </Pressable>
@@ -351,7 +354,7 @@ const ViewAd = ({navigation, route}) => {
         <View
           style={[
             styles.pdh16,
-            {width: widthRef.current, height: height * 0.27},
+            { width: widthRef.current, height: height * 0.27 },
           ]}>
           <Text>Unsupported media type</Text>
         </View>
@@ -414,7 +417,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -447,7 +450,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -480,7 +483,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -530,7 +533,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -561,7 +564,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -595,7 +598,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setAdUploaded(true);
           setIsLoading(false);
@@ -644,7 +647,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -690,7 +693,7 @@ const ViewAd = ({navigation, route}) => {
         latitude: itemLatitude,
         longitude: itemLongitude,
       };
-      const {response, status} = await post(url, body, true);
+      const { response, status } = await post(url, body, true);
       if (status === 200) {
         setIsLoading(false);
         setAdUploaded(true);
@@ -730,7 +733,7 @@ const ViewAd = ({navigation, route}) => {
         latitude: itemLatitude,
         longitude: itemLongitude,
       };
-      const {response, status} = await post(url, body, true);
+      const { response, status } = await post(url, body, true);
       if (status === 200) {
         setIsLoading(false);
         setAdUploaded(true);
@@ -774,7 +777,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -824,7 +827,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setAdUploaded(true);
           setIsLoading(false);
@@ -870,7 +873,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -922,7 +925,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -979,7 +982,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1021,7 +1024,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setAdUploaded(true);
           setIsLoading(false);
@@ -1074,7 +1077,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1125,7 +1128,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1169,7 +1172,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1213,7 +1216,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1257,7 +1260,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1301,7 +1304,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1345,7 +1348,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1395,7 +1398,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1437,7 +1440,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1483,7 +1486,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1525,7 +1528,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1612,7 +1615,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1660,7 +1663,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1700,7 +1703,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1753,7 +1756,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1798,7 +1801,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1844,7 +1847,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1901,7 +1904,7 @@ const ViewAd = ({navigation, route}) => {
         latitude: itemLatitude,
         longitude: itemLongitude,
       };
-      const {response, status} = await post(url, body, true);
+      const { response, status } = await post(url, body, true);
       if (status === 200) {
         setIsLoading(false);
         setAdUploaded(true);
@@ -1952,7 +1955,7 @@ const ViewAd = ({navigation, route}) => {
           longitude: itemLongitude,
         };
         setIsLoading(true);
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -1993,7 +1996,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -2036,7 +2039,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -2071,7 +2074,7 @@ const ViewAd = ({navigation, route}) => {
           location: fullAddress,
           fareKm: askingPrice,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -2136,7 +2139,7 @@ const ViewAd = ({navigation, route}) => {
         latitude: itemLatitude,
         longitude: itemLongitude,
       };
-      const {response, status} = await post(url, body, true);
+      const { response, status } = await post(url, body, true);
       if (status === 200) {
         setIsLoading(false);
         setAdUploaded(true);
@@ -2185,7 +2188,7 @@ const ViewAd = ({navigation, route}) => {
         latitude: itemLatitude,
         longitude: itemLongitude,
       };
-      const {response, status} = await post(url, body, true);
+      const { response, status } = await post(url, body, true);
       if (status === 200) {
         setIsLoading(false);
         setAdUploaded(true);
@@ -2249,7 +2252,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -2311,7 +2314,7 @@ const ViewAd = ({navigation, route}) => {
           latitude: itemLatitude,
           longitude: itemLongitude,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setIsLoading(false);
           setAdUploaded(true);
@@ -2337,154 +2340,131 @@ const ViewAd = ({navigation, route}) => {
     return formattedText;
   };
 
-  const checkPaymentVerification = async () => {
-    setIsLoading(true);
-    try {
-      const body = {
-        itemLatitude: itemDetails.itemLatitude,
-        itemLongitude: itemDetails.itemLongitude,
-        categoryName: itemDetails.categoryName,
-      };
-      const {response, status} = await post(
-        'api/v1/payment/check/payment',
-        body,
-        true,
-      );
 
-      if (status === 200) {
-        const responseData = response.response;
-        setCurrentResponseData(responseData);
 
-        if (responseData.payment) {
-          initiateUPIPayment(responseData.amount, responseData);
-        }
+
+  // 💰 Start PayU payment directly
+const initiatePayUPayment = async () => {
+  setIsLoading(true);
+  try {
+    const body = {
+      name : userName, 
+      phone: userNumber,
+      itemLatitude : itemDetails.itemLatitude,
+      itemLongitude : itemDetails.itemLongitude,
+      address : itemDetails.fullAddress,
+      categoryName:categoryName
+     };
+
+    const { response, status } = await post(
+      "api/v1/payment/payu/initiate",
+      body,
+      true
+    );
+
+    if (status === 200) {
+      const responseData = response.response;
+      setCurrentResponseData(responseData);
+
+      if (responseData.payment) {
+        const payload = responseData.payuPayload;
+        setPayuPayload(payload);
+        setShowPayUModal(true);
+      } else {
+        await createItem(); // for free listings
       }
-    } catch (error) {
-      console.error('error while checking payment verification ', error);
     }
+  } catch (error) {
+    console.error("Error initiating PayU payment:", error);
+    Alert.alert("Error", "Payment initiation failed.");
+  } finally {
     setIsLoading(false);
-  };
+  }
+};
 
-  const initiateUPIPayment = async (amount, responseData = null) => {
-    try {
-      const options = {
-        description: 'Order Payment',
-        currency: 'INR',
-        key: RAZORPAY_KEY_ID,
-        amount,
-        name: 'XSale',
-        prefill: {contact: userNumber, name: userName},
-        theme: {color: '#fff'},
-        method: {upi: true},
-      };
 
-      RazorpayCheckout.open(options)
-        .then(async () => {
-          await analytics().logEvent('listing_fee_payment', {
-            value: amount / 100,
-            currency: 'INR',
-            category: categoryName,
-          });
-          try {
-            await createItem();
-            await analytics().logEvent('upload_item', {
-              category: 'listing',
-              item_category: itemDetails.categoryName,
-              location: `${itemDetails.itemLatitude},${itemDetails.itemLongitude}`,
-              payment_required: true,
-              payment_amount: amount / 100,
-            });
-          } catch (err) {
-            alert(
-              'Payment successful, but item upload failed. Please try again.',
-            );
-          }
-        })
-        .catch(error => {
-          const rewardData = responseData || currentResponseData;
-          if (rewardData?.isReward) {
-            setRewardData({
-              requiredViews: rewardData.rewardViewsRequired || 5,
-              discountedAmount: rewardData.rewardAmount,
-              originalAmount: rewardData.amount,
-            });
-            setShowRewardModal(true);
-            setAdViewCount(0);
-          } else {
-            alert('Payment not completed. Your ad could not be uploaded.');
-          }
+  // ✅ Step 5: Handle PayU result
+  const handlePayUResult = async (status) => {
+    setShowPayUModal(false);
+
+    if (status === "success") {
+      try {
+        await analytics().logEvent("listing_fee_payment", {
+          value: currentResponseData.amount / 100,
+          currency: "INR",
+          category: itemDetails.categoryName,
         });
-    } catch (error) {
-      console.error('Error initiating payment:', error);
+
+        await createItem();
+
+        await analytics().logEvent("upload_item", {
+          category: "listing",
+          item_category: itemDetails.categoryName,
+          location: `${itemDetails.itemLatitude},${itemDetails.itemLongitude}`,
+          payment_required: true,
+          payment_amount: currentResponseData.amount / 100,
+        });
+
+        Alert.alert("Success", "Your item has been uploaded successfully.");
+      } catch (err) {
+        Alert.alert("Payment successful", "But upload failed. Please retry.");
+      }
+    } else if (status === "failure") {
+      const rewardData = currentResponseData;
+      if (rewardData?.isReward) {
+        setRewardData({
+          requiredViews: rewardData.rewardViewsRequired || 5,
+          discountedAmount: rewardData.rewardAmount,
+          originalAmount: rewardData.amount,
+        });
+        setShowRewardModal(true);
+        setAdViewCount(0);
+      } else {
+        Alert.alert("Payment failed", "Your ad could not be uploaded.");
+      }
     }
   };
 
+  // ✅ Step 6: Rewarded ad logic
   const showRewardedAd = () => {
-    const rewardedAdUnitId = 'ca-app-pub-9372794286829313/2160297504';
+    const rewardedAdUnitId = "ca-app-pub-9372794286829313/2160297504";
     const rewarded = RewardedAd.createForAdRequest(rewardedAdUnitId, {
       requestNonPersonalizedAdsOnly: true,
     });
 
-    const unsubscribe = rewarded.addAdEventsListener(
-      async ({type, payload}) => {
-        switch (type) {
-          case RewardedAdEventType.LOADED:
-            rewarded.show();
-            break;
+    const unsubscribe = rewarded.addAdEventsListener(async ({ type }) => {
+      if (type === RewardedAdEventType.LOADED) rewarded.show();
 
-          case RewardedAdEventType.EARNED_REWARD:
-            const newCount = adViewCount + 1;
-            setAdViewCount(newCount);
+      if (type === RewardedAdEventType.EARNED_REWARD) {
+        const newCount = adViewCount + 1;
+        setAdViewCount(newCount);
 
-            if (newCount >= 5) {
-              // DON'T close modal and DON'T call Razorpay
-              // Just update rewardData with discounted price
-              setRewardData({
-                requiredViews: 5,
-                discountedAmount: currentResponseData.rewardAmount, 
-                originalAmount: currentResponseData.amount, 
-                currentAmount: currentResponseData.rewardAmount, 
-              });
-              setAdViewCount(0);
-            } else {
-              Alert.alert(`Great! You have watched ${newCount} of 1 ads.`);
-            }
-            break;
-
-          case RewardedAdEventType.CLOSED:
-            break;
-
-          case RewardedAdEventType.ERROR:
-            console.log('Rewarded Ad Error: ', payload);
-            Alert.alert('Ad Error', 'Failed to load ad.');
-            break;
-
-          default:
-            break;
+        if (newCount >= 5) {
+          setRewardData({
+            requiredViews: 5,
+            discountedAmount: currentResponseData.rewardAmount,
+            originalAmount: currentResponseData.amount,
+          });
+          setAdViewCount(0);
+        } else {
+          Alert.alert(`Watched ${newCount} of 5 ads.`);
         }
-      },
-    );
+      }
+    });
 
     rewarded.load();
-
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   };
 
   const handleDirectPayment = () => {
     setShowRewardModal(false);
-
     const amountToPay =
       rewardData?.discountedAmount || rewardData?.originalAmount;
-
-    if (amountToPay) {
-      initiateUPIPayment(amountToPay, currentResponseData);
-    }
+    if (amountToPay) initiatePayUPayment(amountToPay, currentResponseData);
   };
 
   return (
-    <SafeAreaView style={[styles.pdt16, {flex: 1}]}>
+    <SafeAreaView style={[styles.pdt16, { flex: 1 }]}>
       <RewardModal
         visible={showRewardModal}
         onClose={() => setShowRewardModal(false)}
@@ -2494,13 +2474,20 @@ const ViewAd = ({navigation, route}) => {
         onDirectPayment={handleDirectPayment}
       />
 
+      <PayUWebViewModal
+        visible={showPayUModal}
+        payuPayload={payuPayload}
+        onClose={() => setShowPayUModal(false)}
+        onResult={handlePayUResult}
+      />
+
       <View
         style={[
           styles.fdRow,
           styles.mr16,
           styles.ml16,
           styles.mb12,
-          {justifyContent: 'space-between'},
+          { justifyContent: 'space-between' },
         ]}>
         <TouchableOpacity onPress={() => navigation.pop()}>
           <Image source={icons.arrow_back} style={[styles.icon36]} />
@@ -2525,7 +2512,7 @@ const ViewAd = ({navigation, route}) => {
       )}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={[{height: height * 2}]}>
+        style={[{ height: height * 2 }]}>
         <View>
           <FlatList
             pagingEnabled
@@ -2554,7 +2541,7 @@ const ViewAd = ({navigation, route}) => {
           <View
             style={[
               styles.fdRow,
-              {justifyContent: 'space-between', alignItems: 'center'},
+              { justifyContent: 'space-between', alignItems: 'center' },
             ]}>
             {itemDetails.askingPrice && (
               <View style={[styles.fdRow]}>
@@ -2563,14 +2550,14 @@ const ViewAd = ({navigation, route}) => {
                   style={[
                     styles.icon20,
                     styles.mr8,
-                    {marginTop: 5, tintColor: colors.mintGreen},
+                    { marginTop: 5, tintColor: colors.mintGreen },
                   ]}
                 />
                 <Text
                   style={[
                     styles.fwBold,
                     styles.ts20,
-                    {color: colors.mintGreen},
+                    { color: colors.mintGreen },
                   ]}>
                   {itemDetails?.askingPrice &&
                     formatPriceIndian(itemDetails.askingPrice)}
@@ -2583,11 +2570,11 @@ const ViewAd = ({navigation, route}) => {
               styles.mt8,
               styles.mb8,
               styles.ts18,
-              {color: colors.black},
+              { color: colors.black },
             ]}>
             {itemDetails?.displayName.trim()}
           </Text>
-          <View style={[styles.fdRow, {marginTop: 6, alignItems: 'center'}]}>
+          <View style={[styles.fdRow, { marginTop: 6, alignItems: 'center' }]}>
             <Image
               source={icons.location}
               style={[styles.icon24, styles.mr8]}
@@ -2618,7 +2605,7 @@ const ViewAd = ({navigation, route}) => {
           </View>
 
           <View style={[styles.mt12]}>
-            <Text style={[styles.ts17, styles.h2, {color: colors.black}]}>
+            <Text style={[styles.ts17, styles.h2, { color: colors.black }]}>
               Additional Details
             </Text>
 
@@ -2634,8 +2621,8 @@ const ViewAd = ({navigation, route}) => {
                         ? ' year'
                         : ' years'
                       : value === '1'
-                      ? ' month'
-                      : ' months';
+                        ? ' month'
+                        : ' months';
                 } else if (key.toLowerCase() === 'height') {
                   displayValue += ' feet';
                 }
@@ -2643,13 +2630,13 @@ const ViewAd = ({navigation, route}) => {
                 return (
                   <View key={key} style={[styles.mb4, styles.fdRow]}>
                     <Text
-                      style={[styles.ts14, {color: colors.black}, styles.mr8]}>
+                      style={[styles.ts14, { color: colors.black }, styles.mr8]}>
                       {formatLabel(key)}:
                     </Text>
                     <Text
                       style={[
                         styles.ts14,
-                        {color: colors.black, flex: 1, flexWrap: 'wrap'},
+                        { color: colors.black, flex: 1, flexWrap: 'wrap' },
                       ]}>
                       {displayValue}
                     </Text>
@@ -2675,17 +2662,17 @@ const ViewAd = ({navigation, route}) => {
               style={[
                 styles.ts19,
                 styles.mb16,
-                {color: colors.black, color: colors.red},
+                { color: colors.black, color: colors.red },
               ]}>
               Disclaimer
             </Text>
-            <Text style={[{color: colors.black}]}>
+            <Text style={[{ color: colors.black }]}>
               Your safety is our first priority. Make face to face deal only.
               Don't try to pay or receive any amount in advance.
             </Text>
             {!fullDisclaimer && (
               <Pressable
-                style={[{alignSelf: 'flex-end'}, styles.mt8]}
+                style={[{ alignSelf: 'flex-end' }, styles.mt8]}
                 onPress={() => setFullDisclaimer(true)}>
                 <Text
                   style={[
@@ -2710,7 +2697,7 @@ const ViewAd = ({navigation, route}) => {
                   backgroundColor: colors.orange100,
                 },
               ]}>
-              <Text style={[{color: colors.black}, styles.ts15]}>
+              <Text style={[{ color: colors.black }, styles.ts15]}>
                 How to identify a scammer ?
               </Text>
               <Text></Text>
@@ -2731,7 +2718,7 @@ const ViewAd = ({navigation, route}) => {
               </View>
               {fullDisclaimer && (
                 <Pressable
-                  style={[{alignSelf: 'flex-end'}, styles.mt16]}
+                  style={[{ alignSelf: 'flex-end' }, styles.mt16]}
                   onPress={() => setFullDisclaimer(false)}>
                   <Text
                     style={[
@@ -2748,7 +2735,7 @@ const ViewAd = ({navigation, route}) => {
             </View>
           )}
 
-          <View style={{width: '100%', marginBottom: 20, marginTop: 10}}>
+          <View style={{ width: '100%', marginBottom: 20, marginTop: 10 }}>
             <BannerAd
               size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
               unitId={'ca-app-pub-9372794286829313/2903257633'}
@@ -2761,8 +2748,8 @@ const ViewAd = ({navigation, route}) => {
             />
           </View>
 
-          <View style={[{height: 'auto'}, styles.mt8, styles.mb16]}>
-            <Text style={[styles.ts17, {color: colors.black}]}>
+          <View style={[{ height: 'auto' }, styles.mt8, styles.mb16]}>
+            <Text style={[styles.ts17, { color: colors.black }]}>
               Seller Profile
             </Text>
             <SellerProfile
@@ -2779,9 +2766,9 @@ const ViewAd = ({navigation, route}) => {
                   'Submit'
                 )
               }
-              style={[{width: '50%', alignSelf: 'center'}, styles.mt28]}
+              style={[{ width: '50%', alignSelf: 'center' }, styles.mt28]}
               textStyle={[styles.fwBold, styles.ts18]}
-              onPress={checkPaymentVerification}
+              onPress={initiatePayUPayment}
               disable={isLoading}
               isLoading={isLoading}
             />

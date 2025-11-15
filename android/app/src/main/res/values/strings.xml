@@ -3,10 +3,11 @@
         <string name="google_maps_api_key">
         AIzaSyCBw5IJo7FFW5jbxB78Ib9vk4ayIhysF9I
         </string>
-        <string name="facebook_app_id">
-        2627171400959268
-        </string> <!-- Your App ID -->
+         <!-- Your App ID -->
+        <string name="facebook_app_id">831268519633339</string>
+
+        <!-- Your Client Token -->
         <string name="facebook_client_token">
         f498818df63a1ccbabe7bacbab48b44b
-        </string> <!-- Your Client Token -->
+        </string>
 </resources>

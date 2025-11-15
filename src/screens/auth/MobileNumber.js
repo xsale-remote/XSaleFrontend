@@ -21,6 +21,7 @@ import {
   BannerAdSize,
   InterstitialAd,
   AdEventType,
+  RewardedAd, RewardedAdEventType
 } from 'react-native-google-mobile-ads';
 
 const MobileNumber = ({ navigation, route }) => {
@@ -42,139 +43,108 @@ const MobileNumber = ({ navigation, route }) => {
     getToken();
   }, []);
 
+  
   const signInWithPhoneNumber = async () => {
-    const interstitialAdUnitId = 'ca-app-pub-9372794286829313/4227844649';
-    const interstitial =
-      InterstitialAd.createForAdRequest(interstitialAdUnitId);
-    setLoading(true);
     if (mobileNumber.length !== 10) {
-      setLoading(false);
       setNumberError(true);
-    } else {
-      setNumberError(false);
-      const body = {
-        phoneNumber: `+91${mobileNumber}`,
-      };
-      try {
-        const url = 'api/v1/user/check-user';
-        const { response, status } = await post(url, body);
-        if (response.response !== null) {
-          const inDatabase = response.response;
-          if (inDatabase) {
-            const url = 'api/v1/user/login';
-            const body = {
-              phoneNumber: mobileNumber,
-              FCMToken: currentFCMToken,
-            };
-            // Load the interstitial ad
-            interstitial.load();
+      return;
+    }
 
-            // Show the ad once loaded
-            const unsubscribeLoad = interstitial.addAdEventListener(
-              AdEventType.LOADED,
-              () => {
-                interstitial.show();
-              },
-            );
+    setNumberError(false);
+    setLoading(true);
 
-            // Navigate after ad is closed
-            const unsubscribeClose = interstitial.addAdEventListener(
-              AdEventType.CLOSED,
-              () => {
-                unsubscribeLoad();
-                unsubscribeClose();
-                unsubscribeError();
-                navigation.navigate('Home');
-              },
-            );
+    await new Promise(resolve => setTimeout(resolve, 50));
 
-            // Navigate if ad loading/showing errors out
-            const unsubscribeError = interstitial.addAdEventListener(
-              AdEventType.ERROR,
-              () => {
-                unsubscribeLoad();
-                unsubscribeClose();
-                unsubscribeError();
-                navigation.navigate('Home');
-              },
-            );
+    const rewardedAdUnitId = 'ca-app-pub-9372794286829313/1559464025';
+    const rewarded = RewardedAd.createForAdRequest(rewardedAdUnitId, {
+      requestNonPersonalizedAdsOnly: true,
+    });
 
-            const { response, status } = await post(url, body);
-            if (status === 200) {
-              const storeUserData = async () => {
-                try {
-                  const jsonString = JSON.stringify(response.response);
-                  await EncryptedStorage.setItem('userData', jsonString);
-                } catch (error) {
-                  console.log(
-                    `error while storing user data to encrypted storage ${error}`,
-                  );
-                }
-              };
-              storeUserData();
-              ToastAndroid.showWithGravityAndOffset(
-                'Login Successfully',
-                ToastAndroid.LONG,
-                ToastAndroid.BOTTOM,
-                25,
-                50,
-              );
-              setLoading(false);
-              navigation.replace('Home');
-            } else {
-              ToastAndroid.showWithGravityAndOffset(
-                'An error occurred while login you in',
-                ToastAndroid.LONG,
-                ToastAndroid.BOTTOM,
-                25,
-                50,
-              );
-              setLoading(false);
-            }
-          }
-        } else {
-          try {
-            setNumberError(false);
-            setLoading(false);
-            interstitial.load();
-            const unsubscribeLoad = interstitial.addAdEventListener(
-              AdEventType.LOADED,
-              () => {
-                interstitial.show();
-              },
-            );
-
-            const unsubscribeClose = interstitial.addAdEventListener(
-              AdEventType.CLOSED,
-              () => {
-                unsubscribeLoad();
-                unsubscribeClose();
-                unsubscribeError();
-              },
-            );
-
-            const unsubscribeError = interstitial.addAdEventListener(
-              AdEventType.ERROR,
-              () => {
-                unsubscribeLoad();
-                unsubscribeClose();
-                unsubscribeError();
-              },
-            );
-            navigation.navigate('Location', {
-              mobileNumber: mobileNumber,
-            });
-
-          } catch (error) {
-            console.log('error while registering the user ', error);
-          }
-        }       
-      } catch (error) {
-        console.log('error while login/signup ', error);
-        setLoading(false);
+    let navigationHandled = false;
+    const safeNavigate = (screen, params = {}) => {
+      if (!navigationHandled) {
+        navigationHandled = true;
+        navigation.navigate(screen, params);
       }
+    };
+
+    const showRewardedAd = (onComplete) => {
+      let timeout;
+      const unsubscribe = rewarded.addAdEventsListener(async ({ type }) => {
+        if (type === RewardedAdEventType.LOADED) {
+          rewarded.show();
+        }
+
+        if (type === RewardedAdEventType.EARNED_REWARD) {
+          clearTimeout(timeout);
+          unsubscribe();
+          onComplete();
+        }
+
+        if (type === RewardedAdEventType.ERROR || type === RewardedAdEventType.CLOSED) {
+          clearTimeout(timeout);
+          unsubscribe();
+          onComplete();
+        }
+      });
+
+      rewarded.load();
+      timeout = setTimeout(() => {
+        console.log('⚠️ Ad timeout, proceeding without ad...');
+        unsubscribe();
+        onComplete();
+      }, 6000);
+    };
+
+    try {
+      const url = 'api/v1/user/check-user';
+      const { response, status  } = await post(url, { phoneNumber: `+91${mobileNumber}` });
+
+      const userExists = response?.response?._id; 
+      if (userExists) {
+        // Login flow
+        const loginUrl = 'api/v1/user/login';
+        const loginBody = {
+          phoneNumber: mobileNumber,
+          FCMToken: currentFCMToken,
+        };
+
+        const { response: loginResponse, status } = await post(loginUrl, loginBody);
+        console.log(response, status , " this is status")
+
+        if (status === 200) {
+          await EncryptedStorage.setItem('userData', JSON.stringify(loginResponse.response));
+
+          ToastAndroid.showWithGravityAndOffset(
+            'Login Successfully',
+            ToastAndroid.LONG,
+            ToastAndroid.BOTTOM,
+            25,
+            50,
+          );
+
+          showRewardedAd(() => {
+            safeNavigate('Home');
+            setLoading(false);
+          });
+        } else {
+          ToastAndroid.show('Login failed, please try again', ToastAndroid.SHORT);
+          setLoading(false);
+        }
+      } else {
+        showRewardedAd(() => {
+          safeNavigate('Location', { mobileNumber });
+          setLoading(false);
+        });
+      }
+    } catch (error) {
+      console.log('Error during login/signup:', error);
+      ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
+      setLoading(false);
+      safeNavigate('Home');
     }
   };
+
 
   function filterInput(input) {
     const sanitizedInput = input.replace(/\D/g, '');
@@ -184,6 +154,7 @@ const MobileNumber = ({ navigation, route }) => {
   const handleNumberChange = t => {
     const filteredInput = filterInput(t);
     setMobileNumber(filteredInput);
+
   };
 
   return (
@@ -251,46 +222,38 @@ const MobileNumber = ({ navigation, route }) => {
               style={{ backgroundColor: '#F6F2F2', borderWidth: 0.5 }}
               textStyle={{ color: colors.black }}
               onPress={() => {
-                const interstitialAdUnitId =
-                  'ca-app-pub-9372794286829313/4227844649';
-                const interstitial =
-                  InterstitialAd.createForAdRequest(interstitialAdUnitId);
+                const rewardedAdUnitId = 'ca-app-pub-9372794286829313/1559464025';
+                const rewarded = RewardedAd.createForAdRequest(rewardedAdUnitId, {
+                  requestNonPersonalizedAdsOnly: true,
+                });
+                const unsubscribe = rewarded.addAdEventsListener(async ({ type }) => {
+                  // When ad is loaded, show it
+                  if (type === RewardedAdEventType.LOADED) {
+                    rewarded.show();
+                  }
 
-                // Load the interstitial ad
-                interstitial.load();
-
-                // Show the ad once loaded
-                const unsubscribeLoad = interstitial.addAdEventListener(
-                  AdEventType.LOADED,
-                  () => {
-                    interstitial.show();
-                  },
-                );
-
-                // Navigate after ad is closed
-                const unsubscribeClose = interstitial.addAdEventListener(
-                  AdEventType.CLOSED,
-                  () => {
-                    unsubscribeLoad();
-                    unsubscribeClose();
-                    unsubscribeError();
+                  // When user earns the reward (ad completed)
+                  if (type === RewardedAdEventType.EARNED_REWARD) {
+                    unsubscribe();
                     navigation.navigate('Home');
-                  },
-                );
+                  }
 
-                // Navigate if ad loading/showing errors out
-                const unsubscribeError = interstitial.addAdEventListener(
-                  AdEventType.ERROR,
-                  () => {
-                    unsubscribeLoad();
-                    unsubscribeClose();
-                    unsubscribeError();
+                  // When ad fails to load or is closed early — still navigate
+                  if (
+                    type === RewardedAdEventType.ERROR ||
+                    type === RewardedAdEventType.CLOSED
+                  ) {
+                    unsubscribe();
                     navigation.navigate('Home');
-                  },
-                );
+                  }
+                });
+
+                // Start loading the ad
+                rewarded.load();
               }}
               disable={loading}
             />
+
           </View>
           <View>
             <BannerAd
@@ -322,3 +285,4 @@ const MobileNumber = ({ navigation, route }) => {
 };
 
 export default MobileNumber;
+

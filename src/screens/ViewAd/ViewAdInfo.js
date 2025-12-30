@@ -15,25 +15,29 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import React, {useEffect, useState, useRef} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styles from '../../assets/styles';
 import colors from '../../assets/colors';
-import {get, post} from '../../utils/requestBuilder';
+import { get, post } from '../../utils/requestBuilder';
 import icons from '../../assets/icons';
-import {Button} from '../../component/shared';
+import { Button } from '../../component/shared';
 import Video from 'react-native-video';
-import {SellerProfile} from '../../component/viewAd.js';
-import {getUserInfo} from '../../utils/function.js';
-import {BannerAd, TestIds, BannerAdSize} from 'react-native-google-mobile-ads';
-import {formatPriceIndian} from '../../utils/function.js';
+import { SellerProfile } from '../../component/viewAd.js';
+import { getUserInfo } from '../../utils/function.js';
+import {
+  BannerAd,
+  TestIds,
+  BannerAdSize,
+  InterstitialAd,
+  AdEventType,
+} from 'react-native-google-mobile-ads';
+import { formatPriceIndian } from '../../utils/function.js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const {height, width} = Dimensions.get('window');
-const adUnitId = __DEV__
-  ? TestIds.ADAPTIVE_BANNER
-  : 'ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyyyyyy';
+const { height, width } = Dimensions.get('window');
 
-const ViewAdInfo = ({navigation, route}) => {
-  const {adId, likeFunction, parentId, userId, isLiked, useChildren, forHome} =
+const ViewAdInfo = ({ navigation, route }) => {
+  const { adId, likeFunction, parentId, userId, isLiked, useChildren, forHome } =
     route.params;
   const [loading, setLoading] = useState('');
   const [userData, setUserData] = useState('');
@@ -59,6 +63,52 @@ const ViewAdInfo = ({navigation, route}) => {
     setHeartColor(isLiked ? icons.red_heart : icons.heart);
   }, []);
 
+  const adUnitId = 'ca-app-pub-9372794286829313/2080406453';
+  // one on three 
+  useEffect(() => {
+  const updateAdCount = async () => {
+    try {
+      const savedCount = await AsyncStorage.getItem('ad_view_count');
+      let count = savedCount ? parseInt(savedCount, 10) : 0;
+      if (count >= 3) {
+        count = 0;
+      }
+
+      count += 1;
+
+      await AsyncStorage.setItem('ad_view_count', count.toString());
+
+      if (count === 1) {
+        const interstitial = InterstitialAd.createForAdRequest(adUnitId);
+
+        interstitial.load();
+
+        const unsubscribeLoad = interstitial.addAdEventListener(AdEventType.LOADED, () => {
+          interstitial.show();
+        });
+
+        const unsubscribeClose = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
+          unsubscribeLoad();
+          unsubscribeClose();
+          unsubscribeError();
+        });
+
+        const unsubscribeError = interstitial.addAdEventListener(AdEventType.ERROR, () => {
+          unsubscribeLoad();
+          unsubscribeClose();
+          unsubscribeError();
+        });
+      }
+    } catch (err) {
+      console.error('Error handling ad count', err);
+    }
+  };
+
+  updateAdCount();
+}, []);
+
+
+
   const getUser = async () => {
     try {
       const userData = await getUserInfo();
@@ -74,7 +124,7 @@ const ViewAdInfo = ({navigation, route}) => {
 
   const formatDate = isoDate => {
     const date = new Date(isoDate);
-    const options = {day: '2-digit', month: 'long', year: 'numeric'};
+    const options = { day: '2-digit', month: 'long', year: 'numeric' };
     return new Intl.DateTimeFormat('en-GB', options).format(date);
   };
 
@@ -124,11 +174,11 @@ const ViewAdInfo = ({navigation, route}) => {
         url = `api/v1/listing/fetchSingleItem/${adId}`;
       }
 
-      const {response, status} = await get(url);
+      const { response, status } = await get(url);
       if (status === 200) {
         setLoading(false);
         const responseData = response?.response || [];
-        const {user, item, createdAt} = responseData;
+        const { user, item, createdAt } = responseData;
         setItemDetails(item);
         setUserDetails(user);
         setCategoryName(responseData?.item.categoryName);
@@ -143,7 +193,7 @@ const ViewAdInfo = ({navigation, route}) => {
         setItemPosted(formattedDate);
 
         // settings item info
-        const {askingPrice, displayName, media, location} = item;
+        const { askingPrice, displayName, media, location } = item;
         setAskingPrice(askingPrice);
         setMediaArray(media);
         setDisplayName(displayName);
@@ -165,7 +215,7 @@ const ViewAdInfo = ({navigation, route}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const widthRef = useRef(width); // Store screen width
 
-  const renderItem = ({item, index}) => {
+  const renderItem = ({ item, index }) => {
     const fileExtension = item.split('.').pop().toLowerCase();
     const isVideo = fileExtension === 'mp4';
     const isImage = ['jpg', 'jpeg', 'png'].includes(fileExtension);
@@ -175,16 +225,49 @@ const ViewAdInfo = ({navigation, route}) => {
         <Pressable
           style={[
             styles.pdh16,
-            {width: widthRef.current, height: height * 0.27},
+            { width: widthRef.current, height: height * 0.27 },
           ]}
-          onPress={() =>
-            navigation.navigate('AdsMedia', {
-              mediaUriArray: mediaArray,
-            })
-          }>
+          onPress={() => {
+            const interstitialAdUnitId =
+              'ca-app-pub-9372794286829313/2109975439';
+            const interstitial =
+              InterstitialAd.createForAdRequest(interstitialAdUnitId);
+
+            const unsubscribe = interstitial.addAdEventListener(
+              AdEventType.LOADED,
+              () => {
+                interstitial.show();
+              },
+            );
+
+            const unsubscribeClose = interstitial.addAdEventListener(
+              AdEventType.CLOSED,
+              () => {
+                unsubscribe();
+                unsubscribeClose();
+                navigation.navigate('AdsMedia', {
+                  mediaUriArray: mediaArray,
+                });
+              },
+            );
+
+            const unsubscribeError = interstitial.addAdEventListener(
+              AdEventType.ERROR,
+              () => {
+                unsubscribe();
+                unsubscribeClose();
+                unsubscribeError();
+                navigation.navigate('AdsMedia', {
+                  mediaUriArray: mediaArray,
+                });
+              },
+            );
+
+            interstitial.load();
+          }}>
           <Video
-            source={{uri: item}}
-            style={{width: '80%', height: '80%', alignSelf: 'center'}}
+            source={{ uri: item }}
+            style={{ width: '80%', height: '80%', alignSelf: 'center' }}
             resizeMode="contain"
             paused={index === currentIndex ? false : true}
             controls
@@ -197,27 +280,59 @@ const ViewAdInfo = ({navigation, route}) => {
         <Pressable
           style={[
             styles.pdh16,
-            {width: widthRef.current, height: height * 0.27},
+            { width: widthRef.current, height: height * 0.27 },
           ]}
-          onPress={() =>
-            navigation.navigate('AdsMedia', {
-              mediaUriArray: mediaArray,
-            })
-          }>
+          onPress={() => {
+            const interstitialAdUnitId =
+              'ca-app-pub-9372794286829313/2109975439';
+            const interstitial =
+              InterstitialAd.createForAdRequest(interstitialAdUnitId);
+
+            const unsubscribe = interstitial.addAdEventListener(
+              AdEventType.LOADED,
+              () => {
+                interstitial.show();
+              },
+            );
+
+            const unsubscribeClose = interstitial.addAdEventListener(
+              AdEventType.CLOSED,
+              () => {
+                unsubscribe();
+                unsubscribeClose();
+                navigation.navigate('AdsMedia', {
+                  mediaUriArray: mediaArray,
+                });
+              },
+            );
+
+            const unsubscribeError = interstitial.addAdEventListener(
+              AdEventType.ERROR,
+              () => {
+                unsubscribe();
+                unsubscribeClose();
+                unsubscribeError();
+                navigation.navigate('AdsMedia', {
+                  mediaUriArray: mediaArray,
+                });
+              },
+            );
+
+            interstitial.load();
+          }}>
           <Image
-            source={{uri: item}}
-            style={{width: '100%', height: '100%', alignSelf: 'center'}}
+            source={{ uri: item }}
+            style={{ width: '100%', height: '100%', alignSelf: 'center' }}
             resizeMode="contain"
           />
         </Pressable>
       );
     } else {
-      // Handle unsupported media type
       return (
         <View
           style={[
             styles.pdh16,
-            {width: widthRef.current, height: height * 0.27},
+            { width: widthRef.current, height: height * 0.27 },
           ]}>
           <Text>Unsupported media type</Text>
         </View>
@@ -266,6 +381,39 @@ const ViewAdInfo = ({navigation, route}) => {
   };
 
   const handleChat = async () => {
+    const interstitialAdUnitId = 'ca-app-pub-9372794286829313/5873126475';
+    const interstitial =
+      InterstitialAd.createForAdRequest(interstitialAdUnitId);
+
+    // Load the interstitial ad
+    interstitial.load();
+
+    // Add event listener for the ad
+    const unsubscribe = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        interstitial.show();
+      },
+    );
+
+    // Listen for when the ad is closed or error occurs, then navigate to chat
+    const unsubscribeClose = interstitial.addAdEventListener(
+      AdEventType.CLOSED,
+      () => {
+        unsubscribe();
+        unsubscribeClose();
+      },
+    );
+
+    const unsubscribeError = interstitial.addAdEventListener(
+      AdEventType.ERROR,
+      () => {
+        unsubscribe();
+        unsubscribeClose();
+        unsubscribeError();
+      },
+    );
+
     setChatLoading(true);
     try {
       if (!userData) {
@@ -283,7 +431,7 @@ const ViewAdInfo = ({navigation, route}) => {
           userId1: userData.user._id,
           userId2: userDetails._id,
         };
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           if (
             response?.response?.content?.length > 0 ||
@@ -338,26 +486,83 @@ const ViewAdInfo = ({navigation, route}) => {
 
   const handleCall = phoneNumber => {
     let phoneUrl = `tel:${phoneNumber}`;
-    try {
+    const interstitialAdUnitId = 'ca-app-pub-9372794286829313/6171481709';
+    const interstitial =
+      InterstitialAd.createForAdRequest(interstitialAdUnitId);
+
+    // Function to open the phone dialer
+    const openPhoneApp = () => {
       Linking.canOpenURL(phoneUrl)
         .then(supported => {
-          // if (!supported) {
-          //   console.log("Can't handle url: " + phoneUrl);
-          // } else {
-          // }
-          return Linking.openURL(phoneUrl);
+          if (supported) {
+            Linking.openURL(phoneUrl);
+          } else {
+            console.log("Can't handle url: " + phoneUrl);
+          }
         })
-        .catch(err => console.error('An error occurred', err));
-    } catch (error) {
-      console.log('error while calling user');
-    }
-  };
+        .catch(err => console.error('Error opening phone app', err));
+    };
 
+    // Load the interstitial ad
+    interstitial.load();
+
+    // Add event listener for ad loaded event to show ad
+    const unsubscribeLoad = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        interstitial.show();
+      },
+    );
+
+    // After ad is closed, check login and open phone app
+    const unsubscribeClose = interstitial.addAdEventListener(
+      AdEventType.CLOSED,
+      () => {
+        unsubscribeLoad();
+        unsubscribeClose();
+        unsubscribeError();
+
+        if (!userData) {
+          ToastAndroid.showWithGravityAndOffset(
+            'You are not logged in, please login first',
+            ToastAndroid.LONG,
+            ToastAndroid.BOTTOM,
+            25,
+            50,
+          );
+        } else {
+          openPhoneApp();
+        }
+      },
+    );
+
+    // On ad error, also open phone app so user is not blocked
+    const unsubscribeError = interstitial.addAdEventListener(
+      AdEventType.ERROR,
+      () => {
+        unsubscribeLoad();
+        unsubscribeClose();
+        unsubscribeError();
+
+        if (!userData) {
+          ToastAndroid.showWithGravityAndOffset(
+            'You are not logged in, please login first',
+            ToastAndroid.LONG,
+            ToastAndroid.BOTTOM,
+            25,
+            50,
+          );
+        } else {
+          openPhoneApp();
+        }
+      },
+    );
+  };
   return (
-    <SafeAreaView style={[styles.pdt16, {flex: 1}]}>
+    <SafeAreaView style={[styles.pdt16, { flex: 1 }]}>
       {loading ? (
         <View
-          style={[{justifyContent: 'center', alignItems: 'center', flex: 1}]}>
+          style={[{ justifyContent: 'center', alignItems: 'center', flex: 1 }]}>
           <ActivityIndicator color={colors.mintGreen} size="large" />
         </View>
       ) : (
@@ -368,7 +573,7 @@ const ViewAdInfo = ({navigation, route}) => {
               styles.mr16,
               styles.ml16,
               styles.mb12,
-              {justifyContent: 'space-between'},
+              { justifyContent: 'space-between' },
             ]}>
             <TouchableOpacity onPress={() => navigation.pop()}>
               <Image source={icons.arrow_back} style={[styles.icon36]} />
@@ -406,7 +611,7 @@ const ViewAdInfo = ({navigation, route}) => {
           </View>
           <ScrollView
             showsVerticalScrollIndicator={false}
-            style={{height: height * 1}}>
+            style={{ height: height * 1 }}>
             <View>
               <FlatList
                 pagingEnabled
@@ -434,7 +639,7 @@ const ViewAdInfo = ({navigation, route}) => {
               <View
                 style={[
                   styles.fdRow,
-                  {justifyContent: 'space-between', alignItems: 'center'},
+                  { justifyContent: 'space-between', alignItems: 'center' },
                 ]}>
                 {askingPrice !== undefined && askingPrice !== null && (
                   <View style={[styles.fdRow]}>
@@ -443,20 +648,20 @@ const ViewAdInfo = ({navigation, route}) => {
                       style={[
                         styles.icon20,
                         styles.mr8,
-                        {marginTop: 5, tintColor: colors.mintGreen},
+                        { marginTop: 5, tintColor: colors.mintGreen },
                       ]}
                     />
                     <Text
                       style={[
                         styles.fwBold,
                         styles.ts20,
-                        {color: colors.mintGreen},
+                        { color: colors.mintGreen },
                       ]}>
                       {formatPriceIndian(askingPrice)}
                     </Text>
                   </View>
                 )}
-                <Text style={[{color: colors.black}, styles.ts12]}>
+                <Text style={[{ color: colors.black }, styles.ts12]}>
                   Posted on {itemPosted}
                 </Text>
               </View>
@@ -466,19 +671,19 @@ const ViewAdInfo = ({navigation, route}) => {
                   styles.mt8,
                   styles.mb8,
                   styles.ts18,
-                  {color: colors.black},
+                  { color: colors.black },
                 ]}>
                 {displayName?.trim()}
               </Text>
               <View
-                style={[styles.fdRow, {marginTop: 6, alignItems: 'center'}]}>
+                style={[styles.fdRow, { marginTop: 6, alignItems: 'center' }]}>
                 <Image
                   source={icons.location}
                   style={[styles.icon24, styles.mr8]}
                 />
                 <Text
                   style={[
-                    {color: colors.black, paddingRight: 12},
+                    { color: colors.black, paddingRight: 12 },
                     styles.ts15,
                     styles.fw400,
                   ]}>
@@ -486,10 +691,16 @@ const ViewAdInfo = ({navigation, route}) => {
                 </Text>
               </View>
               <View style={[styles.mt12]}>
-                <Text style={[styles.ts17, {color: colors.black}]}>
+                <View style={[styles.mt8, styles.mb12]}>
+                  <BannerAd
+                    unitId={'ca-app-pub-9372794286829313/9854241697'}
+                    size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
+                  />
+                </View>
+
+                <Text style={[styles.ts17, styles.h2, { color: colors.black }]}>
                   Additional Details
                 </Text>
-
                 <View style={[styles.pdt8, styles.mt4]}>
                   {Object.entries(additionalInformation).map(([key, value]) => {
                     // Determine the display text for age and height
@@ -502,8 +713,8 @@ const ViewAdInfo = ({navigation, route}) => {
                             ? ' year'
                             : ' years'
                           : value === '1'
-                          ? ' month'
-                          : ' months';
+                            ? ' month'
+                            : ' months';
                     } else if (key.toLowerCase() === 'height') {
                       displayValue += ' feet';
                     }
@@ -513,7 +724,7 @@ const ViewAdInfo = ({navigation, route}) => {
                         <Text
                           style={[
                             styles.ts14,
-                            {color: colors.black},
+                            { color: colors.black },
                             styles.mr8,
                           ]}>
                           {formatLabel(key)}:
@@ -521,7 +732,7 @@ const ViewAdInfo = ({navigation, route}) => {
                         <Text
                           style={[
                             styles.ts14,
-                            {color: colors.black, flex: 1, flexWrap: 'wrap'},
+                            { color: colors.black, flex: 1, flexWrap: 'wrap' },
                           ]}>
                           {displayValue}
                         </Text>
@@ -529,6 +740,19 @@ const ViewAdInfo = ({navigation, route}) => {
                     );
                   })}
                 </View>
+              </View>
+
+              <View style={{ width: '100%', marginBottom: 20, marginTop: 10 }}>
+                <BannerAd
+                  size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+                  unitId={'ca-app-pub-9372794286829313/7614063803'}
+                  onAdFailedToLoad={error => {
+                    console.log('Ad failed to load:', error);
+                  }}
+                  onAdLoaded={() => {
+                    console.log('Ad loaded successfully');
+                  }}
+                />
               </View>
 
               {/*  for disclaimer */}
@@ -550,17 +774,17 @@ const ViewAdInfo = ({navigation, route}) => {
                     styles.fwBold,
                     styles.ts19,
                     styles.mb16,
-                    {color: colors.black, color: colors.red},
+                    { color: colors.black, color: colors.red },
                   ]}>
                   Disclaimer
                 </Text>
-                <Text style={[{color: colors.black}]}>
+                <Text style={[{ color: colors.black }]}>
                   Your safety is our first priority. Make face to face deal
                   only. Don't try to pay or receive any amount in advance.
                 </Text>
                 {!fullDisclaimer && (
                   <Pressable
-                    style={[{alignSelf: 'flex-end'}, styles.mt8]}
+                    style={[{ alignSelf: 'flex-end' }, styles.mt8]}
                     onPress={() => setFullDisclaimer(true)}>
                     <Text
                       style={[
@@ -587,7 +811,7 @@ const ViewAdInfo = ({navigation, route}) => {
                   ]}>
                   <Text
                     style={[
-                      {color: colors.black, fontWeight: '600'},
+                      { color: colors.black, fontWeight: '600' },
                       styles.ts14,
                     ]}>
                     How to identify a scammer ?
@@ -610,7 +834,7 @@ const ViewAdInfo = ({navigation, route}) => {
                   </View>
                   {fullDisclaimer && (
                     <Pressable
-                      style={[{alignSelf: 'flex-end'}, styles.mt16]}
+                      style={[{ alignSelf: 'flex-end' }, styles.mt16]}
                       onPress={() => setFullDisclaimer(false)}>
                       <Text
                         style={[
@@ -628,21 +852,8 @@ const ViewAdInfo = ({navigation, route}) => {
               )}
             </View>
 
-            <View style={{width: '100%', marginBottom: 20, marginTop: 10}}>
-              <BannerAd
-                size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-                unitId={'ca-app-pub-9372794286829313/7614063803'}
-                onAdFailedToLoad={error => {
-                  console.log('Ad failed to load:', error);
-                }}
-                onAdLoaded={() => {
-                  console.log('Ad loaded successfully');
-                }}
-              />
-            </View>
-
             <View style={[, styles.mb28, styles.mt8, styles.pdh16]}>
-              <Text style={[styles.ts18, {color: colors.black}]}>
+              <Text style={[styles.ts18, { color: colors.black }]}>
                 Seller Profile
               </Text>
               <SellerProfile
@@ -650,13 +861,6 @@ const ViewAdInfo = ({navigation, route}) => {
                 name={userDetails?.userName}
                 customerId={userDetails?._id}
                 userImage={userDetails?.profilePicture}
-              />
-            </View>
-
-            <View>
-              <BannerAd
-                unitId={'ca-app-pub-9372794286829313/9854241697'}
-                size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
               />
             </View>
           </ScrollView>
@@ -669,18 +873,22 @@ const ViewAdInfo = ({navigation, route}) => {
                 styles.pdh16,
                 styles.pdb8,
                 styles.mt20,
-                {width: '100%', justifyContent: 'space-between'},
+                { width: '100%', justifyContent: 'space-between' },
               ]}>
               <Button
                 // label={'Chat'}
                 label={
                   chatLoading ? (
-                    <ActivityIndicator size={'small'} color={colors.black} style={{alignSelf : "center"}}/>
+                    <ActivityIndicator
+                      size={'small'}
+                      color={colors.black}
+                      style={{ alignSelf: 'center' }}
+                    />
                   ) : (
                     'Chat'
                   )
                 }
-                textStyle={[styles.fwBold, styles.ts18, {color: colors.black}]}
+                textStyle={[styles.fwBold, styles.ts18, { color: colors.black }]}
                 style={[
                   {
                     width: '45%',
@@ -695,7 +903,7 @@ const ViewAdInfo = ({navigation, route}) => {
 
               <Button
                 label={'Call'}
-                style={[{width: '45%'}]}
+                style={[{ width: '45%' }]}
                 textStyle={[styles.fwBold, styles.ts18]}
                 onPress={() => handleCall(userDetails.phoneNumber)}
               />

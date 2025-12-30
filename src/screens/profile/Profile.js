@@ -24,6 +24,7 @@ import {getUserInfo} from '../../utils/function';
 import {deleteApi, post} from '../../utils/requestBuilder';
 import {CommonActions} from '@react-navigation/native';
 import {useFocusEffect} from '@react-navigation/native';
+import {BannerAd, TestIds, BannerAdSize} from 'react-native-google-mobile-ads';
 
 const LogoutModal = ({visible, onConfirm, onCancel}) => {
   return (
@@ -57,7 +58,7 @@ const LogoutModal = ({visible, onConfirm, onCancel}) => {
               styles.mb20,
               {
                 textAlign: 'center',
-                color : colors.black
+                color: colors.black,
               },
             ]}>
             Are you sure you want to log out?
@@ -124,7 +125,7 @@ const DeleteModal = ({visible, onConfirm, onCancel, isLoading}) => {
               styles.mb20,
               {
                 textAlign: 'center',
-                color : colors.black
+                color: colors.black,
               },
             ]}>
             Permanently delete your account & all data associated with it. ?
@@ -210,7 +211,7 @@ const InputModal = ({
                 width: '100%',
                 borderRadius: 5,
                 textAlignVertical: 'top',
-                color : colors.grey500
+                color: colors.grey500,
               },
               styles.ts16,
               styles.mb16,
@@ -447,7 +448,7 @@ const Profile = ({navigation}) => {
     {id: 4, icon: icons.rate_us, title: 'Rate Us', onPress: rateUs},
   ];
 
-  const OptionHeader = ({label}) => {
+  const OptionHeader = ({label, style}) => {
     return (
       <View
         style={[
@@ -457,6 +458,7 @@ const Profile = ({navigation}) => {
             backgroundColor: colors.pink100,
             width: '100%',
           },
+          style
         ]}>
         <Text
           style={[
@@ -567,8 +569,8 @@ const Profile = ({navigation}) => {
           isEmpty={suggestionEmpty}
         />
       )}
-      <View style={[styles.mt20, {height: '80%'}]}>
-        {userData && <OptionHeader label={'Setting'} />}
+      <View style={[styles.mt20]}>
+        {userData && <OptionHeader label={'Setting'} style={[styles.mb12]}/>}
         <View>
           {userData &&
             firstHeader.map((item, index) => {
@@ -582,7 +584,7 @@ const Profile = ({navigation}) => {
               );
             })}
         </View>
-        <OptionHeader label={'Support'} />
+        <OptionHeader label={'Support'} style={[styles.mb12, styles.mt8, {height : 45}]}/>
         <View>
           {secondHeader.map((item, index) => {
             return (
@@ -598,6 +600,12 @@ const Profile = ({navigation}) => {
         </View>
       </View>
 
+      <View>
+        <BannerAd
+          unitId={'ca-app-pub-9372794286829313/2600930020'}
+          size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
+        />
+      </View>
       <BottomNavigation />
     </SafeAreaView>
   );

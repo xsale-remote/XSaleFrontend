@@ -10,7 +10,8 @@ import styles from '../../assets/styles';
 import colors from '../../assets/colors';
 import icons from '../../assets/icons';
 
-const ButtonWithIcon = ({label, icon, style, onPress, isLoading}) => {
+const ButtonWithIcon = ({ label, icon, style, onPress, isLoading }) => {
+  console.log(isLoading , " value")
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -28,14 +29,16 @@ const ButtonWithIcon = ({label, icon, style, onPress, isLoading}) => {
         styles.pdh16,
         style,
       ]}>
-      <Image
-        source={icon}
-        style={[styles.icon28, styles.mr8, {tintColor: colors.white}]}
-      />
+      {!isLoading &&
+        <Image
+          source={icon}
+          style={[styles.icon28, styles.mr8, { tintColor: colors.white }]}
+        />
+      }
       {isLoading ? (
         <ActivityIndicator size={'small'} color={colors.white} />
       ) : (
-        <Text style={[styles.ts15, {color: colors.white}]}>{label}</Text>
+        <Text style={[styles.ts15, { color: colors.white }]}>{label}</Text>
       )}
     </TouchableOpacity>
   );

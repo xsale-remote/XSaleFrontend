@@ -14,23 +14,76 @@ import icons from '../../assets/icons';
 import {useNavigation} from '@react-navigation/native';
 import images from '../../assets/images';
 import colors from '../../assets/colors';
+import {
+  BannerAd,
+  TestIds,
+  BannerAdSize,
+  InterstitialAd,
+  AdEventType,
+} from 'react-native-google-mobile-ads';
 
 const ChatScreenHeader = ({style, profilePic, name, phoneNumber}) => {
   const {height, width} = Dimensions.get('window');
   const navigation = useNavigation();
 
   const handleCallPress = async () => {
+    const interstitialAdUnitId = 'ca-app-pub-9372794286829313/5458193504';
+    const interstitial =
+      InterstitialAd.createForAdRequest(interstitialAdUnitId);
     let phoneUrl = `tel:${phoneNumber}`;
-    Linking.canOpenURL(phoneUrl)
-      .then(supported => {
-        // if (!supported) {
-        //   console.log("Can't handle url: " + phoneUrl);
-        // } else {
-        //   return Linking.openURL(phoneUrl);
-        // }
+
+    const openPhoneApp = () => {
+      Linking.canOpenURL(phoneUrl)
+        .then(supported => {
           return Linking.openURL(phoneUrl);
-      })
-      .catch(err => console.error('An error occurred', err));
+        })
+        .catch(err => console.error('An error occurred', err));
+    };
+
+    // Load the interstitial ad
+    interstitial.load();
+
+    // Add event listener for ad loaded event to show ad
+    const unsubscribeLoad = interstitial.addAdEventListener(
+      AdEventType.LOADED,
+      () => {
+        interstitial.show();
+      },
+    );
+
+    // After ad is closed, check login and open phone app
+    const unsubscribeClose = interstitial.addAdEventListener(
+      AdEventType.CLOSED,
+      () => {
+        unsubscribeLoad();
+        unsubscribeClose();
+        unsubscribeError();
+
+        openPhoneApp();
+      },
+    );
+
+    // On ad error, also open phone app so user is not blocked
+    const unsubscribeError = interstitial.addAdEventListener(
+      AdEventType.ERROR,
+      () => {
+        unsubscribeLoad();
+        unsubscribeClose();
+        unsubscribeError();
+
+        if (!userData) {
+          ToastAndroid.showWithGravityAndOffset(
+            'You are not logged in, please login first',
+            ToastAndroid.LONG,
+            ToastAndroid.BOTTOM,
+            25,
+            50,
+          );
+        } else {
+          openPhoneApp();
+        }
+      },
+    );
   };
 
   return (

@@ -11,13 +11,13 @@ const colors = {
   grey500: '#979797',
   mintGreen: '#087E8B',
   lightOrange: '#ff5a5f',
-  grey700: '#dedede', // search input background
-  taupeGray: '#898989', // view more color
-  blackOlive: '#565454', // price , new arrivals color
-  lightPink: '#C1839F', // product company text color
+  grey700: '#dedede', 
+  taupeGray: '#898989', 
+  blackOlive: '#565454', 
+  lightPink: '#C1839F', 
   pink100: '#ffedeb',
   fleshTint: '#ff6363',
-  metallicSeaweed: '#08738b', // navigation tab indicator
+  metallicSeaweed: '#08738b', 
   red: '#f70511',
   orange100: '#fff4f4',
 };

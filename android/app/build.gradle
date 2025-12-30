@@ -1,3 +1,89 @@
+// apply plugin: "com.android.application"
+// apply plugin: "org.jetbrains.kotlin.android"
+// apply plugin: "com.facebook.react"
+// apply plugin: 'com.google.gms.google-services'
+// apply plugin: 'com.google.firebase.crashlytics'
+
+// android {
+//     ndkVersion rootProject.ext.ndkVersion
+//     buildToolsVersion rootProject.ext.buildToolsVersion
+//     compileSdk rootProject.ext.compileSdkVersion
+
+//     namespace "com.Xsale"
+//     defaultConfig {
+//         applicationId "com.Xsale"
+//         minSdkVersion rootProject.ext.minSdkVersion
+//         targetSdkVersion rootProject.ext.targetSdkVersion
+//         versionCode 20
+//         versionName "1.5.9"
+//     }
+//     signingConfigs {
+//         debug {
+//             storeFile file('debug.keystore')
+//             storePassword 'android'
+//             keyAlias 'androiddebugkey'
+//             keyPassword 'android'
+//         }
+
+
+//         release {
+//             if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+//                 storeFile file(MYAPP_UPLOAD_STORE_FILE)
+//                 storePassword MYAPP_UPLOAD_STORE_PASSWORD
+//                 keyAlias MYAPP_UPLOAD_KEY_ALIAS
+//                 keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+//             }
+//         }
+//     }
+//     buildTypes {
+//         debug {
+//             signingConfig signingConfigs.debug
+//         }
+//         release {
+//             signingConfig signingConfigs.release
+//             minifyEnabled false
+//             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+//         }
+//     }
+// }
+
+// dependencies {
+//     implementation('com.facebook.android:facebook-android-sdk:16.3.0') 
+//     implementation("com.facebook.react:react-android")
+//     implementation("com.facebook.react:flipper-integration")
+//     implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
+
+//     if (hermesEnabled.toBoolean()) {
+//         implementation("com.facebook.react:hermes-android")
+//     } else {
+//         implementation 'org.webkit:android-jsc:+'
+//     }
+
+//     implementation(project(':react-native-maps')) {
+//         exclude group: 'com.google.android.gms'
+//     }
+
+//     implementation 'com.google.firebase:firebase-auth'  
+//     implementation("com.google.firebase:firebase-analytics")
+//     implementation("com.google.firebase:firebase-crashlytics")
+//     implementation 'com.google.android.gms:play-services-base:18.0.1'
+//     implementation 'com.google.android.gms:play-services-location:19.0.1'
+//     implementation 'com.google.android.gms:play-services-maps:18.0.2'
+//     implementation("com.google.android.gms:play-services-ads:23.3.0")
+//     implementation 'com.google.android.gms:play-services-ads:22.0.0' 
+//     implementation 'androidx.appcompat:appcompat:1.6.1' 
+// }
+
+// apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
+// applyNativeModulesAppBuildGradle(project)
+
+
+
+
+
+
+
+
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
@@ -14,9 +100,10 @@ android {
         applicationId "com.Xsale"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 15
-        versionName "1.5.4"
+        versionCode 27
+        versionName "1.6.4"
     }
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -24,7 +111,6 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
-
 
         release {
             if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
@@ -35,6 +121,7 @@ android {
             }
         }
     }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -48,10 +135,23 @@ android {
 }
 
 dependencies {
-    implementation('com.facebook.android:facebook-android-sdk:16.3.0') 
     implementation("com.facebook.react:react-android")
     implementation("com.facebook.react:flipper-integration")
+
     implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-crashlytics")
+
+    implementation 'com.google.android.gms:play-services-base:18.0.1'
+    implementation 'com.google.android.gms:play-services-location:19.0.1'
+    implementation 'com.google.android.gms:play-services-maps:18.0.2'
+    implementation 'com.google.android.gms:play-services-ads:23.3.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+
+    implementation(project(':react-native-maps')) {
+        exclude group: 'com.google.android.gms'
+    }
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
@@ -59,18 +159,8 @@ dependencies {
         implementation 'org.webkit:android-jsc:+'
     }
 
-    implementation(project(':react-native-maps')) {
-        exclude group: 'com.google.android.gms'
-    }
-    // implementation 'com.google.android.gms:play-services-safetynet:18.0.1'
-    // implementation 'com.google.android.gms:play-services-integrity:17.0.0'
-    implementation 'com.google.firebase:firebase-auth'  
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-crashlytics")
-    implementation 'com.google.android.gms:play-services-base:18.0.1'
-    implementation 'com.google.android.gms:play-services-location:19.0.1'
-    implementation 'com.google.android.gms:play-services-maps:18.0.2'
-    implementation("com.google.android.gms:play-services-ads:23.3.0")
+    implementation 'com.facebook.android:audience-network-sdk:6.16.0'
+    implementation 'com.google.ads.mediation:facebook:6.16.0.0'
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")

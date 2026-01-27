@@ -64,50 +64,57 @@ const ViewAdInfo = ({ navigation, route }) => {
   }, []);
 
   const adUnitId = 'ca-app-pub-9372794286829313/2080406453';
-  // one on three 
+  // one on three
   useEffect(() => {
-  const updateAdCount = async () => {
-    try {
-      const savedCount = await AsyncStorage.getItem('ad_view_count');
-      let count = savedCount ? parseInt(savedCount, 10) : 0;
-      if (count >= 3) {
-        count = 0;
+    const updateAdCount = async () => {
+      try {
+        const savedCount = await AsyncStorage.getItem('ad_view_count');
+        let count = savedCount ? parseInt(savedCount, 10) : 0;
+        if (count >= 3) {
+          count = 0;
+        }
+
+        count += 1;
+
+        await AsyncStorage.setItem('ad_view_count', count.toString());
+
+        if (count === 1) {
+          const interstitial = InterstitialAd.createForAdRequest(adUnitId);
+
+          interstitial.load();
+
+          const unsubscribeLoad = interstitial.addAdEventListener(
+            AdEventType.LOADED,
+            () => {
+              interstitial.show();
+            },
+          );
+
+          const unsubscribeClose = interstitial.addAdEventListener(
+            AdEventType.CLOSED,
+            () => {
+              unsubscribeLoad();
+              unsubscribeClose();
+              unsubscribeError();
+            },
+          );
+
+          const unsubscribeError = interstitial.addAdEventListener(
+            AdEventType.ERROR,
+            () => {
+              unsubscribeLoad();
+              unsubscribeClose();
+              unsubscribeError();
+            },
+          );
+        }
+      } catch (err) {
+        console.error('Error handling ad count', err);
       }
+    };
 
-      count += 1;
-
-      await AsyncStorage.setItem('ad_view_count', count.toString());
-
-      if (count === 1) {
-        const interstitial = InterstitialAd.createForAdRequest(adUnitId);
-
-        interstitial.load();
-
-        const unsubscribeLoad = interstitial.addAdEventListener(AdEventType.LOADED, () => {
-          interstitial.show();
-        });
-
-        const unsubscribeClose = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
-          unsubscribeLoad();
-          unsubscribeClose();
-          unsubscribeError();
-        });
-
-        const unsubscribeError = interstitial.addAdEventListener(AdEventType.ERROR, () => {
-          unsubscribeLoad();
-          unsubscribeClose();
-          unsubscribeError();
-        });
-      }
-    } catch (err) {
-      console.error('Error handling ad count', err);
-    }
-  };
-
-  updateAdCount();
-}, []);
-
-
+    updateAdCount();
+  }, []);
 
   const getUser = async () => {
     try {
@@ -168,12 +175,7 @@ const ViewAdInfo = ({ navigation, route }) => {
     try {
       setLoading(true);
       let url;
-      if (forHome) {
-        url = `api/v1/listing/fetchSingleItem/home/${adId}`;
-      } else {
-        url = `api/v1/listing/fetchSingleItem/${adId}`;
-      }
-
+      url = `api/v1/listing/fetchSingleItem/home/${adId}`;
       const { response, status } = await get(url);
       if (status === 200) {
         setLoading(false);
@@ -191,8 +193,6 @@ const ViewAdInfo = ({ navigation, route }) => {
         setAdditionalInformation(filteredDetails);
         const formattedDate = formatDate(createdAt);
         setItemPosted(formattedDate);
-
-        // settings item info
         const { askingPrice, displayName, media, location } = item;
         setAskingPrice(askingPrice);
         setMediaArray(media);
@@ -202,7 +202,6 @@ const ViewAdInfo = ({ navigation, route }) => {
         if (firstImage) {
           setItemDisplayPicture(firstImage);
         }
-        // setting user infos
       } else {
         console.log('no response');
       }
@@ -275,7 +274,6 @@ const ViewAdInfo = ({ navigation, route }) => {
         </Pressable>
       );
     } else if (isImage) {
-      // Handle image rendering
       return (
         <Pressable
           style={[
@@ -581,14 +579,7 @@ const ViewAdInfo = ({ navigation, route }) => {
             <View style={[styles.fdRow, styles.mt4]}>
               <TouchableOpacity
                 onPress={() => {
-                  // if (useChildren) {
-                  //   likeFunction(parentId, userId, 'childrenId');
-                  // } else if (!useChildren) {
-                  // likeFunction(parentId, userId, 'parentId');
-                  // }
-
                   likeFunction(parentId, userId);
-
                   if (heartColor === icons.red_heart) {
                     setHeartColor(icons.heart);
                   } else if (heartColor === icons.heart) {

@@ -16,7 +16,6 @@ import styles from '../../assets/styles';
 import {ChatCard} from '../../component/Chats';
 import {get} from '../../utils/requestBuilder';
 import colors from '../../assets/colors';
-import io from 'socket.io-client';
 import {getUserInfo} from '../../utils/function';
 import {useFocusEffect} from '@react-navigation/native';
 
@@ -27,7 +26,7 @@ const Chats = ({navigation}) => {
     {id: 3, label: 'Sell'},
   ];
 
-  const [socket] = useState(null); // Assuming you're managing socket state elsewhere
+  const [socket] = useState(null); 
   const [messages, setMessages] = useState([]);
   const [myId, setMyId] = useState(null);
   const [interactedUsers, setInteractedUsers] = useState([]);
@@ -47,15 +46,13 @@ const Chats = ({navigation}) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      // Fetch data or perform any necessary side effects here
       getUser();
-    }, [myId]), // Depend on myId to refetch data when it changes
+    }, [myId]), 
   );
 
   useEffect(() => {
     if (socket) {
       socket.on('new_message', message => {
-        // Update state with the new message
         setMessages(prevMessages => [...prevMessages, message]);
         console.log(`New message received from the backend: ${message}`);
       });
@@ -85,7 +82,6 @@ const Chats = ({navigation}) => {
       } else {
         setIsLoading(false);
         console.log('No user data available. User is not logged in.');
-        // Optionally, you can reset state or handle UI changes here
       }
     } catch (error) {
       console.log(`Error while fetching user info: ${error}`);
@@ -106,7 +102,6 @@ const Chats = ({navigation}) => {
             const { updatedAt, content, _id } = item;
             const lastMessage = item.content[item.content.length - 1]?.message;
 
-            // Check if item.itemId and item.itemId.item exist
             const itemData = item.itemId && Array.isArray(item.itemId.item)
               ? item.itemId.item[0]
               : item.itemId?.item;

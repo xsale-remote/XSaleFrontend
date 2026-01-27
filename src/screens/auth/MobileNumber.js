@@ -8,11 +8,11 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import styles from '../../assets/styles';
 import colors from '../../assets/colors';
-import { Button, TitleInput } from '../../component/shared';
-import { post } from '../../utils/requestBuilder';
+import {Button, TitleInput} from '../../component/shared';
+import {post} from '../../utils/requestBuilder';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import messaging from '@react-native-firebase/messaging';
 import {
@@ -21,10 +21,11 @@ import {
   BannerAdSize,
   InterstitialAd,
   AdEventType,
-  RewardedAd, RewardedAdEventType
+  RewardedAd,
+  RewardedAdEventType,
 } from 'react-native-google-mobile-ads';
 
-const MobileNumber = ({ navigation, route }) => {
+const MobileNumber = ({navigation, route}) => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [numberError, setNumberError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -43,7 +44,6 @@ const MobileNumber = ({ navigation, route }) => {
     getToken();
   }, []);
 
-  
   const signInWithPhoneNumber = async () => {
     if (mobileNumber.length !== 10) {
       setNumberError(true);
@@ -68,9 +68,9 @@ const MobileNumber = ({ navigation, route }) => {
       }
     };
 
-    const showRewardedAd = (onComplete) => {
+    const showRewardedAd = onComplete => {
       let timeout;
-      const unsubscribe = rewarded.addAdEventsListener(async ({ type }) => {
+      const unsubscribe = rewarded.addAdEventsListener(async ({type}) => {
         if (type === RewardedAdEventType.LOADED) {
           rewarded.show();
         }
@@ -81,7 +81,10 @@ const MobileNumber = ({ navigation, route }) => {
           onComplete();
         }
 
-        if (type === RewardedAdEventType.ERROR || type === RewardedAdEventType.CLOSED) {
+        if (
+          type === RewardedAdEventType.ERROR ||
+          type === RewardedAdEventType.CLOSED
+        ) {
           clearTimeout(timeout);
           unsubscribe();
           onComplete();
@@ -98,22 +101,27 @@ const MobileNumber = ({ navigation, route }) => {
 
     try {
       const url = 'api/v1/user/check-user';
-      const { response, status  } = await post(url, { phoneNumber: `+91${mobileNumber}` });
+      const {response, status} = await post(url, {
+        phoneNumber: `+91${mobileNumber}`,
+      });
 
-      const userExists = response?.response?._id; 
+      const userExists = response?.response?._id;
       if (userExists) {
-        // Login flow
         const loginUrl = 'api/v1/user/login';
         const loginBody = {
           phoneNumber: mobileNumber,
           FCMToken: currentFCMToken,
         };
 
-        const { response: loginResponse, status } = await post(loginUrl, loginBody);
-        console.log(response, status , " this is status")
-
+        const {response: loginResponse, status} = await post(
+          loginUrl,
+          loginBody,
+        );
         if (status === 200) {
-          await EncryptedStorage.setItem('userData', JSON.stringify(loginResponse.response));
+          await EncryptedStorage.setItem(
+            'userData',
+            JSON.stringify(loginResponse.response),
+          );
 
           ToastAndroid.showWithGravityAndOffset(
             'Login Successfully',
@@ -128,12 +136,15 @@ const MobileNumber = ({ navigation, route }) => {
             setLoading(false);
           });
         } else {
-          ToastAndroid.show('Login failed, please try again', ToastAndroid.SHORT);
+          ToastAndroid.show(
+            'Login failed, please try again',
+            ToastAndroid.SHORT,
+          );
           setLoading(false);
         }
       } else {
         showRewardedAd(() => {
-          safeNavigate('Location', { mobileNumber });
+          safeNavigate('Location', {mobileNumber});
           setLoading(false);
         });
       }
@@ -145,7 +156,6 @@ const MobileNumber = ({ navigation, route }) => {
     }
   };
 
-
   function filterInput(input) {
     const sanitizedInput = input.replace(/\D/g, '');
     return sanitizedInput;
@@ -154,37 +164,36 @@ const MobileNumber = ({ navigation, route }) => {
   const handleNumberChange = t => {
     const filteredInput = filterInput(t);
     setMobileNumber(filteredInput);
-
   };
 
   return (
-    <SafeAreaView style={[styles.pdh16, { flex: 1 }]}>
+    <SafeAreaView style={[styles.pdh16, {flex: 1}]}>
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={{flex: 1}}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: 'space-between' }}
+          contentContainerStyle={{flexGrow: 1, justifyContent: 'space-between'}}
           keyboardShouldPersistTaps="handled">
           <View
-            style={{ flex: 0.2, justifyContent: 'center', alignItems: 'center' }}>
+            style={{flex: 0.2, justifyContent: 'center', alignItems: 'center'}}>
             <Text
               style={[
                 styles.mb8,
-                { fontSize: 30, color: colors.black },
+                {fontSize: 30, color: colors.black},
                 styles.fwBold,
               ]}>
               Welcome !
             </Text>
             <Text
               style={[
-                { fontSize: 18, color: colors.black, textAlign: 'center' },
+                {fontSize: 18, color: colors.black, textAlign: 'center'},
                 styles.fwBold,
               ]}>
               Let's get started
             </Text>
           </View>
-          <View style={{ flex: 0.5, justifyContent: 'flex-start' }}>
+          <View style={{flex: 0.5, justifyContent: 'flex-start'}}>
             <TitleInput
               inputPlaceholder={'Enter here'}
               title={'Mobile Number'}
@@ -200,7 +209,7 @@ const MobileNumber = ({ navigation, route }) => {
                   styles.mt8,
                   styles.mb16,
                   styles.ts15,
-                  { color: colors.red },
+                  {color: colors.red},
                 ]}>
                 Please enter a valid mobile number
               </Text>
@@ -213,47 +222,53 @@ const MobileNumber = ({ navigation, route }) => {
                   'Login/Signup'
                 )
               }
-              style={[styles.mb24, { alignItems: 'center' }]}
+              style={[styles.mb24, {alignItems: 'center'}]}
               onPress={signInWithPhoneNumber}
               isLoading={loading}
             />
             <Button
               label={'Skip'}
-              style={{ backgroundColor: '#F6F2F2', borderWidth: 0.5 }}
-              textStyle={{ color: colors.black }}
+              style={{backgroundColor: '#F6F2F2', borderWidth: 0.5}}
+              textStyle={{color: colors.black}}
               onPress={() => {
-                const rewardedAdUnitId = 'ca-app-pub-9372794286829313/1559464025';
-                const rewarded = RewardedAd.createForAdRequest(rewardedAdUnitId, {
-                  requestNonPersonalizedAdsOnly: true,
-                });
-                const unsubscribe = rewarded.addAdEventsListener(async ({ type }) => {
-                  // When ad is loaded, show it
-                  if (type === RewardedAdEventType.LOADED) {
-                    rewarded.show();
-                  }
+                const rewardedAdUnitId =
+                  'ca-app-pub-9372794286829313/1559464025';
+                const rewarded = RewardedAd.createForAdRequest(
+                  rewardedAdUnitId,
+                  {
+                    requestNonPersonalizedAdsOnly: true,
+                  },
+                );
+                const unsubscribe = rewarded.addAdEventsListener(
+                  async ({type}) => {
+                    // When ad is loaded, show it
+                    if (type === RewardedAdEventType.LOADED) {
+                      rewarded.show();
+                    }
 
-                  // When user earns the reward (ad completed)
-                  if (type === RewardedAdEventType.EARNED_REWARD) {
-                    unsubscribe();
-                    navigation.navigate('Home');
-                  }
+                    // When user earns the reward (ad completed)
+                    if (type === RewardedAdEventType.EARNED_REWARD) {
+                      unsubscribe();
+                      navigation.navigate('Home');
+                    }
 
-                  // When ad fails to load or is closed early — still navigate
-                  if (
-                    type === RewardedAdEventType.ERROR ||
-                    type === RewardedAdEventType.CLOSED
-                  ) {
-                    unsubscribe();
-                    navigation.navigate('Home');
-                  }
-                });
+                    // When ad fails to load or is closed early — still navigate
+                    if (
+                      type === RewardedAdEventType.ERROR ||
+                      type === RewardedAdEventType.CLOSED
+                    ) {
+                      unsubscribe();
+                      navigation.navigate('Home');
+                    }
+                  },
+                );
 
                 // Start loading the ad
                 rewarded.load();
+                navigation.navigate('Home');
               }}
               disable={loading}
             />
-
           </View>
           <View>
             <BannerAd
@@ -285,4 +300,3 @@ const MobileNumber = ({ navigation, route }) => {
 };
 
 export default MobileNumber;
-

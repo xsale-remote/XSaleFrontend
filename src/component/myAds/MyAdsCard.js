@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Image,
@@ -12,15 +12,13 @@ import {
 import styles from '../../assets/styles';
 import colors from '../../assets/colors';
 import icons from '../../assets/icons';
-import images from '../../assets/images';
-import {deleteApi, put} from '../../utils/requestBuilder';
-import {useNavigation} from '@react-navigation/native';
-import {formatPriceIndian} from '../../utils/function';
-import FastImage from 'react-native-fast-image';
+import { deleteApi, put } from '../../utils/requestBuilder';
+import { useNavigation } from '@react-navigation/native';
+import { formatPriceIndian } from '../../utils/function';
 
 const formatDate = isoString => {
   const date = new Date(isoString);
-  const options = {day: 'numeric', month: 'long', year: 'numeric'};
+  const options = { day: 'numeric', month: 'long', year: 'numeric' };
   return new Intl.DateTimeFormat('en-GB', options).format(date);
 };
 
@@ -59,7 +57,7 @@ const OptionModal = ({
           <Text
             style={[
               styles.h3,
-              {color: colors.black, textAlign: 'left'},
+              { color: colors.black, textAlign: 'left' },
               styles.mb16,
             ]}>
             Ads Option
@@ -70,12 +68,12 @@ const OptionModal = ({
                 style={[
                   styles.p8,
                   styles.mb12,
-                  {width: '100%', borderWidth: 0.5},
+                  { width: '100%', borderWidth: 0.5 },
                 ]}
                 onPress={handleDelete}>
                 <Text
                   style={[
-                    {color: colors.black, textAlign: 'left'},
+                    { color: colors.black, textAlign: 'left' },
                     styles.ts16,
                     styles.fwBold,
                   ]}>
@@ -86,12 +84,12 @@ const OptionModal = ({
                 style={[
                   styles.p8,
                   styles.mb12,
-                  {width: '100%', borderWidth: 0.5},
+                  { width: '100%', borderWidth: 0.5 },
                 ]}
                 onPress={handleDeactivate}>
                 <Text
                   style={[
-                    {color: colors.black, textAlign: 'left'},
+                    { color: colors.black, textAlign: 'left' },
                     styles.ts16,
                     styles.fwBold,
                   ]}>
@@ -104,12 +102,12 @@ const OptionModal = ({
                 style={[
                   styles.p8,
                   styles.mb12,
-                  {width: '100%', borderWidth: 0.5},
+                  { width: '100%', borderWidth: 0.5 },
                 ]}
                 onPress={handleEditAds}>
                 <Text
                   style={[
-                    {color: colors.black, textAlign: 'left'},
+                    { color: colors.black, textAlign: 'left' },
                     styles.ts16,
                     styles.fwBold,
                   ]}>
@@ -119,7 +117,7 @@ const OptionModal = ({
               <TouchableOpacity
                 style={[
                   styles.mt4,
-                  {borderRadius: 10, backgroundColor: colors.red, width: 80},
+                  { borderRadius: 10, backgroundColor: colors.red, width: 80 },
                   styles.p8,
                 ]}
                 onPress={handleClose}>
@@ -127,7 +125,7 @@ const OptionModal = ({
                   style={[
                     styles.ts16,
                     styles.fwBold,
-                    {color: colors.white, textAlign: 'center'},
+                    { color: colors.white, textAlign: 'center' },
                   ]}>
                   Close
                 </Text>
@@ -159,7 +157,7 @@ const MyAdsCard = ({
       overflow: 'hidden',
       backgroundColor: 'white',
       shadowColor: '#000',
-      shadowOffset: {width: 0, height: 5},
+      shadowOffset: { width: 0, height: 5 },
       shadowOpacity: 0.34,
       shadowRadius: 6.27,
       elevation: 5,
@@ -168,15 +166,15 @@ const MyAdsCard = ({
   const navigation = useNavigation();
   const [showModal, setShowModal] = useState(false);
   const [moreOptionLoading, setMoreOptionLoading] = useState(false);
-  const {_id, productType, categoryName, displayName, askingPrice} = itemData;
+  const { _id, productType, categoryName, displayName, askingPrice } = itemData;
   const imageFormats = ['jpg', 'jpeg', 'png'];
   const firstImage = itemData.media
     ? itemData.media.find(mediaUrl =>
-        imageFormats.some(format => mediaUrl.endsWith(format)),
-      )
+      imageFormats.some(format => mediaUrl.endsWith(format)),
+    )
     : itemData[0].media.find(mediaUrl =>
-        imageFormats.some(format => mediaUrl.endsWith(format)),
-      );
+      imageFormats.some(format => mediaUrl.endsWith(format)),
+    );
 
   const deleteActiveAds = async (
     userId,
@@ -196,9 +194,10 @@ const MyAdsCard = ({
         categoryName: itemCategory,
         productType,
       };
-
+      console.log(body,)
       const {response, status} = await deleteApi(url, body);
       if (status === 200) {
+        setShowModal(false)
         setMoreOptionLoading(false);
         ToastAndroid.showWithGravityAndOffset(
           'Ad deleted successfully',
@@ -214,9 +213,8 @@ const MyAdsCard = ({
       console.log('error while deleting the ad ', error);
     }
     setShowModal(!showModal);
-    // handleSelectActive(userId);
     if (handleSelectActive) {
-      handleSelectActive(userId); // Call the function only if it's defined
+      handleSelectActive(userId);
     }
     setMoreOptionLoading(false);
   };
@@ -237,7 +235,7 @@ const MyAdsCard = ({
         categoryName,
         productType,
       };
-      const {response, status} = await put(url, body);
+      const { response, status } = await put(url, body);
       if (status === 200) {
         setMoreOptionLoading(false);
         ToastAndroid.showWithGravityAndOffset(
@@ -265,13 +263,6 @@ const MyAdsCard = ({
   const editAds = async (itemData, parentId, categoryName, productType) => {
     setMoreOptionLoading(true);
     try {
-      // const categories = {
-      //   Jobs: 'Job',
-      //   Fashion: 'Fashion',
-      //   Services: 'Services',
-      //   // Add more category mappings as needed
-      // };
-
       if (categoryName === 'Jobs') {
         navigation.navigate('Job', {
           itemData,
@@ -620,11 +611,11 @@ const MyAdsCard = ({
 
   return (
     <Pressable
-      style={[{height: 125, overflow: 'hidden'}, styles.fdRow, cardStyle]}>
-      <View style={[{width: '30%', backgroundColor: colors.black}]}>
+      style={[{ height: 125, overflow: 'hidden' }, styles.fdRow, cardStyle]}>
+      <View style={[{ width: '30%', backgroundColor: colors.black }]}>
 
         <Image
-          source={{uri: firstImage}}
+          source={{ uri: firstImage }}
           style={{
             height: '100%',
             width: '90%',
@@ -634,8 +625,8 @@ const MyAdsCard = ({
           }}
         />
       </View>
-      <View style={[{width: '70%'}, styles.p8]}>
-        <View style={[styles.fdRow, {width: '100%'}]}>
+      <View style={[{ width: '70%' }, styles.p8]}>
+        <View style={[styles.fdRow, { width: '100%' }]}>
           <Text
             style={[
               styles.ts15,
@@ -657,23 +648,23 @@ const MyAdsCard = ({
         <View
           style={[
             styles.fdRow,
-            {marginTop: displayName.length > 50 ? null : 4},
+            { marginTop: displayName.length > 50 ? null : 4 },
           ]}>
           <Pressable>
             <Image
               source={icons.rupee}
-              style={[styles.icon16, styles.mr8, {marginTop: 6}]}
+              style={[styles.icon16, styles.mr8, { marginTop: 6 }]}
             />
           </Pressable>
-          <Text style={[styles.ts19, {color: colors.black}]}>
+          <Text style={[styles.ts19, { color: colors.black }]}>
             {formatPriceIndian(askingPrice) || '---'}
           </Text>
         </View>
-        <View style={[{marginTop: 2}, styles.pdv4]}>
-          <Text style={[styles.ts13, styles.mb4, {color: colors.black}]}>
+        <View style={[{ marginTop: 2 }, styles.pdv4]}>
+          <Text style={[styles.ts13, styles.mb4, { color: colors.black }]}>
             Posting Date: {formatDate(postedOn)}
           </Text>
-          <Text style={[styles.ts13, {color: colors.black}]}>
+          <Text style={[styles.ts13, { color: colors.black }]}>
             Expiry Date : {formatDate(expiresOn)}
           </Text>
         </View>

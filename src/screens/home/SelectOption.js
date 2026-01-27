@@ -26,7 +26,6 @@ const SelectOption = ({route}) => {
             console.log('Ad loaded successfully');
           }}
         />
-
         <View style={[{marginTop : 10}]}>
           <BannerAd
             size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}

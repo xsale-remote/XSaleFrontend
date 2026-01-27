@@ -230,7 +230,6 @@ const PropertySale = ({navigation, route}) => {
     }
   };
   const handleDropdown = (index, value, type) => {
-    console.log(index, type, value);
     if (type === 'propertType') {
       setPropertyType(value);
       setPropertyTypeEmpty(false);

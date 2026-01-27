@@ -163,7 +163,6 @@ const MyAds = ({navigation, route}) => {
         const body = {
           userId,
           itemId,
-          itemIdType: idType,
         };
         const url = `api/v1/user/item/like-item`;
         const {response, status} = await post(url, body, true);
@@ -211,7 +210,6 @@ const MyAds = ({navigation, route}) => {
       <AdsCard
         parentId={parentId}
         data={itemData}
-        // onPress={() => navigation.navigate('ViewAdInfo', {adId: parentId})}
         onPress={() => {
           navigation.navigate('ViewAdInfo', {
             adId: parentId,
@@ -223,7 +221,6 @@ const MyAds = ({navigation, route}) => {
             forHome: true,
           });
         }}
-        // onDislike={() => likeItem(parentId, userId, 'childrenId')}
         onDislike={() => likeItem(parentId, userId)}
         isLikeLoading={isLikeLoading}
         isLiked={true}

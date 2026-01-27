@@ -381,7 +381,7 @@ const ViewAd = ({ navigation, route }) => {
     );
   };
 
-  const handleSubmit = async () => {
+  const handleOtherCategories = async () => {
     let body = {};
     try {
       let url = '';
@@ -1570,7 +1570,7 @@ const ViewAd = ({ navigation, route }) => {
     } else if (categoryName === 'Property' && itemName === 'Land') {
       createLand();
     } else {
-      handleSubmit();
+      handleOtherCategories();
     }
   };
 
@@ -2062,6 +2062,8 @@ const ViewAd = ({ navigation, route }) => {
           additionalInfo,
           fullAddress,
           askingPrice,
+          itemLatitude,
+          itemLongitude
         } = itemDetails;
         const body = {
           user: userId,
@@ -2073,6 +2075,8 @@ const ViewAd = ({ navigation, route }) => {
           media: mediaUriArray,
           location: fullAddress,
           fareKm: askingPrice,
+          latitude: itemLatitude,
+          longitude: itemLongitude
         };
         const { response, status } = await post(url, body, true);
         if (status === 200) {
@@ -2344,43 +2348,43 @@ const ViewAd = ({ navigation, route }) => {
 
 
   // 💰 Start PayU payment directly
-const initiatePayUPayment = async () => {
-  setIsLoading(true);
-  try {
-    const body = {
-      name : userName, 
-      phone: userNumber,
-      itemLatitude : itemDetails.itemLatitude,
-      itemLongitude : itemDetails.itemLongitude,
-      address : itemDetails.fullAddress,
-      categoryName:categoryName
-     };
+  const initiatePayUPayment = async () => {
+    setIsLoading(true);
+    try {
+      const body = {
+        name: userName,
+        phone: userNumber,
+        itemLatitude: itemDetails.itemLatitude,
+        itemLongitude: itemDetails.itemLongitude,
+        address: itemDetails.fullAddress,
+        categoryName: categoryName
+      };
 
-    const { response, status } = await post(
-      "api/v1/payment/payu/initiate",
-      body,
-      true
-    );
+      const { response, status } = await post(
+        "api/v1/payment/payu/initiate",
+        body,
+        true
+      );
 
-    if (status === 200) {
-      const responseData = response.response;
-      setCurrentResponseData(responseData);
+      if (status === 200) {
+        const responseData = response.response;
+        setCurrentResponseData(responseData);
 
-      if (responseData.payment) {
-        const payload = responseData.payuPayload;
-        setPayuPayload(payload);
-        setShowPayUModal(true);
-      } else {
-        await createItem(); // for free listings
+        if (responseData.payment) {
+          const payload = responseData.payuPayload;
+          setPayuPayload(payload);
+          setShowPayUModal(true);
+        } else {
+          await createItem(); // for free listings
+        }
       }
+    } catch (error) {
+      console.error("Error initiating PayU payment:", error);
+      Alert.alert("Error", "Payment initiation failed.");
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.error("Error initiating PayU payment:", error);
-    Alert.alert("Error", "Payment initiation failed.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
 
   // ✅ Step 5: Handle PayU result

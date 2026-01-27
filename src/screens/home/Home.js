@@ -13,24 +13,23 @@ import {
   Linking,
   ActivityIndicator,
 } from 'react-native';
-import React, {useEffect, useState, useCallback} from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import colors from '../../assets/colors';
 import styles from '../../assets/styles';
-import {HomeHeader, LocationInput, Categories} from '../../component/Home';
-import {BottomNavigation} from '../../component/shared';
-import {get, post} from '../../utils/requestBuilder';
-import {getUserInfo} from '../../utils/function';
-import {AdsCard} from '../../component/shared';
-import {useFocusEffect} from '@react-navigation/native';
+import { HomeHeader, LocationInput, Categories } from '../../component/Home';
+import { BottomNavigation, SearchBar } from '../../component/shared';
+import { get, post } from '../../utils/requestBuilder';
+import { getUserInfo } from '../../utils/function';
+import { AdsCard } from '../../component/shared';
+import { useFocusEffect } from '@react-navigation/native';
 import Geolocation from 'react-native-geolocation-service';
-import {BannerAd, TestIds, BannerAdSize } from 'react-native-google-mobile-ads';
-import {Button} from 'react-native-share';
+import { BannerAd, TestIds, BannerAdSize } from 'react-native-google-mobile-ads';
+import { Button } from 'react-native-share';
 import messaging from "@react-native-firebase/messaging"
 
-const Home = ({navigation}) => {
+const Home = ({ navigation }) => {
   const [homeAds, setHomeAds] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [userName, setUserName] = useState('');
   const [profilePicture, setProfilePicture] = useState('');
   const [address, setAddress] = useState('');
   const [userId, setUserId] = useState('');
@@ -43,6 +42,7 @@ const Home = ({navigation}) => {
   const [page, setPage] = useState(1);
   const [hasMoreItems, setHasMoreItems] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [userLocation, setUserLocation] = useState("");
 
   useEffect(() => {
     getUser();
@@ -85,7 +85,7 @@ const Home = ({navigation}) => {
       const body = {
         _id: userId,
       };
-      const {response, status} = await post(url, body, true);
+      const { response, status } = await post(url, body, true);
       if (status === 200) {
         const responseData = response.response;
         const likedItemIds = responseData.likedItems;
@@ -114,13 +114,13 @@ const Home = ({navigation}) => {
     try {
       const userData = await getUserInfo();
       if (userData) {
-       setLoggedIn(true);
-        const {userName, profilePicture, _id} = userData.user;
+        setLoggedIn(true);
+        const { profilePicture, _id } = userData.user;
         const fullAddress = userData?.user?.location?.fullAddress;
-        const {latitude, longitude} = userData?.user?.location;
+        const { latitude, longitude } = userData?.user?.location;
+        setUserLocation(userData?.user?.location)
         setUserId(_id);
         getUpdatedUser(_id);
-        setUserName(userName);
         setProfilePicture(profilePicture);
         setAddress(fullAddress);
         setUserLatitude(latitude);
@@ -128,9 +128,8 @@ const Home = ({navigation}) => {
         getAllItems(latitude, longitude, 1);
       } else {
         setLoggedIn(false);
-        // Fetch user's location using Google API
         const defaultLocation = await fetchGoogleLocation();
-        const {latitude, longitude} = defaultLocation;
+        const { latitude, longitude } = defaultLocation;
         setAddress("Please login to use location");
         setUserLatitude(latitude);
         setUserLongitude(longitude);
@@ -165,11 +164,11 @@ const Home = ({navigation}) => {
                 style: 'destructive',
               },
             ],
-            {cancelable: false},
+            { cancelable: false },
           );
           return false;
         }
-      } 
+      }
     } catch (err) {
       console.warn(err);
       return false;
@@ -181,33 +180,33 @@ const Home = ({navigation}) => {
       const hasPermission = await requestLocationPermission();
       if (!hasPermission) {
         return;
-      } 
+      }
 
       const getPosition = () => {
         return new Promise((resolve, reject) => {
           Geolocation.getCurrentPosition(
             position => resolve(position),
             error => reject(error),
-            {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
           );
         });
       };
 
       const position = await getPosition();
-       const latitude = position.coords.latitude;
+      const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
       setUserLatitude(latitude);
       setUserLongitude(longitude);
       return {
-        latitude , 
-        longitude  , 
+        latitude,
+        longitude,
       }
     } catch (error) {
       console.error('Error fetching location:', error);
       Alert.alert(
         'Error',
         'Unable to fetch location. Please ensure location services are enabled.',
-        [{text: 'Exit', onPress: () => BackHandler.exitApp()}],
+        [{ text: 'Exit', onPress: () => BackHandler.exitApp() }],
       );
       return {
         fullAddress: 'Unknown Location',
@@ -234,19 +233,16 @@ const Home = ({navigation}) => {
     setRefreshing(currentPage === 1);
     try {
       const url = `api/v1/listing/fetch/items?page=${currentPage}&limit=20&userLatitude=${latitude}&userLongitude=${longitude}`;
-      const {response, status} = await get(url);
+      const { response, status } = await get(url);
       if (status === 200) {
         const responseData = response?.response;
         if (responseData?.items) {
           const activeItems = responseData.items.filter(
             item => !item.isDeactivate,
           );
-          // Update state with fetched items
           setHomeAds(prevItems =>
             currentPage === 1 ? activeItems : [...prevItems, ...activeItems],
           );
-
-          // Set pagination state
           setPage(currentPage);
           const hasMore = responseData.hasMoreItems;
           setHasMoreItems(hasMore);
@@ -264,15 +260,15 @@ const Home = ({navigation}) => {
   };
 
   const modifiedData = [...homeAds];
-  const adInterval = 6;
+  const adInterval = 4;
   for (let i = adInterval; i < modifiedData.length; i += adInterval + 1) {
-    modifiedData.splice(i, 0, {type: 'bannerAd'});
+    modifiedData.splice(i, 0, { type: 'bannerAd' });
   }
 
-  const renderAdsCard = ({item, index}) => {
+  const renderAdsCard = ({ item, index }) => {
     if (item.type === 'bannerAd') {
       return (
-        <View style={{width: '100%'}}>
+        <View style={{ width: '100%' }}>
           <BannerAd
             size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
             unitId={`ca-app-pub-9372794286829313/2602437630`}
@@ -295,11 +291,11 @@ const Home = ({navigation}) => {
     const imageFormats = ['jpg', 'jpeg', 'png', 'JPG', 'JPEG', 'PNG'];
     const firstImage = itemData.media
       ? itemData.media.find(mediaUrl =>
-          imageFormats.some(format => mediaUrl.endsWith(format)),
-        )
+        imageFormats.some(format => mediaUrl.endsWith(format)),
+      )
       : itemData[0].media.find(mediaUrl =>
-          imageFormats.some(format => mediaUrl.endsWith(format)),
-        );
+        imageFormats.some(format => mediaUrl.endsWith(format)),
+      );
 
     return (
       <AdsCard
@@ -326,14 +322,14 @@ const Home = ({navigation}) => {
 
   const likeItem = async (itemId, userId, idType) => {
     if (userId) {
-      setLoadingStates(prevState => ({...prevState, [itemId]: true}));
+      setLoadingStates(prevState => ({ ...prevState, [itemId]: true }));
       try {
         const body = {
           userId,
           itemId,
         };
         const url = `api/v1/user/item/like-item`;
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setLikedStates(prevState => ({
             ...prevState,
@@ -346,7 +342,7 @@ const Home = ({navigation}) => {
       } catch (error) {
         console.log(`error while liking the item ${error}`);
       } finally {
-        setLoadingStates(prevState => ({...prevState, [itemId]: false}));
+        setLoadingStates(prevState => ({ ...prevState, [itemId]: false }));
       }
     } else {
       ToastAndroid.showWithGravityAndOffset(
@@ -368,12 +364,20 @@ const Home = ({navigation}) => {
     );
   };
 
+  const handleSearch = (query) => {
+    navigation.navigate("SearchScreen", {
+      query: query,
+      latitude: userLatitude,
+      longitude: userLongitude
+    })
+  };
+
   return (
-    <SafeAreaView style={[styles.pdh16, {height: '100%', flex: 1}]}>
-      <HomeHeader name={userName} profilePicture={profilePicture} />
-      <LocationInput
-        address={ address}
-        onPress={() => navigation.navigate('ChangeLocation', {address})}
+    <SafeAreaView style={[styles.pdh16, { height: '100%', flex: 1 }]}>
+      <HomeHeader profilePicture={profilePicture} address={address} location={userLocation}/>
+      <SearchBar
+        onSearch={handleSearch}
+        navigation={navigation}
       />
       <View
         style={[
@@ -389,12 +393,12 @@ const Home = ({navigation}) => {
           styles.pdt8,
         ]}>
         <View
-          style={[styles.fdRow, styles.mb4, {justifyContent: 'space-between'}]}>
+          style={[styles.fdRow, styles.mb4, { justifyContent: 'space-between' }]}>
           <Text
             style={[
               styles.fwBold,
               styles.ts17,
-              {color: colors.blackOlive},
+              { color: colors.blackOlive },
               styles.mb4,
             ]}>
             Categories
@@ -404,7 +408,7 @@ const Home = ({navigation}) => {
             <Text
               style={[
                 styles.fw400,
-                {fontFamily: 'Fira Sans', color: colors.taupeGray},
+                { fontFamily: 'Fira Sans', color: colors.taupeGray },
               ]}>
               See All
             </Text>
@@ -415,7 +419,7 @@ const Home = ({navigation}) => {
 
       <FlatList
         showsVerticalScrollIndicator={false}
-        style={[{flex: 1, marginBottom: 50}]}
+        style={[{ flex: 1, marginBottom: 50 }]}
         data={modifiedData}
         renderItem={renderAdsCard}
         keyExtractor={(item, index) => item._id || `banner-${index}`}

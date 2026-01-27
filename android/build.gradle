@@ -21,3 +21,16 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force "androidx.browser:browser:1.8.0"
+        }
+    }
+}

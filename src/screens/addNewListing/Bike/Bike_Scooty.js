@@ -147,15 +147,6 @@ const Bike_Scooty = ({navigation, route}) => {
     }
   };
 
-  // const handleDateChange = date => {
-  //   const formattedDate = date.toLocaleDateString('en-US', {
-  //     day: '2-digit',
-  //     month: '2-digit',
-  //     year: 'numeric',
-  //   });
-  //   setRegisterationDate(formattedDate);
-  // };
-
   const handleDateChange = date => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

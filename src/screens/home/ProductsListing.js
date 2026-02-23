@@ -22,13 +22,6 @@ import Geolocation from 'react-native-geolocation-service';
 
 import {BannerAd, TestIds, BannerAdSize} from 'react-native-google-mobile-ads';
 
-const adUnitId = __DEV__
-  ? TestIds.ADAPTIVE_BANNER
-  : 'ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyyyyyy';
-
-const subCatgoryUnitId = __DEV__
-  ? TestIds.ADAPTIVE_BANNER
-  : 'ca-app-pub-xxxxxxxxxxxxx/yyyyyyyyyyyyyy';
 
 const {width} = Dimensions.get('window');
 

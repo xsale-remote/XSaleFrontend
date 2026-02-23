@@ -3,23 +3,29 @@ const colors = {
   white: '#ffffff',
   silver: '#F5F5F5',
   black: '#000000',
+  grey : "#666666",
   grey50: '#fafafa',
   grey100: '#E1E0E0',
+  grey200 : "#E0E0E0",
   grey800: '#828282',
   darkGrey: '#3C3C3C',
   lightGrey: '#EBEBEB',
   grey500: '#979797',
   mintGreen: '#087E8B',
   lightOrange: '#ff5a5f',
-  grey700: '#dedede', // search input background
-  taupeGray: '#898989', // view more color
-  blackOlive: '#565454', // price , new arrivals color
-  lightPink: '#C1839F', // product company text color
+  grey700: '#dedede', 
+  taupeGray: '#898989', 
+  blackOlive: '#565454', 
+  lightPink: '#C1839F', 
   pink100: '#ffedeb',
   fleshTint: '#ff6363',
-  metallicSeaweed: '#08738b', // navigation tab indicator
+  metallicSeaweed: '#08738b', 
   red: '#f70511',
   orange100: '#fff4f4',
+  platinum : "#e8e8e8", 
+  offWhite : "#f9f9f9", 
+  cyanCider : "#d4f4f1", 
+  seaGreen : "#002f34"
 };
 
 export default colors;

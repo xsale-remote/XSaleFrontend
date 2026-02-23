@@ -73,6 +73,7 @@ const icons = {
   red_heart: require('./icons/red_heart.png'),
   aim: require('./icons/aim.png'),
   circle_tick: require('./icons/circle_tick.png'),
-  login_icon : require("./icons/login_icon.webp")
+  login_icon : require("./icons/login_icon.webp"), 
+  empty : require("./icons/empty.png")
 };
 export default icons;

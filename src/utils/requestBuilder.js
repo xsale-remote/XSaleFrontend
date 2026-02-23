@@ -1,19 +1,15 @@
 import {base_url} from './env';
 import EncryptedStorage from 'react-native-encrypted-storage';
-// get api call function
 
 import axios from 'axios';
 
 export const get = async (url, useToken = false) => {
   try {
-    // Initialize headers object
-    const headers = {};
-
-    // Check if token should be used
+    const headers = {
+      'X-Platform': "mobile",
+    };
     if (useToken) {
       const userInfo = JSON.parse(await EncryptedStorage.getItem('userData'));
-
-      // Check if userInfo is defined and has a token
       if (userInfo && userInfo.token) {
         const userToken = userInfo.token;
         headers.Authorization = `Bearer ${userToken}`;
@@ -22,7 +18,6 @@ export const get = async (url, useToken = false) => {
       }
     }
 
-    // Include headers in the axios request
     const {data} = await axios.get(`${base_url}${url}`, {headers});
     return {status: data.statusCode, response: data.response};
   } catch (error) {
@@ -32,8 +27,7 @@ export const get = async (url, useToken = false) => {
   }
 };
 
-// patch api call function
-export const patch = async (url, body, token = true, name) => {
+export const patch = async (url, body, token = true) => {
   try {
     let headers = new Headers();
     headers.append('x-encrypted-key', tenantId);
@@ -59,7 +53,7 @@ export const patch = async (url, body, token = true, name) => {
       return {status: response.status, response};
     }
   } catch (error) {
-    console.log(name, ' :', error);
+    console.log("Post request builder error: " , error);
   }
 };
 
@@ -67,6 +61,7 @@ export const post = async (url, body, useToken = false) => {
   try {
     const headers = {
       'Content-Type': 'application/json',
+      'X-Platform': "mobile",
     };
 
     if (useToken) {
@@ -100,6 +95,7 @@ export const put = async (url, body, useToken = true) => {
   try {
     const headers = {
       'Content-Type': 'application/json',
+      'X-Platform': "mobile",
     };
 
     if (useToken) {
@@ -111,9 +107,7 @@ export const put = async (url, body, useToken = true) => {
         throw new Error('User token not found');
       }
     }
-
     const {data} = await axios.put(`${base_url}${url}`, body, {headers});
-
     return {
       status: data.statusCode,
       response: data.response,
@@ -130,15 +124,13 @@ export const put = async (url, body, useToken = true) => {
 
 export const deleteApi = async (url, body, useToken = true) => {
   try {
-    // Initialize headers object
     const headers = {
       'Content-Type': 'application/json',
+      'X-Platform': "mobile",
     };
 
-    // Check if token should be used
     if (useToken) {
       const userInfo = JSON.parse(await EncryptedStorage.getItem('userData'));
-      // Check if userInfo is defined and has a token
       if (userInfo) {
         const userToken = userInfo.token;
         headers.Authorization = `Bearer ${userToken}`;
@@ -152,7 +144,6 @@ export const deleteApi = async (url, body, useToken = true) => {
       data: body,
     });
 
-    // Handle the response
     if (response.status === 200) {
       const json = response.data;
       return {status: response.status, response: json};
@@ -162,7 +153,7 @@ export const deleteApi = async (url, body, useToken = true) => {
   } catch (error) {
     console.log('Error:', error);
 
-    const status = error.response?.status || 500; // Default to 500 if status is not available
+    const status = error.response?.status || 500;
     const response = error.response?.data?.response || 'An error occurred';
     return {status, response};
   }
@@ -182,7 +173,6 @@ export const uploadMediaToServer = async mediaArray => {
   try {
     const {data} = await axios.post(
       `${base_url}api/v1/user/profile/upload`,
-      // `http://192.168.188.88:3000/api/v1/user/profile/upload`,
       formData,
       {
         headers: {
@@ -193,15 +183,12 @@ export const uploadMediaToServer = async mediaArray => {
 
     return {status: data.statusCode, response: data.response};
   } catch (error) {
-    // Log detailed error information
     console.error('Error uploading media:', {
       message: error.message,
       response: error.response?.data || 'No response data',
       status: error.response?.status || 'No status code',
       headers: error.response?.headers || 'No headers',
     });
-
-    // Optionally, return a structured error response
     return {
       status: error.response?.status || 500,
       response:

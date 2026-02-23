@@ -148,14 +148,6 @@ const FirstScreen = ({navigation}) => {
           ]}>
           A Sky Technologies Product
         </Text>
-        <Text
-          style={[
-            ,
-            {color: colors.white, bottom: 15, position: 'absolute'},
-            styles.mt12,
-          ]}>
-          skytechnologies.solutions@gmail.com
-        </Text>
       </View>
     </SafeAreaView>
   );

@@ -20,16 +20,23 @@
     
     <!-- Your existing meta-data -->
     <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyCBw5IJo7FFW5jbxB78Ib9vk4ayIhysF9I"/>
+
+    <!-- google admob app id -->
     <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-9372794286829313~3822624732"/>
     
     <!-- NEW: Facebook Meta Data -->
     <meta-data
-        android:name="com.facebook.sdk.ApplicationId"
-        android:value="@string/facebook_app_id" />
+    android:name="com.facebook.sdk.ApplicationId"
+    android:value="@string/facebook_app_id" />
     <meta-data
         android:name="com.facebook.sdk.ClientToken"
         android:value="@string/facebook_client_token" />
-    <!-- End of Facebook Meta Data -->
+
+<!-- Required Facebook Content Provider -->
+    <provider
+        android:name="com.facebook.FacebookContentProvider"
+        android:authorities="com.facebook.app.FacebookContentProvider831268519633339"
+        android:exported="true" />
 
     <activity 
       android:name=".MainActivity" 

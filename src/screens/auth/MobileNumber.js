@@ -8,11 +8,11 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from '../../assets/styles';
 import colors from '../../assets/colors';
-import {Button, TitleInput} from '../../component/shared';
-import {post} from '../../utils/requestBuilder';
+import { Button, TitleInput } from '../../component/shared';
+import { post } from '../../utils/requestBuilder';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import messaging from '@react-native-firebase/messaging';
 import {
@@ -25,7 +25,7 @@ import {
   RewardedAdEventType,
 } from 'react-native-google-mobile-ads';
 
-const MobileNumber = ({navigation, route}) => {
+const MobileNumber = ({ navigation, route }) => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [numberError, setNumberError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -70,7 +70,7 @@ const MobileNumber = ({navigation, route}) => {
 
     const showRewardedAd = onComplete => {
       let timeout;
-      const unsubscribe = rewarded.addAdEventsListener(async ({type}) => {
+      const unsubscribe = rewarded.addAdEventsListener(async ({ type }) => {
         if (type === RewardedAdEventType.LOADED) {
           rewarded.show();
         }
@@ -101,7 +101,7 @@ const MobileNumber = ({navigation, route}) => {
 
     try {
       const url = 'api/v1/user/check-user';
-      const {response, status} = await post(url, {
+      const { response, status } = await post(url, {
         phoneNumber: `+91${mobileNumber}`,
       });
 
@@ -113,7 +113,7 @@ const MobileNumber = ({navigation, route}) => {
           FCMToken: currentFCMToken,
         };
 
-        const {response: loginResponse, status} = await post(
+        const { response: loginResponse, status } = await post(
           loginUrl,
           loginBody,
         );
@@ -144,7 +144,7 @@ const MobileNumber = ({navigation, route}) => {
         }
       } else {
         showRewardedAd(() => {
-          safeNavigate('Location', {mobileNumber});
+          safeNavigate('Location', { mobileNumber });
           setLoading(false);
         });
       }
@@ -167,33 +167,33 @@ const MobileNumber = ({navigation, route}) => {
   };
 
   return (
-    <SafeAreaView style={[styles.pdh16, {flex: 1}]}>
+    <SafeAreaView style={[styles.pdh16, { flex: 1 }]}>
       <KeyboardAvoidingView
-        style={{flex: 1}}
+        style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
         <ScrollView
-          contentContainerStyle={{flexGrow: 1, justifyContent: 'space-between'}}
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'space-between' }}
           keyboardShouldPersistTaps="handled">
           <View
-            style={{flex: 0.2, justifyContent: 'center', alignItems: 'center'}}>
+            style={{ flex: 0.2, justifyContent: 'center', alignItems: 'center' }}>
             <Text
               style={[
                 styles.mb8,
-                {fontSize: 30, color: colors.black},
+                { fontSize: 30, color: colors.black },
                 styles.fwBold,
               ]}>
               Welcome !
             </Text>
             <Text
               style={[
-                {fontSize: 18, color: colors.black, textAlign: 'center'},
+                { fontSize: 18, color: colors.black, textAlign: 'center' },
                 styles.fwBold,
               ]}>
               Let's get started
             </Text>
           </View>
-          <View style={{flex: 0.5, justifyContent: 'flex-start'}}>
+          <View style={{ flex: 0.5, justifyContent: 'flex-start' }}>
             <TitleInput
               inputPlaceholder={'Enter here'}
               title={'Mobile Number'}
@@ -209,7 +209,7 @@ const MobileNumber = ({navigation, route}) => {
                   styles.mt8,
                   styles.mb16,
                   styles.ts15,
-                  {color: colors.red},
+                  { color: colors.red },
                 ]}>
                 Please enter a valid mobile number
               </Text>
@@ -222,14 +222,14 @@ const MobileNumber = ({navigation, route}) => {
                   'Login/Signup'
                 )
               }
-              style={[styles.mb24, {alignItems: 'center'}]}
+              style={[styles.mb24, { alignItems: 'center' }]}
               onPress={signInWithPhoneNumber}
               isLoading={loading}
             />
             <Button
               label={'Skip'}
-              style={{backgroundColor: '#F6F2F2', borderWidth: 0.5}}
-              textStyle={{color: colors.black}}
+              style={{ backgroundColor: '#F6F2F2', borderWidth: 0.5 }}
+              textStyle={{ color: colors.black }}
               onPress={() => {
                 const rewardedAdUnitId =
                   'ca-app-pub-9372794286829313/1559464025';
@@ -240,7 +240,7 @@ const MobileNumber = ({navigation, route}) => {
                   },
                 );
                 const unsubscribe = rewarded.addAdEventsListener(
-                  async ({type}) => {
+                  async ({ type }) => {
                     // When ad is loaded, show it
                     if (type === RewardedAdEventType.LOADED) {
                       rewarded.show();
@@ -270,27 +270,27 @@ const MobileNumber = ({navigation, route}) => {
               disable={loading}
             />
           </View>
-          <View>
+          <View
+            style={[
+              styles.mh12,
+              styles.mv8,
+              {
+                borderRadius: 12,
+                backgroundColor: colors.white,
+                shadowColor: colors.black,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 8,
+                elevation: 4,
+                overflow: "hidden"
+              },
+            ]}
+          >
             <BannerAd
-              size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
-              unitId={'ca-app-pub-9372794286829313/4639295228'}
-              onAdFailedToLoad={error => {
-                console.log('Ad failed to load:', error);
-              }}
-              onAdLoaded={() => {
-                console.log('Ad loaded successfully');
-              }}
-            />
-            <View></View>
-            <BannerAd
-              size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-              unitId={'ca-app-pub-9372794286829313/4944185351'}
-              onAdFailedToLoad={error => {
-                console.log('Ad failed to load:', error);
-              }}
-              onAdLoaded={() => {
-                console.log('Ad loaded successfully');
-              }}
+              size={BannerAdSize.MEDIUM_RECTANGLE}
+              unitId="ca-app-pub-9372794286829313/4639295228"
+              onAdFailedToLoad={error => console.log('Ad failed to load:', error)}
+              onAdLoaded={() => console.log('Ad loaded successfully')}
             />
           </View>
         </ScrollView>

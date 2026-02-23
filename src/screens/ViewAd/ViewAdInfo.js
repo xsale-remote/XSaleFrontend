@@ -32,7 +32,6 @@ import {
   AdEventType,
 } from 'react-native-google-mobile-ads';
 import { formatPriceIndian } from '../../utils/function.js';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { height, width } = Dimensions.get('window');
 
@@ -61,59 +60,6 @@ const ViewAdInfo = ({ navigation, route }) => {
     getItemDetails();
     getUser();
     setHeartColor(isLiked ? icons.red_heart : icons.heart);
-  }, []);
-
-  const adUnitId = 'ca-app-pub-9372794286829313/2080406453';
-  // one on three
-  useEffect(() => {
-    const updateAdCount = async () => {
-      try {
-        const savedCount = await AsyncStorage.getItem('ad_view_count');
-        let count = savedCount ? parseInt(savedCount, 10) : 0;
-        if (count >= 3) {
-          count = 0;
-        }
-
-        count += 1;
-
-        await AsyncStorage.setItem('ad_view_count', count.toString());
-
-        if (count === 1) {
-          const interstitial = InterstitialAd.createForAdRequest(adUnitId);
-
-          interstitial.load();
-
-          const unsubscribeLoad = interstitial.addAdEventListener(
-            AdEventType.LOADED,
-            () => {
-              interstitial.show();
-            },
-          );
-
-          const unsubscribeClose = interstitial.addAdEventListener(
-            AdEventType.CLOSED,
-            () => {
-              unsubscribeLoad();
-              unsubscribeClose();
-              unsubscribeError();
-            },
-          );
-
-          const unsubscribeError = interstitial.addAdEventListener(
-            AdEventType.ERROR,
-            () => {
-              unsubscribeLoad();
-              unsubscribeClose();
-              unsubscribeError();
-            },
-          );
-        }
-      } catch (err) {
-        console.error('Error handling ad count', err);
-      }
-    };
-
-    updateAdCount();
   }, []);
 
   const getUser = async () => {
@@ -379,39 +325,6 @@ const ViewAdInfo = ({ navigation, route }) => {
   };
 
   const handleChat = async () => {
-    const interstitialAdUnitId = 'ca-app-pub-9372794286829313/5873126475';
-    const interstitial =
-      InterstitialAd.createForAdRequest(interstitialAdUnitId);
-
-    // Load the interstitial ad
-    interstitial.load();
-
-    // Add event listener for the ad
-    const unsubscribe = interstitial.addAdEventListener(
-      AdEventType.LOADED,
-      () => {
-        interstitial.show();
-      },
-    );
-
-    // Listen for when the ad is closed or error occurs, then navigate to chat
-    const unsubscribeClose = interstitial.addAdEventListener(
-      AdEventType.CLOSED,
-      () => {
-        unsubscribe();
-        unsubscribeClose();
-      },
-    );
-
-    const unsubscribeError = interstitial.addAdEventListener(
-      AdEventType.ERROR,
-      () => {
-        unsubscribe();
-        unsubscribeClose();
-        unsubscribeError();
-      },
-    );
-
     setChatLoading(true);
     try {
       if (!userData) {
@@ -423,18 +336,11 @@ const ViewAdInfo = ({ navigation, route }) => {
           50,
         );
       } else {
-        setChatLoading(true);
         const url = `api/v1/messages/message/hasMessaged`;
-        const body = {
-          userId1: userData.user._id,
-          userId2: userDetails._id,
-        };
+        const body = { userId1: userData.user._id, userId2: userDetails._id };
         const { response, status } = await post(url, body, true);
         if (status === 200) {
-          if (
-            response?.response?.content?.length > 0 ||
-            response.token === 'User chats exist'
-          ) {
+          if (response?.response?.content?.length > 0 || response.token === 'User chats exist') {
             navigation.navigate('ChatScreen', {
               otherUserFCMToken: userDetails.FCMToken,
               userFCMToken: userData.user.FCMToken,
@@ -445,9 +351,9 @@ const ViewAdInfo = ({ navigation, route }) => {
               conversationId: response.response._id,
               isNew: false,
               productName: displayName.trim(),
-              askingPrice: askingPrice,
+              askingPrice,
               location: itemLocation.trim(),
-              itemDisplayPicture: itemDisplayPicture,
+              itemDisplayPicture,
               itemId: adId,
               phoneNumber: userDetails.phoneNumber,
             });
@@ -459,21 +365,15 @@ const ViewAdInfo = ({ navigation, route }) => {
               profilePic: userDetails.profilePicture,
               myId: userData.user._id,
               productName: displayName.trim(),
-              askingPrice: askingPrice,
+              askingPrice,
               location: itemLocation.trim(),
-              itemDisplayPicture: itemDisplayPicture,
+              itemDisplayPicture,
               phoneNumber: userDetails.phoneNumber,
               isNewChat: true,
               sellerId: userDetails._id,
               itemId: adId,
             });
           }
-        } else {
-          console.log(
-            'status is not 200 while checking user has messaged ',
-            status,
-            response,
-          );
         }
       }
     } catch (error) {
@@ -483,78 +383,22 @@ const ViewAdInfo = ({ navigation, route }) => {
   };
 
   const handleCall = phoneNumber => {
-    let phoneUrl = `tel:${phoneNumber}`;
-    const interstitialAdUnitId = 'ca-app-pub-9372794286829313/6171481709';
-    const interstitial =
-      InterstitialAd.createForAdRequest(interstitialAdUnitId);
-
-    // Function to open the phone dialer
-    const openPhoneApp = () => {
+    const phoneUrl = `tel:${phoneNumber}`;
+    if (!userData) {
+      ToastAndroid.showWithGravityAndOffset(
+        'You are not logged in, please login first',
+        ToastAndroid.LONG,
+        ToastAndroid.BOTTOM,
+        25,
+        50,
+      );
+    } else {
       Linking.canOpenURL(phoneUrl)
         .then(supported => {
-          if (supported) {
-            Linking.openURL(phoneUrl);
-          } else {
-            console.log("Can't handle url: " + phoneUrl);
-          }
+          if (supported) Linking.openURL(phoneUrl);
         })
         .catch(err => console.error('Error opening phone app', err));
-    };
-
-    // Load the interstitial ad
-    interstitial.load();
-
-    // Add event listener for ad loaded event to show ad
-    const unsubscribeLoad = interstitial.addAdEventListener(
-      AdEventType.LOADED,
-      () => {
-        interstitial.show();
-      },
-    );
-
-    // After ad is closed, check login and open phone app
-    const unsubscribeClose = interstitial.addAdEventListener(
-      AdEventType.CLOSED,
-      () => {
-        unsubscribeLoad();
-        unsubscribeClose();
-        unsubscribeError();
-
-        if (!userData) {
-          ToastAndroid.showWithGravityAndOffset(
-            'You are not logged in, please login first',
-            ToastAndroid.LONG,
-            ToastAndroid.BOTTOM,
-            25,
-            50,
-          );
-        } else {
-          openPhoneApp();
-        }
-      },
-    );
-
-    // On ad error, also open phone app so user is not blocked
-    const unsubscribeError = interstitial.addAdEventListener(
-      AdEventType.ERROR,
-      () => {
-        unsubscribeLoad();
-        unsubscribeClose();
-        unsubscribeError();
-
-        if (!userData) {
-          ToastAndroid.showWithGravityAndOffset(
-            'You are not logged in, please login first',
-            ToastAndroid.LONG,
-            ToastAndroid.BOTTOM,
-            25,
-            50,
-          );
-        } else {
-          openPhoneApp();
-        }
-      },
-    );
+    }
   };
   return (
     <SafeAreaView style={[styles.pdt16, { flex: 1 }]}>
@@ -682,10 +526,25 @@ const ViewAdInfo = ({ navigation, route }) => {
                 </Text>
               </View>
               <View style={[styles.mt12]}>
-                <View style={[styles.mt8, styles.mb12]}>
+                <View style={{
+                  marginHorizontal: 12,
+                  marginVertical: 8,
+                  borderRadius: 12,
+                  backgroundColor: colors.white,
+                  shadowColor: colors.black,
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 4,
+                  elevation: 4,
+                  overflow: 'hidden',
+                  alignSelf: 'stretch',
+                }}>
                   <BannerAd
-                    unitId={'ca-app-pub-9372794286829313/9854241697'}
-                    size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
+                    size={BannerAdSize.MEDIUM_RECTANGLE}
+                    unitId="ca-app-pub-9372794286829313/9854241697"
+                    style={{ width: '100%' }}
+                    onAdFailedToLoad={error => console.log('Ad failed to load:', error)}
+                    onAdLoaded={() => console.log('Ad loaded successfully')}
                   />
                 </View>
 
@@ -733,16 +592,25 @@ const ViewAdInfo = ({ navigation, route }) => {
                 </View>
               </View>
 
-              <View style={{ width: '100%', marginBottom: 20, marginTop: 10 }}>
+              <View style={{
+                width: '100%',
+                alignSelf: 'stretch',
+                backgroundColor: '#f9f9f9',
+                borderTopWidth: 0.5,
+                borderBottomWidth: 0.5,
+                borderColor: '#e0e0e0',
+                alignItems: 'center',
+                paddingVertical: 4,
+                marginBottom: 20,
+                marginTop: 10,
+                borderRadius: 10
+              }}>
                 <BannerAd
                   size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
                   unitId={'ca-app-pub-9372794286829313/7614063803'}
-                  onAdFailedToLoad={error => {
-                    console.log('Ad failed to load:', error);
-                  }}
-                  onAdLoaded={() => {
-                    console.log('Ad loaded successfully');
-                  }}
+                  style={{ width: '100%' }}
+                  onAdFailedToLoad={error => console.log('Ad failed:', error)}
+                  onAdLoaded={() => console.log('Ad loaded')}
                 />
               </View>
 

@@ -72,7 +72,6 @@ const SearchBar = ({ onSearch, navigation, value }) => {
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      console.log('Searching for:', searchQuery);
       if (onSearch) {
         onSearch(searchQuery);
       }

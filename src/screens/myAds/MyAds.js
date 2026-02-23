@@ -238,7 +238,6 @@ const MyAds = ({navigation, route}) => {
       const url = `api/v1/user/fetch/uploaded-items`;
       const body = {userId};
       const {response, status} = await post(url, body, true);
-
       if (status === 200) {
         const responseData = response.response;
         // Separate items based on their isDeactivate status

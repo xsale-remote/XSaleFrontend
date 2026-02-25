@@ -132,9 +132,6 @@ const App = () => {
     return unsubscribe;
   }, []);
 
-  messaging().setBackgroundMessageHandler(async remoteMessage => {
-    console.log('📩 Background message:', remoteMessage);
-  });
 
   useEffect(() => {
     const appOpenAd = AppOpenAd.createForAdRequest(APP_OPEN_AD_UNIT_ID, {

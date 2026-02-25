@@ -77,6 +77,7 @@ const NameScreen = ({ navigation, route }) => {
     try {
       const token = await messaging().getToken();
       setFCMToken(token);
+      await messaging().subscribeToTopic('xsale_daily');
     } catch (error) {
       console.log(`error while getting token ${error}`);
     }

@@ -8,7 +8,6 @@ import messaging from '@react-native-firebase/messaging';
 import { enableScreens } from 'react-native-screens';
 import { MobileAds, AppOpenAd, AdEventType } from 'react-native-google-mobile-ads';
 
-// ⚙️ Your screens imports (kept the same)
 import {
   Home,
   AllCategories,
@@ -76,7 +75,7 @@ enableScreens();
 const Stack = createNativeStackNavigator();
 
 const APP_OPEN_AD_UNIT_ID =
-   "ca-app-pub-9372794286829313/7384304648"
+  "ca-app-pub-9372794286829313/7384304648"
 
 const App = () => {
   const NAVIGATION_IDS = ['Chats'];
@@ -116,6 +115,17 @@ const App = () => {
       };
     },
   };
+
+  useEffect(() => {
+    const subscribeOnce = async () => {
+      const subscribed = await AsyncStorage.getItem('xsale_daily_subscribed');
+      if (!subscribed) {
+        await messaging().subscribeToTopic('xsale_daily');
+        await AsyncStorage.setItem('xsale_daily_subscribed', 'true');
+      }
+    };
+    subscribeOnce();
+  }, [])
 
   useEffect(() => {
     MobileAds()

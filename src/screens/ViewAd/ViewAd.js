@@ -2595,10 +2595,22 @@ const ViewAd = ({ navigation, route }) => {
               {itemDetails.fullAddress}
             </Text>
           </View>
-          <View style={[styles.mt20]}>
+          <View style={{
+            marginHorizontal: 12,
+            marginVertical: 8,
+            borderRadius: 12,
+            backgroundColor: colors.white,
+            shadowColor: colors.black,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 4,
+            elevation: 4,
+            overflow: 'hidden',
+            alignSelf: 'stretch',
+          }}>
             <BannerAd
               unitId={`ca-app-pub-9372794286829313/3411561192`}
-              size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
+              size={BannerAdSize.MEDIUM_RECTANGLE}
               onAdFailedToLoad={error => {
                 console.log('Ad failed to load:', error);
               }}
@@ -2739,7 +2751,19 @@ const ViewAd = ({ navigation, route }) => {
             </View>
           )}
 
-          <View style={{ width: '100%', marginBottom: 20, marginTop: 10 }}>
+          <View style={{
+            width: '100%',
+            alignSelf: 'stretch',
+            backgroundColor: '#f9f9f9',
+            borderTopWidth: 0.5,
+            borderBottomWidth: 0.5,
+            borderColor: '#e0e0e0',
+            alignItems: 'center',
+            paddingVertical: 4,
+            marginBottom: 20,
+            marginTop: 10,
+            borderRadius: 10
+          }}>
             <BannerAd
               size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
               unitId={'ca-app-pub-9372794286829313/2903257633'}

@@ -381,7 +381,7 @@ const ViewAd = ({ navigation, route }) => {
     );
   };
 
-  const handleSubmit = async () => {
+  const handleOtherCategories = async () => {
     let body = {};
     try {
       let url = '';
@@ -1570,7 +1570,7 @@ const ViewAd = ({ navigation, route }) => {
     } else if (categoryName === 'Property' && itemName === 'Land') {
       createLand();
     } else {
-      handleSubmit();
+      handleOtherCategories();
     }
   };
 
@@ -2062,6 +2062,8 @@ const ViewAd = ({ navigation, route }) => {
           additionalInfo,
           fullAddress,
           askingPrice,
+          itemLatitude,
+          itemLongitude
         } = itemDetails;
         const body = {
           user: userId,
@@ -2073,6 +2075,8 @@ const ViewAd = ({ navigation, route }) => {
           media: mediaUriArray,
           location: fullAddress,
           fareKm: askingPrice,
+          latitude: itemLatitude,
+          longitude: itemLongitude
         };
         const { response, status } = await post(url, body, true);
         if (status === 200) {
@@ -2344,43 +2348,43 @@ const ViewAd = ({ navigation, route }) => {
 
 
   // 💰 Start PayU payment directly
-const initiatePayUPayment = async () => {
-  setIsLoading(true);
-  try {
-    const body = {
-      name : userName, 
-      phone: userNumber,
-      itemLatitude : itemDetails.itemLatitude,
-      itemLongitude : itemDetails.itemLongitude,
-      address : itemDetails.fullAddress,
-      categoryName:categoryName
-     };
+  const initiatePayUPayment = async () => {
+    setIsLoading(true);
+    try {
+      const body = {
+        name: userName,
+        phone: userNumber,
+        itemLatitude: itemDetails.itemLatitude,
+        itemLongitude: itemDetails.itemLongitude,
+        address: itemDetails.fullAddress,
+        categoryName: categoryName
+      };
 
-    const { response, status } = await post(
-      "api/v1/payment/payu/initiate",
-      body,
-      true
-    );
+      const { response, status } = await post(
+        "api/v1/payment/payu/initiate",
+        body,
+        true
+      );
 
-    if (status === 200) {
-      const responseData = response.response;
-      setCurrentResponseData(responseData);
+      if (status === 200) {
+        const responseData = response.response;
+        setCurrentResponseData(responseData);
 
-      if (responseData.payment) {
-        const payload = responseData.payuPayload;
-        setPayuPayload(payload);
-        setShowPayUModal(true);
-      } else {
-        await createItem(); // for free listings
+        if (responseData.payment) {
+          const payload = responseData.payuPayload;
+          setPayuPayload(payload);
+          setShowPayUModal(true);
+        } else {
+          await createItem(); // for free listings
+        }
       }
+    } catch (error) {
+      console.error("Error initiating PayU payment:", error);
+      Alert.alert("Error", "Payment initiation failed.");
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.error("Error initiating PayU payment:", error);
-    Alert.alert("Error", "Payment initiation failed.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
 
   // ✅ Step 5: Handle PayU result
@@ -2591,10 +2595,22 @@ const initiatePayUPayment = async () => {
               {itemDetails.fullAddress}
             </Text>
           </View>
-          <View style={[styles.mt20]}>
+          <View style={{
+            marginHorizontal: 12,
+            marginVertical: 8,
+            borderRadius: 12,
+            backgroundColor: colors.white,
+            shadowColor: colors.black,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 4,
+            elevation: 4,
+            overflow: 'hidden',
+            alignSelf: 'stretch',
+          }}>
             <BannerAd
               unitId={`ca-app-pub-9372794286829313/3411561192`}
-              size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
+              size={BannerAdSize.MEDIUM_RECTANGLE}
               onAdFailedToLoad={error => {
                 console.log('Ad failed to load:', error);
               }}
@@ -2735,7 +2751,19 @@ const initiatePayUPayment = async () => {
             </View>
           )}
 
-          <View style={{ width: '100%', marginBottom: 20, marginTop: 10 }}>
+          <View style={{
+            width: '100%',
+            alignSelf: 'stretch',
+            backgroundColor: '#f9f9f9',
+            borderTopWidth: 0.5,
+            borderBottomWidth: 0.5,
+            borderColor: '#e0e0e0',
+            alignItems: 'center',
+            paddingVertical: 4,
+            marginBottom: 20,
+            marginTop: 10,
+            borderRadius: 10
+          }}>
             <BannerAd
               size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
               unitId={'ca-app-pub-9372794286829313/2903257633'}

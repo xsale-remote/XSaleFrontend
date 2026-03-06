@@ -95,5 +95,7 @@ const images = {
   otherElectronics: require('./images/other_electronics.png'),
   broken_image: require('./images/broken_image.png'),
   otherVehicles: require('./images/other_vehicles.png'),
+  gamezop_banner : require("./images/gamezop_banner.png"), 
+  empty : require("./images/empty.png")
 };
 export default images;

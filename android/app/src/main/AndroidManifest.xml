@@ -20,6 +20,8 @@
     
     <!-- Your existing meta-data -->
     <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyCBw5IJo7FFW5jbxB78Ib9vk4ayIhysF9I"/>
+
+    <!-- google admob app id -->
     <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-9372794286829313~3822624732"/>
     
     <!-- NEW: Facebook Meta Data -->

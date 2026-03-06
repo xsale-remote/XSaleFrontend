@@ -26,10 +26,9 @@ const SelectOption = ({route}) => {
             console.log('Ad loaded successfully');
           }}
         />
-
         <View style={[{marginTop : 10}]}>
           <BannerAd
-            size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+            size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
             unitId={'ca-app-pub-9372794286829313/1015744986'}
             onAdFailedToLoad={error => {
               console.log('Ad failed to load:', error);

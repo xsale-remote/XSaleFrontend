@@ -6,18 +6,18 @@ import {
   PermissionsAndroid,
   Linking,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {ButtonWithIcon} from '../../component/shared';
+import React, { useEffect, useState } from 'react';
+import { ButtonWithIcon } from '../../component/shared';
 import icons from '../../assets/icons';
 import styles from '../../assets/styles';
 import colors from '../../assets/colors';
 import Geolocation from 'react-native-geolocation-service';
 import axios from 'axios';
-import {GOOGLE_MAP_KEY} from '../../utils/env';
-import {BannerAd, TestIds, BannerAdSize} from 'react-native-google-mobile-ads';
+import { GOOGLE_MAP_KEY } from '../../utils/env';
+import { BannerAd, TestIds, BannerAdSize } from 'react-native-google-mobile-ads';
 
-const Location = ({navigation, route}) => {
-  const {mobileNumber} = route.params;
+const Location = ({ navigation, route }) => {
+  const { mobileNumber } = route.params;
   const [locationLoading, setLocationLoading] = useState(false);
   const [fullAddress, setFullAddress] = useState('');
   const [receivedMobileNumber, setReceivedMobileNumber] = useState('');
@@ -132,7 +132,7 @@ const Location = ({navigation, route}) => {
           console.error('No results found for the given coordinates.');
           return;
         }
-        const {formatted_address, address_components} = results[0];
+        const { formatted_address, address_components } = results[0];
 
         if (!formatted_address || !address_components) {
           console.error('Required fields missing in the response:', results[0]);
@@ -185,13 +185,13 @@ const Location = ({navigation, route}) => {
   };
 
   return (
-    <SafeAreaView style={[{flex: 1}, styles.pdh16]}>
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+    <SafeAreaView style={[{ flex: 1 }, styles.pdh16]}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Image
           source={icons.locationMap}
-          style={[{width: 250, height: 220, resizeMode: 'contain'}, styles.mb48]}
+          style={[{ width: 250, height: 220, resizeMode: 'contain' }, styles.mb48]}
         />
-        <Text style={[{color: '#A59C9C'}, styles.ts15, styles.mb4]}>
+        <Text style={[{ color: '#A59C9C' }, styles.ts15, styles.mb4]}>
           Enjoy a personalized selling and buying experience by telling us your
           location
         </Text>
@@ -203,7 +203,7 @@ const Location = ({navigation, route}) => {
           isLoading={locationLoading}
         />
         <Text
-          style={[{color: colors.black}, styles.ts16, styles.mt36]}
+          style={[{ color: colors.black }, styles.ts16, styles.mt36]}
           onPress={() =>
             navigation.navigate('ChooseLocation', {
               purpose: 'creating new user',
@@ -213,16 +213,27 @@ const Location = ({navigation, route}) => {
           Other Location
         </Text>
       </View>
-      <View style={{width: '100%'}}>
+      <View
+        style={[
+          styles.mh12,
+          styles.mv8,
+          {
+            borderRadius: 12,
+            backgroundColor: colors.white,
+            shadowColor: colors.black,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            elevation: 4,
+            overflow: "hidden"
+          },
+        ]}
+      >
         <BannerAd
-          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          size={BannerAdSize.MEDIUM_RECTANGLE}
           unitId={'ca-app-pub-9372794286829313/8312337303'}
-          onAdFailedToLoad={error => {
-            console.log('Ad failed to load:', error);
-          }}
-          onAdLoaded={() => {
-            console.log('Ad loaded successfully');
-          }}
+          onAdFailedToLoad={error => console.log('Ad failed to load:', error)}
+          onAdLoaded={() => console.log('Ad loaded successfully')}
         />
       </View>
     </SafeAreaView>
@@ -230,3 +241,5 @@ const Location = ({navigation, route}) => {
 };
 
 export default Location;
+
+

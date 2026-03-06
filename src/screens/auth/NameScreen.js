@@ -40,7 +40,7 @@ const NameScreen = ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [profileUploading, setProfileUploading] = useState(false);
   const [FCMToken, setFCMToken] = useState('');
-  const [showAd, setShowAd] = useState(false); 
+  const [showAd, setShowAd] = useState(false);
 
   useEffect(() => {
     checkAdShow();
@@ -77,6 +77,7 @@ const NameScreen = ({ navigation, route }) => {
     try {
       const token = await messaging().getToken();
       setFCMToken(token);
+      await messaging().subscribeToTopic('xsale_daily');
     } catch (error) {
       console.log(`error while getting token ${error}`);
     }
@@ -86,7 +87,7 @@ const NameScreen = ({ navigation, route }) => {
     return new Promise((resolve) => {
       const interstitialAdUnitId = 'ca-app-pub-9372794286829313/2371673194';
       const interstitial = InterstitialAd.createForAdRequest(interstitialAdUnitId);
-      
+
       let adLoaded = false;
       let adShown = false;
 
@@ -94,8 +95,8 @@ const NameScreen = ({ navigation, route }) => {
       const adTimeout = setTimeout(() => {
         console.log('Ad loading timeout - no inventory');
         cleanupAdListeners();
-        resolve(true); 
-      }, 8000); 
+        resolve(true);
+      }, 8000);
 
       const unsubscribeLoad = interstitial.addAdEventListener(
         AdEventType.LOADED,
@@ -368,23 +369,27 @@ const NameScreen = ({ navigation, route }) => {
         </View>
       </View>
 
-      {/* Bottom Sticky Banner Ad */}
       <View
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          width: '100%',
-          alignSelf: 'center',
-        }}>
+        style={[
+          // styles.mh12,
+          styles.mv8,
+          {
+            borderRadius: 12,
+            backgroundColor: colors.white,
+            shadowColor: colors.black,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            elevation: 4,
+            overflow: "hidden"
+          },
+        ]}
+      >
         <BannerAd
           size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          unitId={'ca-app-pub-9372794286829313/1710520186'}
-          onAdFailedToLoad={error => {
-            console.log('Ad failed to load:', error);
-          }}
-          onAdLoaded={() => {
-            console.log('Ad loaded successfully');
-          }}
+          unitId="ca-app-pub-9372794286829313/1710520186"
+          onAdFailedToLoad={error => console.log('Ad failed to load:', error)}
+          onAdLoaded={() => console.log('Ad loaded successfully')}
         />
       </View>
 

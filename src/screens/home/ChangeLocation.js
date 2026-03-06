@@ -72,9 +72,7 @@ const ChangeLocation = ({navigation, route}) => {
           const stateComponent = addressComponents.find(component =>
             component.types.includes('administrative_area_level_1'),
           );
-          console.log(stateComponent , 
-            "this is state value"
-          )
+
           const pincodeComponent = addressComponents.find(component =>
             component.types.includes('postal_code'),
           );
@@ -91,16 +89,8 @@ const ChangeLocation = ({navigation, route}) => {
             longitude: lng,
             fullAddress: description,
           };
-
-          // setUserLocation({
-          //   latitude: lat,
-          //   longitude: lng,
-          //   latitudeDelta: 0.2,
-          //   longitudeDelta: 0.2,
-          // });
           setUserLocation(updatedAddressInfo);
           setShowButton(true);
-          // navigation.pop();
         } else {
           console.error('Error fetching place details:', placeDetails.status);
         }
@@ -115,8 +105,8 @@ const ChangeLocation = ({navigation, route}) => {
   const showAutocomplete = () => {
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 200, // Adjust animation duration as needed
-      useNativeDriver: true, // Use native driver for smoother performance
+      duration: 200,
+      useNativeDriver: true, 
     }).start();
   };
 
@@ -141,13 +131,8 @@ const ChangeLocation = ({navigation, route}) => {
         const {response, status} = await put(url, body, true);
         if (status === 200) {
           try {
-            // Convert the updated user data to a JSON string
             const jsonString = JSON.stringify(response.response);
-
-            // Save the updated user data in EncryptedStorage
             await EncryptedStorage.setItem('userData', jsonString);
-
-            // Show a success message and navigate back
             ToastAndroid.showWithGravityAndOffset(
               'Location update Successful',
               ToastAndroid.LONG,
@@ -155,8 +140,6 @@ const ChangeLocation = ({navigation, route}) => {
               25,
               50,
             );
-
-            // Pop the navigation stack
             navigation.pop();
           } catch (error) {
             console.log(
@@ -241,22 +224,22 @@ const ChangeLocation = ({navigation, route}) => {
               query={{
                 key: GOOGLE_MAP_KEY,
                 language: 'en',
-                components: 'country:in', // Restrict results to India
+                components: 'country:in', 
               }}
               styles={{
                 textInput: {
                   fontSize: 15,
-                  color: colors.grey500, // Input text color
+                  color: colors.grey500, 
                 },
                 container: {flex: 0},
-                listView: {backgroundColor: 'white'}, // Background of suggestions list
+                listView: {backgroundColor: 'white'}, 
                 description: {
-                  color: colors.grey800, // Text color for suggested places
+                  color: colors.grey800,
                 },
               }}
               debounce={500}
               textInputProps={{
-                placeholderTextColor: colors.grey500, // Placeholder text color for dark mode
+                placeholderTextColor: colors.grey500, 
               }}
             />
           </Animated.View>

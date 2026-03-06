@@ -88,7 +88,6 @@ const ChageInfo = ({navigation}) => {
         setProfileUploading(true);
         const sererResponse = await uploadMediaToServer(imageInfoObject);
         if (sererResponse.status === 200) {
-          console.log('profile picture upload successfully');
           console.log(sererResponse.response.response[0]);
           setProfileUploading(false);
           setProfilePictureURL(sererResponse.response.response[0]);
@@ -136,7 +135,6 @@ const ChageInfo = ({navigation}) => {
         const sererResponse = await uploadMediaToServer(imageInfoObject);
 
         if (sererResponse.status === 200) {
-          console.log('profile picture upload successfully');
           console.log(sererResponse.response.response[0]);
           setProfilePictureURL(sererResponse.response.response[0]);
           setProfileUploading(false);

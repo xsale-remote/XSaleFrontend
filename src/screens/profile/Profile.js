@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,20 +13,57 @@ import {
   Share,
   Linking,
 } from 'react-native';
-import {BottomNavigation} from '../../component/shared';
+import { BottomNavigation } from '../../component/shared';
 import styles from '../../assets/styles';
 import colors from '../../assets/colors';
 import icons from '../../assets/icons';
 import images from '../../assets/images';
 import EncryptedStorage from 'react-native-encrypted-storage';
-import {Button} from '../../component/shared';
-import {getUserInfo} from '../../utils/function';
-import {deleteApi, post} from '../../utils/requestBuilder';
-import {CommonActions} from '@react-navigation/native';
-import {useFocusEffect} from '@react-navigation/native';
-import {BannerAd, TestIds, BannerAdSize} from 'react-native-google-mobile-ads';
+import { Button } from '../../component/shared';
+import { getUserInfo } from '../../utils/function';
+import { deleteApi, post } from '../../utils/requestBuilder';
+import { CommonActions } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
+import { BannerAd, TestIds, BannerAdSize } from 'react-native-google-mobile-ads';
+import InAppBrowser from 'react-native-inappbrowser-reborn';
 
-const LogoutModal = ({visible, onConfirm, onCancel}) => {
+const openGamezop = async () => {
+  const url = 'https://11152.play.gamezop.com/';
+
+  try {
+    const isAvailable = await InAppBrowser.isAvailable();
+
+    if (isAvailable) {
+      await InAppBrowser.open(url, {
+        // Android → Chrome Custom Tabs
+        showTitle: false,
+        enableUrlBarHiding: true,
+        enableDefaultShare: false,
+
+        // iOS → Safari View Controller
+        dismissButtonStyle: 'close',
+        modalEnabled: true,
+
+        // Common
+        animations: {
+          startEnter: 'slide_in_right',
+          startExit: 'slide_out_left',
+          endEnter: 'slide_in_left',
+          endExit: 'slide_out_right',
+        },
+      });
+    } else {
+      // Fallback
+      Linking.openURL(url);
+    }
+  } catch (error) {
+    console.log('Gamezop open error:', error);
+  }
+};
+
+
+
+const LogoutModal = ({ visible, onConfirm, onCancel }) => {
   return (
     <Modal animationType="slide" transparent={true} visible={visible}>
       <View
@@ -49,7 +86,7 @@ const LogoutModal = ({visible, onConfirm, onCancel}) => {
             },
             styles.p20,
           ]}>
-          <Text style={[styles.h1, styles.mb12, {textAlign: 'center'}]}>
+          <Text style={[styles.h1, styles.mb12, { textAlign: 'center' }]}>
             Logout
           </Text>
           <Text
@@ -76,14 +113,14 @@ const LogoutModal = ({visible, onConfirm, onCancel}) => {
               label={'Yes'}
               onPress={onConfirm}
               style={[
-                {width: '45%', backgroundColor: 'transparent', borderWidth: 1},
+                { width: '45%', backgroundColor: 'transparent', borderWidth: 1 },
               ]}
-              textStyle={{color: colors.black}}
+              textStyle={{ color: colors.black }}
             />
             <Button
               label={'No'}
               onPress={onCancel}
-              style={[{width: '45%', backgroundColor: colors.mintGreen}]}
+              style={[{ width: '45%', backgroundColor: colors.mintGreen }]}
             />
           </View>
         </View>
@@ -92,7 +129,7 @@ const LogoutModal = ({visible, onConfirm, onCancel}) => {
   );
 };
 
-const DeleteModal = ({visible, onConfirm, onCancel, isLoading}) => {
+const DeleteModal = ({ visible, onConfirm, onCancel, isLoading }) => {
   return (
     <Modal animationType="slide" transparent={true} visible={visible}>
       <View
@@ -116,7 +153,7 @@ const DeleteModal = ({visible, onConfirm, onCancel, isLoading}) => {
               borderWidth: 1,
             },
           ]}>
-          <Text style={[styles.h1, styles.mb12, {textAlign: 'center'}]}>
+          <Text style={[styles.h1, styles.mb12, { textAlign: 'center' }]}>
             Delete Account
           </Text>
           <Text
@@ -150,12 +187,12 @@ const DeleteModal = ({visible, onConfirm, onCancel, isLoading}) => {
                     borderWidth: 1,
                   },
                 ]}
-                textStyle={{color: colors.black}}
+                textStyle={{ color: colors.black }}
               />
               <Button
                 label={'No'}
                 onPress={onCancel}
-                style={[{width: '45%', backgroundColor: colors.mintGreen}]}
+                style={[{ width: '45%', backgroundColor: colors.mintGreen }]}
               />
             </View>
           ) : (
@@ -199,7 +236,7 @@ const InputModal = ({
               borderWidth: 1,
             },
           ]}>
-          <Text style={[styles.h1, styles.mb12, {textAlign: 'center'}]}>
+          <Text style={[styles.h1, styles.mb12, { textAlign: 'center' }]}>
             Send Suggestion
           </Text>
           <TextInput
@@ -223,7 +260,7 @@ const InputModal = ({
             onChangeText={setValue}
           />
           {isEmpty && (
-            <Text style={[{color: colors.red}, styles.mb12]}>
+            <Text style={[{ color: colors.red }, styles.mb12]}>
               Please enter some suggestion
             </Text>
           )}
@@ -240,14 +277,14 @@ const InputModal = ({
               label={'Cancel'}
               onPress={onCancel}
               style={[
-                {width: '45%', backgroundColor: 'transparent', borderWidth: 1},
+                { width: '45%', backgroundColor: 'transparent', borderWidth: 1 },
               ]}
-              textStyle={{color: colors.black}}
+              textStyle={{ color: colors.black }}
             />
             <Button
               label={'Submit'}
               onPress={onConfirm}
-              style={[{width: '45%', backgroundColor: colors.mintGreen}]}
+              style={[{ width: '45%', backgroundColor: colors.mintGreen }]}
               isLoading={isLoading}
             />
           </View>
@@ -257,7 +294,7 @@ const InputModal = ({
   );
 };
 
-const Profile = ({navigation}) => {
+const Profile = ({ navigation }) => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState('');
   const [userData, setUserData] = useState('');
@@ -293,7 +330,7 @@ const Profile = ({navigation}) => {
       if (!userInfo) {
         setIsLoggedIn(false);
       } else {
-        const {userName, phoneNumber, _id, profilePicture} = userInfo.user;
+        const { userName, phoneNumber, _id, profilePicture } = userInfo.user;
         setProfilePicture(profilePicture);
         setIsLoggedIn(true);
         setUserName(userName);
@@ -318,7 +355,7 @@ const Profile = ({navigation}) => {
           user: userId,
           suggestion,
         };
-        const {response, status} = await post(url, body);
+        const { response, status } = await post(url, body);
         if (status === 200) {
           setSuggestion('');
           setSuggestionSubmitting(false);
@@ -346,7 +383,7 @@ const Profile = ({navigation}) => {
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
-          routes: [{name: 'MobileNumber'}],
+          routes: [{ name: 'MobileNumber' }],
         }),
       );
     } catch (error) {
@@ -358,7 +395,7 @@ const Profile = ({navigation}) => {
     setDeletingUser(true);
     try {
       const url = `api/v1/user/delete-user`;
-      const {response, status} = await deleteApi(url);
+      const { response, status } = await deleteApi(url);
       if (status === 200) {
         ToastAndroid.showWithGravityAndOffset(
           'Successfully deleted the user',
@@ -445,10 +482,10 @@ const Profile = ({navigation}) => {
       title: 'Invite Friends',
       onPress: shareContent,
     },
-    {id: 4, icon: icons.rate_us, title: 'Rate Us', onPress: rateUs},
+    { id: 4, icon: icons.rate_us, title: 'Rate Us', onPress: rateUs },
   ];
 
-  const OptionHeader = ({label, style}) => {
+  const OptionHeader = ({ label, style }) => {
     return (
       <View
         style={[
@@ -465,7 +502,7 @@ const Profile = ({navigation}) => {
             styles.ts18,
             styles.ml16,
             styles.ts18,
-            {color: colors.black},
+            { color: colors.black },
           ]}>
           {label}
         </Text>
@@ -473,20 +510,20 @@ const Profile = ({navigation}) => {
     );
   };
 
-  const Option = ({icon, title, id, onPress}) => {
+  const Option = ({ icon, title, id, onPress }) => {
     return (
       <Pressable
-        style={[styles.pdh16, {width: '100%', height: 45}]}
+        style={[styles.pdh16, { width: '100%', height: 45 }]}
         onPress={onPress}>
         <View style={[styles.fdRow, styles.mt8]}>
           <Image
             source={icon}
             style={[styles.mr12, styles.mt4, styles.icon20]}
           />
-          <Text style={[styles.ts18, {color: colors.black}]}>{title}</Text>
+          <Text style={[styles.ts18, { color: colors.black }]}>{title}</Text>
         </View>
         {id === 3 ? null : (
-          <View style={[styles.mt12, {borderBottomWidth: 0.5}]}></View>
+          <View style={[styles.mt12, { borderBottomWidth: 0.5 }]}></View>
         )}
       </Pressable>
     );
@@ -497,12 +534,12 @@ const Profile = ({navigation}) => {
   }
 
   return (
-    <SafeAreaView style={[styles.pdh16, styles.pdv12, {height: '100%'}]}>
-      <View style={[styles.mt4, styles.fdRow, {height: 'auto', width: '100%'}]}>
+    <SafeAreaView style={[styles.pdh16, styles.pdv12, { height: '100%' }]}>
+      <View style={[styles.mt4, styles.fdRow, { height: 'auto', width: '100%' }]}>
         <Image
-          source={profilePicture ? {uri: profilePicture} : icons.avatar}
+          source={profilePicture ? { uri: profilePicture } : icons.avatar}
           style={[
-            {borderRadius: 50, height: 68, width: 68, resizeMode: 'cover'},
+            { borderRadius: 50, height: 68, width: 68, resizeMode: 'cover' },
           ]}
         />
         <View
@@ -510,18 +547,18 @@ const Profile = ({navigation}) => {
             styles.fdRow,
             styles.pdh16,
             styles.pdr8,
-            {justifyContent: 'space-between', width: '80%'},
+            { justifyContent: 'space-between', width: '80%' },
           ]}>
           <View>
-            <Text style={[styles.h1, {color: colors.lightOrange}]}>
+            <Text style={[styles.h1, { color: colors.lightOrange }]}>
               {isLoggedIn && userName ? userName : 'Guest'}
             </Text>
-            <Text style={[styles.h3, styles.mt4, {color: colors.black}]}>
+            <Text style={[styles.h3, styles.mt4, { color: colors.black }]}>
               {isLoggedIn && mobileNumber ? (
                 mobileNumber
               ) : (
                 <Text
-                  style={[{color: colors.mintGreen}]}
+                  style={[{ color: colors.mintGreen }]}
                   onPress={() => navigation.replace('MobileNumber')}>
                   Login
                 </Text>
@@ -536,7 +573,7 @@ const Profile = ({navigation}) => {
                 style={[
                   styles.icon44,
                   styles.mt12,
-                  {transform: [{rotate: '180deg'}]},
+                  { transform: [{ rotate: '180deg' }] },
                 ]}
               />
             </TouchableWithoutFeedback>
@@ -570,7 +607,7 @@ const Profile = ({navigation}) => {
         />
       )}
       <View style={[styles.mt20]}>
-        {userData && <OptionHeader label={'Setting'} style={[styles.mb12]}/>}
+        {userData && <OptionHeader label={'Setting'} style={[styles.mb12]} />}
         <View>
           {userData &&
             firstHeader.map((item, index) => {
@@ -584,7 +621,7 @@ const Profile = ({navigation}) => {
               );
             })}
         </View>
-        <OptionHeader label={'Support'} style={[styles.mb12, styles.mt8, {height : 45}]}/>
+        <OptionHeader label={'Support'} style={[styles.mb12, styles.mt8, { height: 45 }]} />
         <View>
           {secondHeader.map((item, index) => {
             return (
@@ -601,10 +638,25 @@ const Profile = ({navigation}) => {
       </View>
 
       <View>
-        <BannerAd
-          unitId={'ca-app-pub-9372794286829313/2600930020'}
-          size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
-        />
+        <Pressable onPress={openGamezop}>
+          <View
+            style={{
+              height: 180,
+              borderRadius: 12,
+              backgroundColor: '#111',
+              marginTop: 12,
+              overflow: 'hidden',
+            }}
+          >
+            <Image
+              source={images.gamezop_banner}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+            />
+          </View>
+        </Pressable>
+
+
       </View>
       <BottomNavigation />
     </SafeAreaView>

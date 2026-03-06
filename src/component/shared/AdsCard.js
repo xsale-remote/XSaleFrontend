@@ -7,7 +7,7 @@ import {
   Pressable,
   ActivityIndicator,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import images from '../../assets/images';
 import styles from '../../assets/styles';
 import icons from '../../assets/icons';
@@ -28,6 +28,8 @@ const AdsCard = ({
   firstImageUri,
   distance,
 }) => {
+  const [imageError, setImageError] = useState(false);
+
   const adInfo = data[0] || data;
 
   const originalTimeStamp = adInfo.updatedAt;
@@ -53,7 +55,6 @@ const AdsCard = ({
       borderRadius: 15,
       overflow: 'hidden',
       backgroundColor: 'white',
-      // Add shadow properties
       shadowColor: '#000',
       shadowOffset: {width: 0, height: 5},
       shadowOpacity: 0.34,
@@ -62,23 +63,44 @@ const AdsCard = ({
     },
   ];
 
+  const renderImage = () => {
+    if (imageError) {
+      return (
+        <View
+          style={{
+            height: '100%',
+            width: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: colors.silver,
+          }}>
+          <Text style={{color: colors.textSecondary, fontSize: 12}}>
+            No Image
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <FastImage
+        source={{
+          uri: firstImageUri,
+          priority: FastImage.priority.high,
+          cache: FastImage.cacheControl.immutable,
+        }}
+        style={{height: '100%', width: '100%'}}
+        resizeMode={FastImage.resizeMode.cover}
+        onError={() => setImageError(true)}
+      />
+    );
+  };
+
   return (
     <>
       {!forFavourite && (
         <Pressable onPress={onPress} style={cardStyle}>
           <View style={[{height: '50%'}, styles.pdh8]}>
-            {/* <FastImage
-              source={{
-                uri: firstImageUri,
-                cache: FastImage.cacheControl.web,
-                priority: FastImage.priority.normal,
-              }}
-              style={{height: '100%', width: '100%', resizeMode: 'cover'}}
-            /> */}
-            <Image
-              source={{uri: firstImageUri}}
-              style={{height: '100%', width: '100%', resizeMode: 'cover'}}
-            />
+            {renderImage()}
           </View>
 
           <View style={[styles.p4, {height: '50%'}]}>
@@ -197,19 +219,7 @@ const AdsCard = ({
       {forFavourite && (
         <Pressable onPress={onPress} style={cardStyle}>
           <View style={[{height: '52%'}, styles.pdh8]}>
-            {/* <FastImage
-              source={{
-                uri: firstImageUri,
-                cache: FastImage.cacheControl.web,
-                priority: FastImage.priority.normal,
-              }}
-              style={{height: '100%', width: '100%', resizeMode: 'cover'}}
-            /> */}
-
-            <Image
-              source={{uri: firstImageUri}}
-              style={{height: '100%', width: '100%', resizeMode: 'cover'}}
-            />
+            {renderImage()}
           </View>
 
           <View style={[styles.p4, {height: '50%'}]}>

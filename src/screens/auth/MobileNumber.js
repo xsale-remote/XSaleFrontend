@@ -21,7 +21,8 @@ import {
   BannerAdSize,
   InterstitialAd,
   AdEventType,
-  RewardedAd, RewardedAdEventType
+  RewardedAd,
+  RewardedAdEventType,
 } from 'react-native-google-mobile-ads';
 
 const MobileNumber = ({ navigation, route }) => {
@@ -34,6 +35,8 @@ const MobileNumber = ({ navigation, route }) => {
     try {
       const token = await messaging().getToken();
       setCurrentFCMToken(token);
+      console.log("FCM Token:", token);
+      await messaging().subscribeToTopic('xsale_daily');
     } catch (error) {
       console.log(`error while getting token ${error}`);
     }
@@ -43,7 +46,6 @@ const MobileNumber = ({ navigation, route }) => {
     getToken();
   }, []);
 
-  
   const signInWithPhoneNumber = async () => {
     if (mobileNumber.length !== 10) {
       setNumberError(true);
@@ -68,7 +70,7 @@ const MobileNumber = ({ navigation, route }) => {
       }
     };
 
-    const showRewardedAd = (onComplete) => {
+    const showRewardedAd = onComplete => {
       let timeout;
       const unsubscribe = rewarded.addAdEventsListener(async ({ type }) => {
         if (type === RewardedAdEventType.LOADED) {
@@ -81,7 +83,10 @@ const MobileNumber = ({ navigation, route }) => {
           onComplete();
         }
 
-        if (type === RewardedAdEventType.ERROR || type === RewardedAdEventType.CLOSED) {
+        if (
+          type === RewardedAdEventType.ERROR ||
+          type === RewardedAdEventType.CLOSED
+        ) {
           clearTimeout(timeout);
           unsubscribe();
           onComplete();
@@ -98,22 +103,27 @@ const MobileNumber = ({ navigation, route }) => {
 
     try {
       const url = 'api/v1/user/check-user';
-      const { response, status  } = await post(url, { phoneNumber: `+91${mobileNumber}` });
+      const { response, status } = await post(url, {
+        phoneNumber: `+91${mobileNumber}`,
+      });
 
-      const userExists = response?.response?._id; 
+      const userExists = response?.response?._id;
       if (userExists) {
-        // Login flow
         const loginUrl = 'api/v1/user/login';
         const loginBody = {
           phoneNumber: mobileNumber,
           FCMToken: currentFCMToken,
         };
 
-        const { response: loginResponse, status } = await post(loginUrl, loginBody);
-        console.log(response, status , " this is status")
-
+        const { response: loginResponse, status } = await post(
+          loginUrl,
+          loginBody,
+        );
         if (status === 200) {
-          await EncryptedStorage.setItem('userData', JSON.stringify(loginResponse.response));
+          await EncryptedStorage.setItem(
+            'userData',
+            JSON.stringify(loginResponse.response),
+          );
 
           ToastAndroid.showWithGravityAndOffset(
             'Login Successfully',
@@ -128,7 +138,10 @@ const MobileNumber = ({ navigation, route }) => {
             setLoading(false);
           });
         } else {
-          ToastAndroid.show('Login failed, please try again', ToastAndroid.SHORT);
+          ToastAndroid.show(
+            'Login failed, please try again',
+            ToastAndroid.SHORT,
+          );
           setLoading(false);
         }
       } else {
@@ -145,7 +158,6 @@ const MobileNumber = ({ navigation, route }) => {
     }
   };
 
-
   function filterInput(input) {
     const sanitizedInput = input.replace(/\D/g, '');
     return sanitizedInput;
@@ -154,7 +166,6 @@ const MobileNumber = ({ navigation, route }) => {
   const handleNumberChange = t => {
     const filteredInput = filterInput(t);
     setMobileNumber(filteredInput);
-
   };
 
   return (
@@ -222,60 +233,66 @@ const MobileNumber = ({ navigation, route }) => {
               style={{ backgroundColor: '#F6F2F2', borderWidth: 0.5 }}
               textStyle={{ color: colors.black }}
               onPress={() => {
-                const rewardedAdUnitId = 'ca-app-pub-9372794286829313/1559464025';
-                const rewarded = RewardedAd.createForAdRequest(rewardedAdUnitId, {
-                  requestNonPersonalizedAdsOnly: true,
-                });
-                const unsubscribe = rewarded.addAdEventsListener(async ({ type }) => {
-                  // When ad is loaded, show it
-                  if (type === RewardedAdEventType.LOADED) {
-                    rewarded.show();
-                  }
+                const rewardedAdUnitId =
+                  'ca-app-pub-9372794286829313/1559464025';
+                const rewarded = RewardedAd.createForAdRequest(
+                  rewardedAdUnitId,
+                  {
+                    requestNonPersonalizedAdsOnly: true,
+                  },
+                );
+                const unsubscribe = rewarded.addAdEventsListener(
+                  async ({ type }) => {
+                    // When ad is loaded, show it
+                    if (type === RewardedAdEventType.LOADED) {
+                      rewarded.show();
+                    }
 
-                  // When user earns the reward (ad completed)
-                  if (type === RewardedAdEventType.EARNED_REWARD) {
-                    unsubscribe();
-                    navigation.navigate('Home');
-                  }
+                    // When user earns the reward (ad completed)
+                    if (type === RewardedAdEventType.EARNED_REWARD) {
+                      unsubscribe();
+                      navigation.navigate('Home');
+                    }
 
-                  // When ad fails to load or is closed early — still navigate
-                  if (
-                    type === RewardedAdEventType.ERROR ||
-                    type === RewardedAdEventType.CLOSED
-                  ) {
-                    unsubscribe();
-                    navigation.navigate('Home');
-                  }
-                });
+                    // When ad fails to load or is closed early — still navigate
+                    if (
+                      type === RewardedAdEventType.ERROR ||
+                      type === RewardedAdEventType.CLOSED
+                    ) {
+                      unsubscribe();
+                      navigation.navigate('Home');
+                    }
+                  },
+                );
 
                 // Start loading the ad
                 rewarded.load();
+                navigation.navigate('Home');
               }}
               disable={loading}
             />
-
           </View>
-          <View>
+          <View
+            style={[
+              styles.mh12,
+              styles.mv8,
+              {
+                borderRadius: 12,
+                backgroundColor: colors.white,
+                shadowColor: colors.black,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 8,
+                elevation: 4,
+                overflow: "hidden"
+              },
+            ]}
+          >
             <BannerAd
-              size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
-              unitId={'ca-app-pub-9372794286829313/4639295228'}
-              onAdFailedToLoad={error => {
-                console.log('Ad failed to load:', error);
-              }}
-              onAdLoaded={() => {
-                console.log('Ad loaded successfully');
-              }}
-            />
-            <View></View>
-            <BannerAd
-              size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-              unitId={'ca-app-pub-9372794286829313/4944185351'}
-              onAdFailedToLoad={error => {
-                console.log('Ad failed to load:', error);
-              }}
-              onAdLoaded={() => {
-                console.log('Ad loaded successfully');
-              }}
+              size={BannerAdSize.MEDIUM_RECTANGLE}
+              unitId="ca-app-pub-9372794286829313/4639295228"
+              onAdFailedToLoad={error => console.log('Ad failed to load:', error)}
+              onAdLoaded={() => console.log('Ad loaded successfully')}
             />
           </View>
         </ScrollView>
@@ -285,4 +302,3 @@ const MobileNumber = ({ navigation, route }) => {
 };
 
 export default MobileNumber;
-

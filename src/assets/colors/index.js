@@ -3,8 +3,10 @@ const colors = {
   white: '#ffffff',
   silver: '#F5F5F5',
   black: '#000000',
+  grey : "#666666",
   grey50: '#fafafa',
   grey100: '#E1E0E0',
+  grey200 : "#E0E0E0",
   grey800: '#828282',
   darkGrey: '#3C3C3C',
   lightGrey: '#EBEBEB',
@@ -20,6 +22,10 @@ const colors = {
   metallicSeaweed: '#08738b', 
   red: '#f70511',
   orange100: '#fff4f4',
+  platinum : "#e8e8e8", 
+  offWhite : "#f9f9f9", 
+  cyanCider : "#d4f4f1", 
+  seaGreen : "#002f34"
 };
 
 export default colors;

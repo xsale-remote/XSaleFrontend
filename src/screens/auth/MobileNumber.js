@@ -35,6 +35,8 @@ const MobileNumber = ({ navigation, route }) => {
     try {
       const token = await messaging().getToken();
       setCurrentFCMToken(token);
+      console.log("FCM Token:", token);
+      await messaging().subscribeToTopic('xsale_daily');
     } catch (error) {
       console.log(`error while getting token ${error}`);
     }

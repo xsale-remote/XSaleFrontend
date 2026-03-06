@@ -57,6 +57,7 @@ const FirstScreen = ({navigation}) => {
       const url = `api/v1/user/fetch/app-version`;
       const {response} = await get(url);
       const latestVersion = response.response;
+      console.log(currentVersion, latestVersion , " version")
       setIsLatestVersion(currentVersion === latestVersion);
     } catch (error) {
       console.error(`Error while fetching latest version: ${error}`);

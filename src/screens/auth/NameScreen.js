@@ -26,6 +26,7 @@ import {
   AdEventType,
 } from 'react-native-google-mobile-ads';
 import { get } from '../../utils/requestBuilder';
+import { admobNamescreenInterstitial, admobNamescreenBanner } from '../../utils/env';
 
 const NameScreen = ({ navigation, route }) => {
   const { addressInfo, fullAddress, receivedMobileNumber } = route.params || {};
@@ -85,7 +86,7 @@ const NameScreen = ({ navigation, route }) => {
 
   const showInterstitialAd = () => {
     return new Promise((resolve) => {
-      const interstitialAdUnitId = 'ca-app-pub-9372794286829313/2371673194';
+      const interstitialAdUnitId = admobNamescreenInterstitial;
       const interstitial = InterstitialAd.createForAdRequest(interstitialAdUnitId);
 
       let adLoaded = false;
@@ -371,7 +372,6 @@ const NameScreen = ({ navigation, route }) => {
 
       <View
         style={[
-          // styles.mh12,
           styles.mv8,
           {
             borderRadius: 12,
@@ -387,7 +387,7 @@ const NameScreen = ({ navigation, route }) => {
       >
         <BannerAd
           size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          unitId="ca-app-pub-9372794286829313/1710520186"
+          unitId={admobNamescreenBanner}
           onAdFailedToLoad={error => console.log('Ad failed to load:', error)}
           onAdLoaded={() => console.log('Ad loaded successfully')}
         />

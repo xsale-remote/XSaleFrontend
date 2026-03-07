@@ -15,6 +15,7 @@ import Geolocation from 'react-native-geolocation-service';
 import axios from 'axios';
 import { GOOGLE_MAP_KEY } from '../../utils/env';
 import { BannerAd, TestIds, BannerAdSize } from 'react-native-google-mobile-ads';
+import { admobLocationBanner } from '../../utils/env';
 
 const Location = ({ navigation, route }) => {
   const { mobileNumber } = route.params;
@@ -231,7 +232,7 @@ const Location = ({ navigation, route }) => {
       >
         <BannerAd
           size={BannerAdSize.MEDIUM_RECTANGLE}
-          unitId={'ca-app-pub-9372794286829313/8312337303'}
+          unitId={admobLocationBanner}
           onAdFailedToLoad={error => console.log('Ad failed to load:', error)}
           onAdLoaded={() => console.log('Ad loaded successfully')}
         />

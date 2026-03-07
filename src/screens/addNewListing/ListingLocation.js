@@ -5,7 +5,8 @@ import styles from '../../assets/styles';
 import {Button, TitleHeader, ButtonWithIcon} from '../../component/shared';
 import icons from '../../assets/icons';
 import {getUserInfo} from '../../utils/function';
-import {BannerAd, TestIds, BannerAdSize} from 'react-native-google-mobile-ads';
+import {BannerAd, BannerAdSize} from 'react-native-google-mobile-ads';
+import { admobLocationBanner } from '../../utils/env';
 
 const ListingLocation = ({navigation, route}) => {
   const itemDetails = route.params;
@@ -128,7 +129,7 @@ const ListingLocation = ({navigation, route}) => {
       <View style={{width: '100%'}}>
         <BannerAd
           size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          unitId={'ca-app-pub-9372794286829313/8312337303'} // Replace with your ad unit ID
+          unitId={admobLocationBanner}
           onAdFailedToLoad={error => {
             console.log('Ad failed to load:', error);
           }}

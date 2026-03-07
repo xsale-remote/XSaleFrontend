@@ -26,20 +26,15 @@ import { ProductUploadModal } from '../../component/Home';
 import {
   BannerAd,
   BannerAdSize,
-  TestIds,
   RewardedAd,
   RewardedAdEventType,
 } from 'react-native-google-mobile-ads';
 import { formatPriceIndian } from '../../utils/function.js';
-import { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } from '../../utils/env';
-import RazorpayCheckout from 'react-native-razorpay';
 import { getUserInfo } from '../../utils/function.js';
 import analytics from '@react-native-firebase/analytics';
-import { useNavigation } from '@react-navigation/native';
+import { admobViewadRewarded, admobViewadBanner1, admobViewadBanner2 } from '../../utils/env.js';
 
 const { height, width } = Dimensions.get('window');
-
-
 
 const RewardModal = ({
   visible,
@@ -2429,9 +2424,8 @@ const ViewAd = ({ navigation, route }) => {
     }
   };
 
-  // ✅ Step 6: Rewarded ad logic
   const showRewardedAd = () => {
-    const rewardedAdUnitId = "ca-app-pub-9372794286829313/2160297504";
+    const rewardedAdUnitId = admobViewadRewarded;
     const rewarded = RewardedAd.createForAdRequest(rewardedAdUnitId, {
       requestNonPersonalizedAdsOnly: true,
     });
@@ -2609,7 +2603,7 @@ const ViewAd = ({ navigation, route }) => {
             alignSelf: 'stretch',
           }}>
             <BannerAd
-              unitId={`ca-app-pub-9372794286829313/3411561192`}
+              unitId={admobViewadBanner1}
               size={BannerAdSize.MEDIUM_RECTANGLE}
               onAdFailedToLoad={error => {
                 console.log('Ad failed to load:', error);
@@ -2766,7 +2760,7 @@ const ViewAd = ({ navigation, route }) => {
           }}>
             <BannerAd
               size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-              unitId={'ca-app-pub-9372794286829313/2903257633'}
+              unitId={admobViewadBanner2}
               onAdFailedToLoad={error => {
                 console.log('Ad failed to load:', error);
               }}

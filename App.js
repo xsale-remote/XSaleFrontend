@@ -69,8 +69,6 @@ import {
   LandSale,
   Hostel,
 } from './src/screens/addNewListing/property';
-import { SocketProvider } from './src/utils/SocketContext';
-
 enableScreens();
 const Stack = createNativeStackNavigator();
 
@@ -193,8 +191,7 @@ const App = () => {
   StatusBar.setBackgroundColor('black');
 
   return (
-    <SocketProvider>
-      <NavigationContainer linking={linking}>
+    <NavigationContainer linking={linking}>
         <Stack.Navigator
           screenOptions={{ headerShown: false }}
           initialRouteName="FirstScreen">
@@ -263,8 +260,7 @@ const App = () => {
           <Stack.Screen name="ChangeInfo" component={ChangeInfo} />
           <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
         </Stack.Navigator>
-      </NavigationContainer>
-    </SocketProvider>
+    </NavigationContainer>
   );
 };
 

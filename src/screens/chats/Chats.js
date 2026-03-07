@@ -26,7 +26,6 @@ const Chats = ({navigation}) => {
     {id: 3, label: 'Sell'},
   ];
 
-  const [socket] = useState(null); 
   const [messages, setMessages] = useState([]);
   const [myId, setMyId] = useState(null);
   const [interactedUsers, setInteractedUsers] = useState([]);
@@ -49,20 +48,6 @@ const Chats = ({navigation}) => {
       getUser();
     }, [myId]), 
   );
-
-  useEffect(() => {
-    if (socket) {
-      socket.on('new_message', message => {
-        setMessages(prevMessages => [...prevMessages, message]);
-        console.log(`New message received from the backend: ${message}`);
-      });
-    }
-    return () => {
-      if (socket) {
-        socket.off('new_message');
-      }
-    };
-  }, [socket]);
 
   useEffect(() => {
     getUser();

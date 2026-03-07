@@ -26,6 +26,7 @@ import Geolocation from 'react-native-geolocation-service';
 import { BannerAd, TestIds, BannerAdSize } from 'react-native-google-mobile-ads';
 import { Button } from 'react-native-share';
 import messaging from "@react-native-firebase/messaging"
+import { admobHomeBanner } from '../../utils/env';
 
 const Home = ({ navigation }) => {
   const [homeAds, setHomeAds] = useState([]);
@@ -271,7 +272,7 @@ const Home = ({ navigation }) => {
         <View style={{ width: '100%' }}>
           <BannerAd
             size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
-            unitId={`ca-app-pub-9372794286829313/2602437630`}
+            unitId={admobHomeBanner}
             onAdFailedToLoad={error => {
               console.log('Ad failed to load:', error);
             }}
@@ -374,7 +375,7 @@ const Home = ({ navigation }) => {
 
   return (
     <SafeAreaView style={[styles.pdh16, { height: '100%', flex: 1 }]}>
-      <HomeHeader profilePicture={profilePicture} address={address} location={userLocation}/>
+      <HomeHeader profilePicture={profilePicture} address={address} location={userLocation} />
       <SearchBar
         onSearch={handleSearch}
         navigation={navigation}

@@ -6,7 +6,8 @@ import colors from '../../assets/colors';
 import {CategoriesItemBox} from '../../component/shared';
 import images from '../../assets/images';
 import icons from '../../assets/icons';
-import {BannerAd, TestIds, BannerAdSize} from 'react-native-google-mobile-ads';
+import {BannerAd, BannerAdSize} from 'react-native-google-mobile-ads';
+import { admobSubcategoryBanner } from '../../utils/env';
 
 const SubCategory = ({navigation, route}) => {
   const {title} = route.params;
@@ -803,7 +804,7 @@ const SubCategory = ({navigation, route}) => {
           <View style={{width: '100%'}}>
             <BannerAd
               size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-              unitId={'ca-app-pub-9372794286829313/9740150801'}
+              unitId={admobSubcategoryBanner}
               onAdFailedToLoad={error => {
                 console.log('Ad failed to load:', error);
               }}

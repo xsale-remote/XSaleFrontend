@@ -1,16 +1,15 @@
-import {View, Text, SafeAreaView} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import { View, Text, SafeAreaView } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import colors from '../../assets/colors';
 import styles from '../../assets/styles';
-import {getUserInfo} from '../../utils/function';
+import { getUserInfo } from '../../utils/function';
 import DeviceInfo from 'react-native-device-info';
 import UpdateModal from '../../component/shared/UpdateModal';
-import {get, post} from '../../utils/requestBuilder';
+import { get, post } from '../../utils/requestBuilder';
 import messaging from '@react-native-firebase/messaging';
 import EncryptedStorage from 'react-native-encrypted-storage';
-import { Settings, AppEventsLogger} from 'react-native-fbsdk-next';
-
-const FirstScreen = ({navigation}) => {
+import { Settings, AppEventsLogger } from 'react-native-fbsdk-next';
+const FirstScreen = ({ navigation }) => {
   const [currentVersion, setCurrentVersion] = useState('');
   const [isLatestVersion, setIsLatestVersion] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -25,7 +24,7 @@ const FirstScreen = ({navigation}) => {
     }
   };
 
- useEffect(() => {
+  useEffect(() => {
     Settings.initializeSDK();
     AppEventsLogger.logEvent("fb_mobile_activate_app");
   }, []);
@@ -55,9 +54,8 @@ const FirstScreen = ({navigation}) => {
   const fetchLatestVersion = async () => {
     try {
       const url = `api/v1/user/fetch/app-version`;
-      const {response} = await get(url);
+      const { response } = await get(url);
       const latestVersion = response.response;
-      console.log(currentVersion, latestVersion , " version")
       setIsLatestVersion(currentVersion === latestVersion);
     } catch (error) {
       console.error(`Error while fetching latest version: ${error}`);
@@ -80,7 +78,7 @@ const FirstScreen = ({navigation}) => {
         FCMToken,
       };
       const url = `api/v1/user/handle/fcm-token`;
-      const {response, status} = await post(url, body);
+      const { response, status } = await post(url, body);
       if (status === 200) {
         const responseData = response.response;
         if (responseData.toUpdate === false) {
@@ -113,7 +111,7 @@ const FirstScreen = ({navigation}) => {
       if (isLatestVersion !== null) {
         if (isLatestVersion) {
           if (userData) {
-            const {_id} = userData.user;
+            const { _id } = userData.user;
             fetchFCMToken(_id, currentFCMToken);
             await new Promise(resolve => setTimeout(resolve, 100));
             navigation.replace('Home');
@@ -134,17 +132,17 @@ const FirstScreen = ({navigation}) => {
 
   return (
     <SafeAreaView
-      style={[{flex: 1, borderWidth: 1, backgroundColor: colors.mintGreen}]}>
-      <View style={[{justifyContent: 'center', alignItems: 'center', flex: 1}]}>
+      style={[{ flex: 1, borderWidth: 1, backgroundColor: colors.mintGreen }]}>
+      <View style={[{ justifyContent: 'center', alignItems: 'center', flex: 1 }]}>
         {isLatestVersion === false && <UpdateModal />}
-        <Text style={[{fontSize: 100, color: colors.white}]}>XSale</Text>
-        <Text style={[{color: colors.white}, styles.ts20]}>
+        <Text style={[{ fontSize: 100, color: colors.white }]}>XSale</Text>
+        <Text style={[{ color: colors.white }, styles.ts20]}>
           Buy Better, Sell Faster
         </Text>
         <Text
           style={[
             ,
-            {color: colors.white, bottom: 40, position: 'absolute'},
+            { color: colors.white, bottom: 40, position: 'absolute' },
             styles.mt12,
           ]}>
           A Sky Technologies Product

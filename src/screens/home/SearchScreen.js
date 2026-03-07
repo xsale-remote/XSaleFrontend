@@ -16,8 +16,8 @@ import { get, post } from '../../utils/requestBuilder';
 import { getUserInfo } from '../../utils/function';
 import icons from '../../assets/icons';
 import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
+import { admobSearchscreenBanner } from '../../utils/env';
 
-// Separate component so it has its own state — prevents remounting issues
 const AdBanner = () => {
   const [show, setShow] = useState(true);
   if (!show) return null;
@@ -34,7 +34,7 @@ const AdBanner = () => {
     }]}>
       <BannerAd
         size={BannerAdSize.LARGE_BANNER}
-        unitId={'ca-app-pub-9372794286829313/6961603245'}
+        unitId={admobSearchscreenBanner}
         style={{ width: '100%' }}
         onAdFailedToLoad={() => setShow(false)}
       />

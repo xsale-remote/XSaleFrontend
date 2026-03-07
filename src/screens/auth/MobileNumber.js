@@ -17,13 +17,11 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import messaging from '@react-native-firebase/messaging';
 import {
   BannerAd,
-  TestIds,
   BannerAdSize,
-  InterstitialAd,
-  AdEventType,
   RewardedAd,
   RewardedAdEventType,
 } from 'react-native-google-mobile-ads';
+import {admobMobilenumberRewarded, admobMobilenumberBanner} from "../../utils/env"
 
 const MobileNumber = ({ navigation, route }) => {
   const [mobileNumber, setMobileNumber] = useState('');
@@ -57,7 +55,7 @@ const MobileNumber = ({ navigation, route }) => {
 
     await new Promise(resolve => setTimeout(resolve, 50));
 
-    const rewardedAdUnitId = 'ca-app-pub-9372794286829313/1559464025';
+    const rewardedAdUnitId = admobMobilenumberRewarded;
     const rewarded = RewardedAd.createForAdRequest(rewardedAdUnitId, {
       requestNonPersonalizedAdsOnly: true,
     });
@@ -137,6 +135,7 @@ const MobileNumber = ({ navigation, route }) => {
             safeNavigate('Home');
             setLoading(false);
           });
+          safeNavigate('Home');
         } else {
           ToastAndroid.show(
             'Login failed, please try again',
@@ -149,6 +148,7 @@ const MobileNumber = ({ navigation, route }) => {
           safeNavigate('Location', { mobileNumber });
           setLoading(false);
         });
+        safeNavigate('Location', { mobileNumber });
       }
     } catch (error) {
       console.log('Error during login/signup:', error);
@@ -234,7 +234,7 @@ const MobileNumber = ({ navigation, route }) => {
               textStyle={{ color: colors.black }}
               onPress={() => {
                 const rewardedAdUnitId =
-                  'ca-app-pub-9372794286829313/1559464025';
+                  admobMobilenumberRewarded;
                 const rewarded = RewardedAd.createForAdRequest(
                   rewardedAdUnitId,
                   {
@@ -290,7 +290,7 @@ const MobileNumber = ({ navigation, route }) => {
           >
             <BannerAd
               size={BannerAdSize.MEDIUM_RECTANGLE}
-              unitId="ca-app-pub-9372794286829313/4639295228"
+              unitId={admobMobilenumberBanner}
               onAdFailedToLoad={error => console.log('Ad failed to load:', error)}
               onAdLoaded={() => console.log('Ad loaded successfully')}
             />

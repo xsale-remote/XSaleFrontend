@@ -3,12 +3,17 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
+    "postinstall": "node src/utils/generate-env.js dev",
+    "android": "node src/utils/generate-env.js dev && npx kill-port 8081 && react-native run-android",
+    "android:prod": "node src/utils/generate-env.js prod && npx kill-port 8081 && react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
+    "start:prod": "node src/utils/generate-env.js prod && react-native start",
     "test": "jest",
-    "apk": "cd android && gradlew assembleRelease && cd .. && start android\\app\\build\\outputs\\apk\\release\\"
+    "apk": "node src/utils/generate-env.js prod && cd android && ./gradlew assembleRelease && cd .. && explorer android\\app\\build\\outputs\\apk\\release\\",
+    "apk:dev": "node src/utils/generate-env.js dev && cd android && ./gradlew assembleDebug && cd .. && start android\\app\\build\\outputs\\apk\\debug\\",
+    "bundle": "node src/utils/generate-env.js prod && cd android && ./gradlew bundleRelease && cd .."
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.23.1",
@@ -27,6 +32,7 @@
     "react-native": "0.73.3",
     "react-native-date-picker": "^5.0.2",
     "react-native-device-info": "^11.1.0",
+    "react-native-dotenv": "^3.4.11",
     "react-native-encrypted-storage": "^4.0.3",
     "react-native-fast-image": "^8.6.3",
     "react-native-fbsdk-next": "^13.4.1",
@@ -39,13 +45,11 @@
     "react-native-inappbrowser-reborn": "^3.7.0",
     "react-native-maps": "^1.15.1",
     "react-native-modal-dropdown": "^1.0.2",
-    "react-native-razorpay": "^2.3.0",
     "react-native-safe-area-context": "^4.9.0",
     "react-native-screens": "^3.29.0",
     "react-native-share": "^10.2.1",
     "react-native-video": "^6.1.2",
-    "react-native-webview": "^13.10.0",
-    "socket.io-client": "^4.7.5"
+    "react-native-webview": "^13.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
@@ -58,11 +62,14 @@
     "@types/react": "^18.2.6",
     "@types/react-test-renderer": "^18.0.0",
     "babel-jest": "^29.6.3",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
     "eslint": "^8.19.0",
     "jest": "^29.6.3",
     "prettier": "2.8.8",
     "react-test-renderer": "18.2.0",
-    "typescript": "5.0.4"
+    "typescript": "5.0.4",
+    "wait-on": "^9.0.4"
   },
   "engines": {
     "node": ">=18"

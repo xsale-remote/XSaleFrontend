@@ -26,12 +26,12 @@ import { SellerProfile } from '../../component/viewAd.js';
 import { getUserInfo } from '../../utils/function.js';
 import {
   BannerAd,
-  TestIds,
   BannerAdSize,
   InterstitialAd,
   AdEventType,
 } from 'react-native-google-mobile-ads';
 import { formatPriceIndian } from '../../utils/function.js';
+import { admobViewadinfoInterstitial, admobViewadinfoBanner1, admobViewadinfoBanner2 } from '../../utils/env.js';
 
 const { height, width } = Dimensions.get('window');
 
@@ -174,7 +174,7 @@ const ViewAdInfo = ({ navigation, route }) => {
           ]}
           onPress={() => {
             const interstitialAdUnitId =
-              'ca-app-pub-9372794286829313/2109975439';
+              admobViewadinfoInterstitial;
             const interstitial =
               InterstitialAd.createForAdRequest(interstitialAdUnitId);
 
@@ -228,7 +228,7 @@ const ViewAdInfo = ({ navigation, route }) => {
           ]}
           onPress={() => {
             const interstitialAdUnitId =
-              'ca-app-pub-9372794286829313/2109975439';
+              admobViewadinfoInterstitial;
             const interstitial =
               InterstitialAd.createForAdRequest(interstitialAdUnitId);
 
@@ -541,7 +541,7 @@ const ViewAdInfo = ({ navigation, route }) => {
                 }}>
                   <BannerAd
                     size={BannerAdSize.MEDIUM_RECTANGLE}
-                    unitId="ca-app-pub-9372794286829313/9854241697"
+                    unitId={admobViewadinfoBanner1}
                     style={{ width: '100%' }}
                     onAdFailedToLoad={error => console.log('Ad failed to load:', error)}
                     onAdLoaded={() => console.log('Ad loaded successfully')}
@@ -607,7 +607,7 @@ const ViewAdInfo = ({ navigation, route }) => {
               }}>
                 <BannerAd
                   size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-                  unitId={'ca-app-pub-9372794286829313/7614063803'}
+                  unitId={admobViewadinfoBanner2}
                   style={{ width: '100%' }}
                   onAdFailedToLoad={error => console.log('Ad failed:', error)}
                   onAdLoaded={() => console.log('Ad loaded')}

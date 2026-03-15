@@ -718,7 +718,10 @@ const ViewAdInfo = ({ navigation, route }) => {
               <SellerProfile
                 style={styles.mt12}
                 name={userDetails?.userName}
-                customerId={userDetails?._id}
+                seller={{
+                  _id: userDetails?._id,
+                  publicId: userDetails?.publicId,
+                }}
                 userImage={userDetails?.profilePicture}
               />
             </View>

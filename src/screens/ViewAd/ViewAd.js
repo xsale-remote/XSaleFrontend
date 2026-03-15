@@ -220,6 +220,7 @@ const ViewAd = ({ navigation, route }) => {
   const [showRateModal, setShowRateModal] = useState(false);
   const [userName, setUserName] = useState('');
   const [userNumber, setUserNumber] = useState('');
+  const [sellerIds, setSellerIds] = useState([])
 
   //
   const [showRewardModal, setShowRewardModal] = useState(false);
@@ -270,8 +271,13 @@ const ViewAd = ({ navigation, route }) => {
   const getUserData = async () => {
     try {
       const userData = await getUserInfo();
+      console.log(userData, " this is user data")
       setUserName(userData.user.userName);
       setUserNumber(userData.user.phoneNumber);
+      setSellerIds({
+        _id: userData.user._id,
+        publicId: userData.user.publicId,
+      });
     } catch (error) {
       console.log(`error while fetching user data ${error}`);
     }
@@ -2777,7 +2783,7 @@ const ViewAd = ({ navigation, route }) => {
             <SellerProfile
               style={[styles.mt12, styles.mb20]}
               name={itemDetails.userName}
-              customerId={itemDetails.userId}
+              seller={sellerIds} 
               userImage={profilePicture}
             />
             <Button

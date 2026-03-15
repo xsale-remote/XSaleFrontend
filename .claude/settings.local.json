@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"D:\\\\projects\\\\XSALE\\\\XSaleFrontend\" && python3 -c \"\nimport json\nwith open\\('XSale full application flow.excalidraw', 'r', encoding='utf-8'\\) as f:\n    data = json.load\\(f\\)\n\nelements = data['elements']\ntexts = [\\(e.get\\('text',''\\), e.get\\('x',0\\), e.get\\('y',0\\)\\) for e in elements if e.get\\('type'\\) == 'text' and not e.get\\('isDeleted'\\)]\narrows = [\\(e.get\\('id'\\), e.get\\('startBinding'\\), e.get\\('endBinding'\\)\\) for e in elements if e.get\\('type'\\) == 'arrow' and not e.get\\('isDeleted'\\)]\nimages = [\\(e.get\\('id'\\), e.get\\('x',0\\), e.get\\('y',0\\), e.get\\('width',0\\), e.get\\('height',0\\)\\) for e in elements if e.get\\('type'\\) == 'image' and not e.get\\('isDeleted'\\)]\n\nprint\\('=== TEXTS ==='\\)\nfor t,x,y in sorted\\(texts, key=lambda v: \\(round\\(v[2]/100\\), round\\(v[1]/100\\)\\)\\):\n    print\\(f'  [{round\\(x\\)}, {round\\(y\\)}] \\\\\"{t}\\\\\"'\\)\n\nprint\\(\\)\nprint\\('=== ARROWS \\(connections\\) ==='\\)\nfor aid, start, end in arrows:\n    sb = start.get\\('elementId'\\) if start else 'none'\n    eb = end.get\\('elementId'\\) if end else 'none'\n    print\\(f'  {sb} -> {eb}'\\)\n\nprint\\(\\)\nprint\\(f'Total elements: {len\\(elements\\)}, texts: {len\\(texts\\)}, arrows: {len\\(arrows\\)}, images: {len\\(images\\)}'\\)\n\")",
+      "Bash(cd \"D:\\\\projects\\\\XSALE\\\\XSaleFrontend\" && node -e \"\nconst fs = require\\('fs'\\);\nconst data = JSON.parse\\(fs.readFileSync\\('XSale full application flow.excalidraw', 'utf8'\\)\\);\nconst elements = data.elements;\n\nconst texts = elements.filter\\(e => e.type === 'text' && !e.isDeleted\\);\nconst arrows = elements.filter\\(e => e.type === 'arrow' && !e.isDeleted\\);\nconst images = elements.filter\\(e => e.type === 'image' && !e.isDeleted\\);\n\nconsole.log\\('=== TEXTS \\(sorted by y then x\\) ==='\\);\ntexts.sort\\(\\(a,b\\) => a.y - b.y || a.x - b.x\\).forEach\\(e => {\n  console.log\\('[' + Math.round\\(e.x\\) + ', ' + Math.round\\(e.y\\) + '] \\\\\"' + e.text.replace\\(/\\\\n/g,' | '\\) + '\\\\\"'\\);\n}\\);\n\nconsole.log\\('\\\\n=== IMAGE IDs \\(for reference\\) ==='\\);\nimages.forEach\\(e => {\n  const bound = e.boundElements || [];\n  console.log\\('ID:' + e.id + ' pos:[' + Math.round\\(e.x\\) + ',' + Math.round\\(e.y\\) + '] size:[' + Math.round\\(e.width\\) + 'x' + Math.round\\(e.height\\) + '] arrows:' + bound.map\\(b=>b.id\\).join\\(','\\)\\);\n}\\);\n\nconsole.log\\('\\\\nTotal: texts=' + texts.length + ' arrows=' + arrows.length + ' images=' + images.length\\);\n\")",
+      "mcp__paper__get_basic_info",
+      "mcp__paper__create_artboard",
+      "mcp__paper__write_html",
+      "mcp__paper__get_screenshot",
+      "mcp__paper__get_font_family_info",
+      "Bash(npm run:*)"
+    ]
+  }
+}

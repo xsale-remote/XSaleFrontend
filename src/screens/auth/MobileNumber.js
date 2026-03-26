@@ -22,6 +22,7 @@ import {
   RewardedAdEventType,
 } from 'react-native-google-mobile-ads';
 import {admobMobilenumberRewarded, admobMobilenumberBanner} from "../../utils/env"
+import { logEvent } from '../../utils/analytics';
 
 const MobileNumber = ({ navigation, route }) => {
   const [mobileNumber, setMobileNumber] = useState('');
@@ -52,6 +53,7 @@ const MobileNumber = ({ navigation, route }) => {
 
     setNumberError(false);
     setLoading(true);
+    logEvent('auth_phone_entered');
 
     await new Promise(resolve => setTimeout(resolve, 50));
 
@@ -122,6 +124,7 @@ const MobileNumber = ({ navigation, route }) => {
             'userData',
             JSON.stringify(loginResponse.response),
           );
+          logEvent('login', { method: 'phone' });
 
           ToastAndroid.showWithGravityAndOffset(
             'Login Successfully',
@@ -132,10 +135,10 @@ const MobileNumber = ({ navigation, route }) => {
           );
 
           showRewardedAd(() => {
-            safeNavigate('Home');
+            safeNavigate('MainTabs');
             setLoading(false);
           });
-          safeNavigate('Home');
+          safeNavigate('MainTabs');
         } else {
           ToastAndroid.show(
             'Login failed, please try again',
@@ -154,7 +157,7 @@ const MobileNumber = ({ navigation, route }) => {
       console.log('Error during login/signup:', error);
       ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
       setLoading(false);
-      safeNavigate('Home');
+      safeNavigate('MainTabs');
     }
   };
 
@@ -233,6 +236,7 @@ const MobileNumber = ({ navigation, route }) => {
               style={{ backgroundColor: '#F6F2F2', borderWidth: 0.5 }}
               textStyle={{ color: colors.black }}
               onPress={() => {
+                logEvent('auth_skipped');
                 const rewardedAdUnitId =
                   admobMobilenumberRewarded;
                 const rewarded = RewardedAd.createForAdRequest(
@@ -251,7 +255,7 @@ const MobileNumber = ({ navigation, route }) => {
                     // When user earns the reward (ad completed)
                     if (type === RewardedAdEventType.EARNED_REWARD) {
                       unsubscribe();
-                      navigation.navigate('Home');
+                      navigation.navigate('MainTabs');
                     }
 
                     // When ad fails to load or is closed early — still navigate
@@ -260,14 +264,14 @@ const MobileNumber = ({ navigation, route }) => {
                       type === RewardedAdEventType.CLOSED
                     ) {
                       unsubscribe();
-                      navigation.navigate('Home');
+                      navigation.navigate('MainTabs');
                     }
                   },
                 );
 
                 // Start loading the ad
                 rewarded.load();
-                navigation.navigate('Home');
+                navigation.navigate('MainTabs');
               }}
               disable={loading}
             />

@@ -17,6 +17,7 @@ import { getUserInfo } from '../../utils/function';
 import icons from '../../assets/icons';
 import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 import { admobSearchscreenBanner } from '../../utils/env';
+import { logEvent } from '../../utils/analytics';
 
 const AdBanner = () => {
   const [show, setShow] = useState(true);
@@ -192,7 +193,8 @@ const SearchScreen = ({ navigation, route }) => {
   };
 
   const handleNewSearch = newQuery => {
-    if (newQuery.trim() && newQuery !== searchQuery) {
+    if (newQuery.trim()) {
+      logEvent('search_performed', { query: newQuery, source: 'search_screen', city: route.params?.city || 'unknown' });
       setSearchQuery(newQuery);
       prevSearchQueryRef.current = newQuery;
       setListings([]);
@@ -203,7 +205,13 @@ const SearchScreen = ({ navigation, route }) => {
     }
   };
 
-  const handlePress = item => {
+  const handlePress = (item, position) => {
+    logEvent('search_result_clicked', {
+      query: searchQuery,
+      item_title: item.title || 'unknown',
+      category: item.productType || 'unknown',
+      position: String(position),
+    });
     navigation.navigate('ViewAdInfo', {
       adId: item.id,
       likeFunction: handleFavoritePress,
@@ -294,10 +302,11 @@ const SearchScreen = ({ navigation, route }) => {
     );
   };
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item, index }) => {
     if (item.isAd) return <AdBanner key={item.id} />;
 
-    const isLiked = likedItems.includes(item.id);
+    const isLiked = likedStates[item.id] || false;
+    const isLikeLoading = loadingStates[item.id] || false;
     return (
       <ListingCard
         image={item.image}
@@ -306,9 +315,10 @@ const SearchScreen = ({ navigation, route }) => {
         location={item.location}
         date={item.date}
         featured={item.featured}
-        onPress={() => handlePress(item)}
+        onPress={() => handlePress(item, index + 1)}
         onFavoritePress={() => handleFavoritePress(item.id, userId)}
         isLiked={isLiked}
+        isLikeLoading={isLikeLoading}
       />
     );
   };

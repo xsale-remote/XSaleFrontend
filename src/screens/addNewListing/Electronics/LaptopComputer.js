@@ -16,11 +16,22 @@ import {
 import styles from '../../../assets/styles';
 import colors from '../../../assets/colors';
 import {put} from '../../../utils/requestBuilder';
+import {logEvent} from '../../../utils/analytics';
 
 const LaptopComputer = ({navigation, route}) => {
   const storageOption = ['SSD', 'HD', 'SSD/HD'];
   const {itemName, categoryName, forEdit, itemData, parentId, productType} =
     route.params;
+
+  useEffect(() => {
+    if (!forEdit) {
+      logEvent('listing_step_reached', {
+        step: 'form_filling',
+        category: categoryName,
+        subcategory: itemName,
+      });
+    }
+  }, []);
 
   const [itemSelling, setItemSelling] = useState('');
   const [brand, setBrand] = useState('');

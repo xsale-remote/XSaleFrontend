@@ -11,10 +11,22 @@ import styles from '../../../assets/styles';
 import {TitleHeader, Button, TitleInput} from '../../../component/shared';
 import colors from '../../../assets/colors';
 import {put} from '../../../utils/requestBuilder';
+import {logEvent} from '../../../utils/analytics';
 
 const Furniture = ({navigation, route}) => {
   const {categoryName, itemName, forEdit, itemData, parentId, productType} =
     route.params;
+
+  useEffect(() => {
+    if (!forEdit) {
+      logEvent('listing_step_reached', {
+        step: 'form_filling',
+        category: categoryName,
+        subcategory: itemName,
+      });
+    }
+  }, []);
+
   const [furnitureName, setFurnitureName] = useState('');
   const [additionalInformation, setAdditionalInformation] = useState('');
   const [askingPrice, setAskingPrice] = useState('');

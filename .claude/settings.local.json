@@ -8,7 +8,22 @@
       "mcp__paper__write_html",
       "mcp__paper__get_screenshot",
       "mcp__paper__get_font_family_info",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:stitch.withgoogle.com)",
+      "Bash(npm install:*)",
+      "Bash(mkdir -p \"D:/projects/XSALE/XSaleFrontend/src/assets/fonts\")",
+      "Bash(curl -L \"https://github.com/google/fonts/raw/main/ofl/poppins/Poppins-Bold.ttf\" -o \"D:/projects/XSALE/XSaleFrontend/src/assets/fonts/Poppins-Bold.ttf\")",
+      "Bash(curl -L \"https://github.com/google/fonts/raw/main/ofl/poppins/Poppins-Regular.ttf\" -o \"D:/projects/XSALE/XSaleFrontend/src/assets/fonts/Poppins-Regular.ttf\")",
+      "Bash(npx react-native-bootsplash:*)",
+      "Bash(curl -L \"https://github.com/google/fonts/raw/main/ofl/dosis/Dosis%5Bwght%5D.ttf\" -o \"D:/projects/XSALE/XSaleFrontend/src/assets/fonts/Dosis-ExtraBold.ttf\")",
+      "Bash(curl -L \"https://github.com/google/fonts/raw/main/ofl/dosis/static/Dosis-ExtraBold.ttf\" -o \"D:/projects/XSALE/XSaleFrontend/src/assets/fonts/Dosis-ExtraBold.ttf\")",
+      "Bash(npx react-native-asset:*)",
+      "Bash(./gradlew clean:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(curl -L \"https://github.com/google/fonts/raw/main/ofl/dosis/static/Dosis-ExtraBold.ttf\" -o \"D:/projects/XSALE/XSaleFrontend/android/app/src/main/res/font/dosis_extrabold.ttf\")",
+      "Bash(grep -r \"logEvent\\\\|setUserProperties\\\\|setUserId\\\\|logScreenView\\\\|setCurrentScreen\" /d/projects/XSALE/XSaleFrontend/src --include=*.js)",
+      "Bash(grep -r \"analytics\\\\|Analytics\\\\|logEvent\\\\|AppEventsLogger\\\\|firebase-analytics\" /d/projects/XSALE/XSaleFrontend --include=*.js --include=*.json --include=*.gradle --include=*.xml)"
     ]
   }
 }

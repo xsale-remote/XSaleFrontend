@@ -20,6 +20,7 @@ import { getUserInfo } from '../../utils/function';
 import { post } from '../../utils/requestBuilder';
 import Geolocation from 'react-native-geolocation-service';
 import { admobProductslistingBanner1, admobProductslistingBanner2 } from '../../utils/env';
+import { logEvent } from '../../utils/analytics';
 import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 
 
@@ -877,6 +878,7 @@ const ProductsListing = ({ navigation, route }) => {
               page,
             );
           } else {
+            logEvent('subcategory_selected', { category_name: item.categoryName, subcategory_name: item.itemName });
             setCategoryVisible(false);
             setSubCategoryVisible(true);
             setBoxId(item.id);

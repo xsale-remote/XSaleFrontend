@@ -1,7 +1,6 @@
-import { View, Text, SafeAreaView } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, StatusBar } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import colors from '../../assets/colors';
-import styles from '../../assets/styles';
 import { getUserInfo } from '../../utils/function';
 import DeviceInfo from 'react-native-device-info';
 import UpdateModal from '../../component/shared/UpdateModal';
@@ -9,6 +8,7 @@ import { get, post } from '../../utils/requestBuilder';
 import messaging from '@react-native-firebase/messaging';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { Settings, AppEventsLogger } from 'react-native-fbsdk-next';
+
 const FirstScreen = ({ navigation }) => {
   const [currentVersion, setCurrentVersion] = useState('');
   const [isLatestVersion, setIsLatestVersion] = useState(null);
@@ -28,7 +28,6 @@ const FirstScreen = ({ navigation }) => {
     Settings.initializeSDK();
     AppEventsLogger.logEvent("fb_mobile_activate_app");
   }, []);
-
 
   useEffect(() => {
     getToken();
@@ -85,13 +84,10 @@ const FirstScreen = ({ navigation }) => {
           return null;
         } else if (responseData.toUpdate === true) {
           const newToken = responseData.token;
-          // Fetch current user data from EncryptedStorage
           let userData = JSON.parse(await EncryptedStorage.getItem('userData'));
           if (userData) {
-            // Update the FCMToken at the base level and user level
-            userData.FCMToken = newToken; // Base level
-            userData.user.FCMToken = newToken; // User level
-            // Save updated user data back to EncryptedStorage
+            userData.FCMToken = newToken;
+            userData.user.FCMToken = newToken;
             const updatedToken = await EncryptedStorage.setItem(
               'userData',
               JSON.stringify(userData),
@@ -113,10 +109,8 @@ const FirstScreen = ({ navigation }) => {
           if (userData) {
             const { _id } = userData.user;
             fetchFCMToken(_id, currentFCMToken);
-            await new Promise(resolve => setTimeout(resolve, 100));
-            navigation.replace('Home');
+            navigation.replace('MainTabs');
           } else {
-            await new Promise(resolve => setTimeout(resolve, 100));
             goToMobileNumber();
           }
         }
@@ -131,25 +125,37 @@ const FirstScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView
-      style={[{ flex: 1, borderWidth: 1, backgroundColor: colors.mintGreen }]}>
-      <View style={[{ justifyContent: 'center', alignItems: 'center', flex: 1 }]}>
-        {isLatestVersion === false && <UpdateModal />}
-        <Text style={[{ fontSize: 100, color: colors.white }]}>XSale</Text>
-        <Text style={[{ color: colors.white }, styles.ts20]}>
-          Buy Better, Sell Faster
-        </Text>
-        <Text
-          style={[
-            ,
-            { color: colors.white, bottom: 40, position: 'absolute' },
-            styles.mt12,
-          ]}>
-          A Sky Technologies Product
-        </Text>
+    <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor={colors.white} barStyle="dark-content" />
+      {isLatestVersion === false && <UpdateModal />}
+      <View style={styles.content}>
+        <Text style={styles.title}>XSale</Text>
+        <Text style={styles.tagline}>Buy & Sell Near You</Text>
       </View>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 64,
+    color: colors.mintGreen,
+    fontWeight: '800',
+  },
+  tagline: {
+    fontSize: 16,
+    color: colors.grey800,
+    marginTop: 4,
+  },
+});
 
 export default FirstScreen;

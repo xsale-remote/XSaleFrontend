@@ -155,7 +155,6 @@ const AdsCard = ({
                       justifyContent: 'center',
                       alignItems: 'center',
                       opacity: 0.7,
-                      borderWidth: isLiked ? null : 1,
                     },
                   ]}>
                   {isLiked ? (
@@ -274,7 +273,9 @@ const AdsCard = ({
                     opacity: 0.7,
                   },
                 ]}>
-                {isLiked ? (
+                {isLikeLoading ? (
+                  <ActivityIndicator size={'small'} color={colors.black} />
+                ) : isLiked ? (
                   <Image
                     source={icons.red_heart}
                     style={[styles.icon32, {alignSelf: 'center'}]}

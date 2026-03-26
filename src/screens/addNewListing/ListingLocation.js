@@ -7,6 +7,7 @@ import icons from '../../assets/icons';
 import {getUserInfo} from '../../utils/function';
 import {BannerAd, BannerAdSize} from 'react-native-google-mobile-ads';
 import { admobLocationBanner } from '../../utils/env';
+import { logEvent } from '../../utils/analytics';
 
 const ListingLocation = ({navigation, route}) => {
   const itemDetails = route.params;
@@ -21,6 +22,14 @@ const ListingLocation = ({navigation, route}) => {
 
   useEffect(() => {
     getUser();
+  }, []);
+
+  useEffect(() => {
+    logEvent('listing_step_reached', {
+      step: 'location_selection',
+      category: itemDetails?.categoryName || '',
+      subcategory: itemDetails?.itemName || '',
+    });
   }, []);
 
   const getUser = async () => {

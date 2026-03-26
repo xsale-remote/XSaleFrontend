@@ -16,6 +16,7 @@ import axios from 'axios';
 import { GOOGLE_MAP_KEY } from '../../utils/env';
 import { BannerAd, TestIds, BannerAdSize } from 'react-native-google-mobile-ads';
 import { admobLocationBanner } from '../../utils/env';
+import { logEvent } from '../../utils/analytics';
 
 const Location = ({ navigation, route }) => {
   const { mobileNumber } = route.params;
@@ -111,9 +112,11 @@ const Location = ({ navigation, route }) => {
 
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
         console.log('Location permission granted');
+        logEvent('location_permission_result', { granted: 'true' });
         return true;
       } else {
         console.log('Location permission denied');
+        logEvent('location_permission_result', { granted: 'false' });
         return false;
       }
     } catch (err) {

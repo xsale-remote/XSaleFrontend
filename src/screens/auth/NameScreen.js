@@ -27,6 +27,7 @@ import {
 } from 'react-native-google-mobile-ads';
 import { get } from '../../utils/requestBuilder';
 import { admobNamescreenInterstitial, admobNamescreenBanner } from '../../utils/env';
+import { logEvent } from '../../utils/analytics';
 
 const NameScreen = ({ navigation, route }) => {
   const { addressInfo, fullAddress, receivedMobileNumber } = route.params || {};
@@ -181,6 +182,13 @@ const NameScreen = ({ navigation, route }) => {
         try {
           const jsonString = JSON.stringify(response.response);
           await EncryptedStorage.setItem('userData', jsonString);
+          logEvent('sign_up', {
+            method: 'phone',
+            city: city || '',
+            state: state || '',
+            address: readableAddress || '',
+            has_profile_picture: profilePictureURL ? 'true' : 'false',
+          });
 
           if (showAd === true) {
             await showInterstitialAd();
@@ -189,7 +197,7 @@ const NameScreen = ({ navigation, route }) => {
           navigation.dispatch(
             CommonActions.reset({
               index: 0,
-              routes: [{ name: 'Home' }],
+              routes: [{ name: 'MainTabs' }],
             }),
           );
 

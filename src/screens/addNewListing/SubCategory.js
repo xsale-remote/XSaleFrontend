@@ -1,5 +1,5 @@
 import {View, FlatList, Text, SafeAreaView} from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {TitleHeader} from '../../component/shared';
 import styles from '../../assets/styles';
 import colors from '../../assets/colors';
@@ -8,9 +8,18 @@ import images from '../../assets/images';
 import icons from '../../assets/icons';
 import {BannerAd, BannerAdSize} from 'react-native-google-mobile-ads';
 import { admobSubcategoryBanner } from '../../utils/env';
+import { logEvent } from '../../utils/analytics';
 
 const SubCategory = ({navigation, route}) => {
   const {title} = route.params;
+
+  useEffect(() => {
+    logEvent('listing_step_reached', {
+      step: 'subcategory_selection',
+      category: title,
+    });
+  }, []);
+
   const Animals = [
     {id: 1, itemName: 'Cow', image: images.cow, categoryName: 'Animals'},
     {
@@ -441,6 +450,7 @@ const SubCategory = ({navigation, route}) => {
         all={item.all ? true : false}
         style={[styles.mr12, {width: '31%'}, styles.mb12]}
         onCardPress={() => {
+          logEvent('category_form_opened', { category: title, subcategory: item.itemName });
           if (title === 'Vehicle') {
             navigation.navigate('VehicleSale', {
               itemName: item.itemName,

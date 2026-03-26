@@ -10,10 +10,22 @@ import colors from '../../../assets/colors';
 import styles from '../../../assets/styles';
 import {TitleHeader, TitleInput, Button} from '../../../component/shared';
 import {put} from '../../../utils/requestBuilder';
+import {logEvent} from '../../../utils/analytics';
 
 const OtherAnimals = ({navigation, route}) => {
   const {itemName, categoryName, forEdit, itemData, parentId, productType} =
     route.params;
+
+  useEffect(() => {
+    if (!forEdit) {
+      logEvent('listing_step_reached', {
+        step: 'form_filling',
+        category: categoryName,
+        subcategory: itemName,
+      });
+    }
+  }, []);
+
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [additionalInformation, setAdditionalInformation] = useState('');

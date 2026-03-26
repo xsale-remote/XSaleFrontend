@@ -16,10 +16,19 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { post } from '../../utils/requestBuilder';
 import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 import { admobMediaBanner } from '../../utils/env';
+import { logEvent } from '../../utils/analytics';
 
 const Media = ({ navigation, route }) => {
   const [mediaArray, setMediaArray] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    logEvent('listing_step_reached', {
+      step: 'media_upload',
+      category: route.params?.categoryName || '',
+      subcategory: route.params?.itemName || '',
+    });
+  }, []);
 
   const handleMediaSelection = async () => {
     const options = {
@@ -78,12 +87,15 @@ const Media = ({ navigation, route }) => {
                 setMediaArray(prev => [...prev, newMedia]);
               } else {
                 console.error('Failed to upload file to S3', uploadResponse);
+                logEvent('media_upload_failed', { category: route.params?.categoryName || '', error: 's3_upload_failed' });
               }
             } else {
               console.error('Failed to get pre-signed URL', presignedResponse);
+              logEvent('media_upload_failed', { category: route.params?.categoryName || '', error: 'presigned_url_failed' });
             }
           } catch (error) {
             console.error('Error during file upload', error);
+            logEvent('media_upload_failed', { category: route.params?.categoryName || '', error: 'network_error' });
             ToastAndroid.showWithGravityAndOffset(
               'Failed to upload media. Please try again.',
               ToastAndroid.LONG,

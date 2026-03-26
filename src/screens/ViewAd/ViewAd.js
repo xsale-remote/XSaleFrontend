@@ -19,6 +19,7 @@ import colors from '../../assets/colors';
 import styles from '../../assets/styles';
 import icons from '../../assets/icons';
 import { Button, RateUsModal, PayUWebViewModal } from '../../component/shared';
+import { CommonActions } from '@react-navigation/native';
 import { SellerProfile } from '../../component/viewAd.js';
 import { post } from '../../utils/requestBuilder.js';
 import Video from 'react-native-video';
@@ -33,6 +34,7 @@ import { formatPriceIndian } from '../../utils/function.js';
 import { getUserInfo } from '../../utils/function.js';
 import analytics from '@react-native-firebase/analytics';
 import { admobViewadRewarded, admobViewadBanner1, admobViewadBanner2 } from '../../utils/env.js';
+import { logEvent } from '../../utils/analytics';
 
 const { height, width } = Dimensions.get('window');
 
@@ -268,12 +270,30 @@ const ViewAd = ({ navigation, route }) => {
     setItemName(itemDetails.itemName);
   }, []);
 
+  useEffect(() => {
+    logEvent('listing_step_reached', {
+      step: 'preview',
+      category: categoryName,
+      subcategory: itemName,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (adUploaded) {
+      logEvent('listing_submitted', {
+        category: categoryName,
+        subcategory: itemName,
+        phone_number: `ph_${userNumber}`,
+        user_name: userName,
+      });
+    }
+  }, [adUploaded]);
+
   const getUserData = async () => {
     try {
       const userData = await getUserInfo();
-      console.log(userData, " this is user data")
       setUserName(userData.user.userName);
-      setUserNumber(userData.user.phoneNumber);
+      setUserNumber(String(userData.user.phoneNumber));
       setSellerIds({
         _id: userData.user._id,
         publicId: userData.user.publicId,
@@ -2350,6 +2370,10 @@ const ViewAd = ({ navigation, route }) => {
 
   // 💰 Start PayU payment directly
   const initiatePayUPayment = async () => {
+    logEvent('payment_initiated', {
+      category: categoryName,
+      subcategory: itemName,
+    });
     setIsLoading(true);
     try {
       const body = {
@@ -2378,9 +2402,25 @@ const ViewAd = ({ navigation, route }) => {
         } else {
           await createItem(); // for free listings
         }
+      } else {
+        logEvent('listing_payment_failed', {
+          category: categoryName,
+          subcategory: itemName,
+          phone_number: `ph_${userNumber}`,
+          user_name: userName,
+          reason: 'payment_api_error',
+        });
+        Alert.alert("Error", "Payment initiation failed.");
       }
     } catch (error) {
       console.error("Error initiating PayU payment:", error);
+      logEvent('listing_payment_failed', {
+        category: categoryName,
+        subcategory: itemName,
+        phone_number: `ph_${userNumber}`,
+        user_name: userName,
+        reason: 'payment_api_error',
+      });
       Alert.alert("Error", "Payment initiation failed.");
     } finally {
       setIsLoading(false);
@@ -2415,6 +2455,13 @@ const ViewAd = ({ navigation, route }) => {
         Alert.alert("Payment successful", "But upload failed. Please retry.");
       }
     } else if (status === "failure") {
+      logEvent('listing_payment_failed', {
+        category: categoryName,
+        subcategory: itemName,
+        phone_number: `ph_${userNumber}`,
+        user_name: userName,
+        reason: 'payu_failed',
+      });
       const rewardData = currentResponseData;
       if (rewardData?.isReward) {
         setRewardData({
@@ -2481,7 +2528,16 @@ const ViewAd = ({ navigation, route }) => {
       <PayUWebViewModal
         visible={showPayUModal}
         payuPayload={payuPayload}
-        onClose={() => setShowPayUModal(false)}
+        onClose={() => {
+          logEvent('listing_payment_failed', {
+            category: categoryName,
+            subcategory: itemName,
+            phone_number: `ph_${userNumber}`,
+            user_name: userName,
+            reason: 'user_cancelled',
+          });
+          setShowPayUModal(false);
+        }}
         onResult={handlePayUResult}
       />
 
@@ -2511,7 +2567,7 @@ const ViewAd = ({ navigation, route }) => {
       {showRateModal && (
         <RateUsModal
           visible={showRateModal}
-          onClose={() => navigation.replace('Home')}
+          onClose={() => navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'MainTabs' }] }))}
         />
       )}
       <ScrollView

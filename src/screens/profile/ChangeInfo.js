@@ -16,6 +16,7 @@ import {UploadModal, UploadCameraView} from '../../component/shared';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import colors from '../../assets/colors';
 import {post, put, uploadMediaToServer} from '../../utils/requestBuilder';
+import { logEvent } from '../../utils/analytics';
 import {getUserInfo} from '../../utils/function';
 import EncryptedStorage from 'react-native-encrypted-storage';
 
@@ -180,6 +181,7 @@ const ChageInfo = ({navigation}) => {
         };
         const {response, status} = await put(url, body, true);
         if (status === 200) {
+          logEvent('profile_updated');
           try {
             const jsonString = JSON.stringify(response.response);
             const storedData = await EncryptedStorage.setItem(

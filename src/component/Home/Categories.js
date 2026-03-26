@@ -11,6 +11,7 @@ import styles from '../../assets/styles';
 import icons from '../../assets/icons';
 import {useNavigation} from '@react-navigation/native';
 import colors from '../../assets/colors';
+import { logEvent } from '../../utils/analytics';
 
 const Categories = () => {
   const navigation = useNavigation();
@@ -64,6 +65,7 @@ const Categories = () => {
               styles.mt4,
             ]}
             onPress={() => {
+              logEvent('category_selected', { category_name: item.name, source: 'home' });
               item.name === 'Vehicle' || item.name === 'Property'
                 ? navigation.navigate('SelectOption', item.name)
                 : navigation.navigate('ProductsListing', item.name);

@@ -17,7 +17,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import colors from '../../assets/colors';
 import styles from '../../assets/styles';
 import { HomeHeader, LocationInput, Categories } from '../../component/Home';
-import { BottomNavigation, SearchBar } from '../../component/shared';
+import { SearchBar } from '../../component/shared';
 import { get, post } from '../../utils/requestBuilder';
 import { getUserInfo } from '../../utils/function';
 import { AdsCard } from '../../component/shared';
@@ -27,6 +27,7 @@ import { BannerAd, TestIds, BannerAdSize } from 'react-native-google-mobile-ads'
 import { Button } from 'react-native-share';
 import messaging from "@react-native-firebase/messaging"
 import { admobHomeBanner } from '../../utils/env';
+import { logEvent } from '../../utils/analytics';
 
 const Home = ({ navigation }) => {
   const [homeAds, setHomeAds] = useState([]);
@@ -64,8 +65,10 @@ const Home = ({ navigation }) => {
       );
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
         console.log('Notification permission granted');
+        logEvent('notification_permission', { granted: 'true' });
       } else {
         console.log('Notification permission denied');
+        logEvent('notification_permission', { granted: 'false' });
       }
     } else {
       // For older Android versions and iOS, use Firebase messaging request
@@ -75,6 +78,9 @@ const Home = ({ navigation }) => {
         authStatus === messaging.AuthorizationStatus.PROVISIONAL;
       if (enabled) {
         console.log('Notification authorization status:', authStatus);
+        logEvent('notification_permission', { granted: 'true' });
+      } else {
+        logEvent('notification_permission', { granted: 'false' });
       }
     }
   }
@@ -260,46 +266,40 @@ const Home = ({ navigation }) => {
     }
   };
 
-  const modifiedData = [...homeAds];
-  const adInterval = 4;
-  for (let i = adInterval; i < modifiedData.length; i += adInterval + 1) {
-    modifiedData.splice(i, 0, { type: 'bannerAd' });
-  }
-
-  const renderAdsCard = ({ item, index }) => {
-    if (item.type === 'bannerAd') {
-      return (
-        <View style={{ width: '100%' }}>
-          <BannerAd
-            size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
-            unitId={admobHomeBanner}
-            onAdFailedToLoad={error => {
-              console.log('Ad failed to load:', error);
-            }}
-            onAdLoaded={() => {
-              console.log('Ad loaded successfully');
-            }}
-          />
-        </View>
-      );
+  // Group flat ads into rows of 2, insert a bannerAd after every 2 rows (4 items)
+  const buildModifiedData = (ads) => {
+    const result = [];
+    let rowCount = 0;
+    for (let i = 0; i < ads.length; i += 2) {
+      result.push({ type: 'row', items: ads.slice(i, i + 2) });
+      rowCount++;
+      if (rowCount % 2 === 0 && i + 2 < ads.length) {
+        result.push({ type: 'bannerAd', key: `banner-${rowCount}` });
+      }
     }
+    return result;
+  };
 
+  const modifiedData = buildModifiedData(homeAds);
+
+  const imageFormats = ['jpg', 'jpeg', 'png', 'JPG', 'JPEG', 'PNG'];
+
+  const renderSingleCard = (item) => {
     const parentId = item._id;
     const itemData = item.item;
     const isLikeLoading = loadingStates[parentId];
     const isLiked = likedStates[parentId] || false;
-
-    const imageFormats = ['jpg', 'jpeg', 'png', 'JPG', 'JPEG', 'PNG'];
     const firstImage = itemData.media
       ? itemData.media.find(mediaUrl =>
-        imageFormats.some(format => mediaUrl.endsWith(format)),
-      )
+          imageFormats.some(format => mediaUrl.endsWith(format)),
+        )
       : itemData[0].media.find(mediaUrl =>
-        imageFormats.some(format => mediaUrl.endsWith(format)),
-      );
+          imageFormats.some(format => mediaUrl.endsWith(format)),
+        );
 
     return (
       <AdsCard
+        key={parentId}
         parentId={parentId}
         data={itemData}
         onPress={() =>
@@ -312,7 +312,7 @@ const Home = ({ navigation }) => {
             forHome: true,
           })
         }
-        onLikePress={() => likeItem(parentId, userId)}
+        onLikePress={() => likeItem(parentId, userId, itemData)}
         isLikeLoading={isLikeLoading}
         isLiked={isLiked}
         firstImageUri={firstImage}
@@ -321,7 +321,37 @@ const Home = ({ navigation }) => {
     );
   };
 
-  const likeItem = async (itemId, userId, idType) => {
+  const renderAdsCard = ({ item }) => {
+    if (item.type === 'bannerAd') {
+      return (
+        <View
+          style={{
+            alignItems: 'center',
+            marginBottom: 12,
+            borderRadius: 8,
+            overflow: 'hidden',
+            backgroundColor: colors.grey700,
+            padding: 6,
+          }}>
+          <BannerAd
+            size={BannerAdSize.MEDIUM_RECTANGLE}
+            unitId={__DEV__ ? TestIds.BANNER : admobHomeBanner}
+            onAdFailedToLoad={error => console.log('Ad failed to load:', error)}
+            onAdLoaded={() => console.log('Ad loaded successfully')}
+          />
+        </View>
+      );
+    }
+
+    return (
+      <View style={{ flexDirection: 'row' }}>
+        {item.items.map(ad => renderSingleCard(ad))}
+        {item.items.length === 1 && <View style={{ flex: 1 }} />}
+      </View>
+    );
+  };
+
+  const likeItem = async (itemId, userId, itemData) => {
     if (userId) {
       setLoadingStates(prevState => ({ ...prevState, [itemId]: true }));
       try {
@@ -332,6 +362,14 @@ const Home = ({ navigation }) => {
         const url = `api/v1/user/item/like-item`;
         const { response, status } = await post(url, body, true);
         if (status === 200) {
+          const adInfo = itemData?.[0] || itemData;
+          const isCurrentlyLiked = likedStates[itemId] || false;
+          logEvent('item_like', {
+            category: adInfo?.categoryName || '',
+            subcategory: adInfo?.productType || '',
+            item_name: adInfo?.displayName || '',
+            action: isCurrentlyLiked ? 'unlike' : 'like',
+          });
           setLikedStates(prevState => ({
             ...prevState,
             [itemId]: !prevState[itemId],
@@ -366,10 +404,12 @@ const Home = ({ navigation }) => {
   };
 
   const handleSearch = (query) => {
+    logEvent('search_performed', { query: query, source: 'home', city: userLocation?.city || userLocation?.state || 'unknown' });
     navigation.navigate("SearchScreen", {
       query: query,
       latitude: userLatitude,
-      longitude: userLongitude
+      longitude: userLongitude,
+      city: userLocation?.city || userLocation?.state || 'unknown'
     })
   };
 
@@ -405,7 +445,10 @@ const Home = ({ navigation }) => {
             Categories
           </Text>
           <TouchableOpacity
-            onPress={() => navigation.navigate('AllCategories')}>
+            onPress={() => {
+              logEvent('all_categories_opened');
+              navigation.navigate('AllCategories');
+            }}>
             <Text
               style={[
                 styles.fw400,
@@ -420,10 +463,12 @@ const Home = ({ navigation }) => {
 
       <FlatList
         showsVerticalScrollIndicator={false}
-        style={[{ flex: 1, marginBottom: 50 }]}
+        style={[{ flex: 1 }]}
         data={modifiedData}
         renderItem={renderAdsCard}
-        keyExtractor={(item, index) => item._id || `banner-${index}`}
+        keyExtractor={(item, index) =>
+          item.type === 'bannerAd' ? item.key : item.type === 'row' ? `row-${index}` : `item-${index}`
+        }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -431,13 +476,11 @@ const Home = ({ navigation }) => {
             colors={[colors.mintGreen]}
           />
         }
-        numColumns={2}
         onEndReached={loadMoreItems}
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
       />
 
-      <BottomNavigation />
     </SafeAreaView>
   );
 };

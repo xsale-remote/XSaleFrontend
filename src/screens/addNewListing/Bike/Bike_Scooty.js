@@ -18,11 +18,22 @@ import styles from '../../../assets/styles';
 import colors from '../../../assets/colors';
 import DatePicker from 'react-native-date-picker';
 import {put} from '../../../utils/requestBuilder';
+import {logEvent} from '../../../utils/analytics';
 
 const Bike_Scooty = ({navigation, route}) => {
   const type = route.params;
   const {itemName, categoryName, forEdit, itemData, parentId, productType} =
     route.params;
+
+  useEffect(() => {
+    if (!forEdit) {
+      logEvent('listing_step_reached', {
+        step: 'form_filling',
+        category: categoryName,
+        subcategory: itemName,
+      });
+    }
+  }, []);
   const colorScheme = useColorScheme(); 
 
   const fuelTypes = ['Petrol', 'Electric'];

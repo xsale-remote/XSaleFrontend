@@ -48,6 +48,7 @@
     "react-native-safe-area-context": "^4.9.0",
     "react-native-screens": "^3.29.0",
     "react-native-share": "^10.2.1",
+    "react-native-splash-screen": "^3.3.0",
     "react-native-video": "^6.1.2",
     "react-native-webview": "^13.10.0"
   },

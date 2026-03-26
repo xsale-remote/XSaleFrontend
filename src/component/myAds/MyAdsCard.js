@@ -15,6 +15,7 @@ import icons from '../../assets/icons';
 import { deleteApi, put } from '../../utils/requestBuilder';
 import { useNavigation } from '@react-navigation/native';
 import { formatPriceIndian } from '../../utils/function';
+import { logEvent } from '../../utils/analytics';
 
 const formatDate = isoString => {
   const date = new Date(isoString);
@@ -197,6 +198,10 @@ const MyAdsCard = ({
       console.log(body,)
       const {response, status} = await deleteApi(url, body);
       if (status === 200) {
+        logEvent('listing_deleted', {
+          category: itemCategory,
+          subcategory: productType,
+        });
         setShowModal(false)
         setMoreOptionLoading(false);
         ToastAndroid.showWithGravityAndOffset(
@@ -237,9 +242,13 @@ const MyAdsCard = ({
       };
       const { response, status } = await put(url, body);
       if (status === 200) {
+        logEvent(selectedSubCategory === 'Deactivate' ? 'listing_reactivated' : 'listing_deactivated', {
+          category: categoryName,
+          subcategory: productType,
+        });
         setMoreOptionLoading(false);
         ToastAndroid.showWithGravityAndOffset(
-          'Ad Deactivated',
+          selectedSubCategory === 'Deactivate' ? 'Ad Activated' : 'Ad Deactivated',
           ToastAndroid.LONG,
           ToastAndroid.BOTTOM,
           25,
@@ -261,6 +270,10 @@ const MyAdsCard = ({
   };
 
   const editAds = async (itemData, parentId, categoryName, productType) => {
+    logEvent('listing_edited', {
+      category: categoryName,
+      subcategory: productType,
+    });
     setMoreOptionLoading(true);
     try {
       if (categoryName === 'Jobs') {

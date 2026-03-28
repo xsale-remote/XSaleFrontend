@@ -16,10 +16,21 @@ import {
   DropDown,
 } from '../../../component/shared';
 import {put} from '../../../utils/requestBuilder';
+import {logEvent} from '../../../utils/analytics';
 
 const LandSale = ({navigation, route}) => {
   const {itemName, categoryName, forEdit, itemData, parentId, productType} =
     route.params;
+
+  useEffect(() => {
+    if (!forEdit) {
+      logEvent('listing_step_reached', {
+        step: 'form_filling',
+        category: categoryName,
+        subcategory: itemName,
+      });
+    }
+  }, []);
 
   const [propertyType, setPropertyType] = useState('');
   const [propertyArea, setPropertyArea] = useState('');

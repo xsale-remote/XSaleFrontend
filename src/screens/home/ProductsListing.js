@@ -8,24 +8,25 @@ import {
   ActivityIndicator,
   ToastAndroid,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {TitleHeader, CategoriesItemBox, AdsCard} from '../../component/shared';
+import React, { useEffect, useState } from 'react';
+import { TitleHeader, CategoriesItemBox, AdsCard } from '../../component/shared';
 import styles from '../../assets/styles';
-import {FilterBox} from '../../component/Home';
+import { FilterBox } from '../../component/Home';
 import images from '../../assets/images';
 import icons from '../../assets/icons';
-import {get} from '../../utils/requestBuilder';
+import { get } from '../../utils/requestBuilder';
 import colors from '../../assets/colors';
-import {getUserInfo} from '../../utils/function';
-import {post} from '../../utils/requestBuilder';
+import { getUserInfo } from '../../utils/function';
+import { post } from '../../utils/requestBuilder';
 import Geolocation from 'react-native-geolocation-service';
+import { admobProductslistingBanner1, admobProductslistingBanner2 } from '../../utils/env';
+import { logEvent } from '../../utils/analytics';
+import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 
-import {BannerAd, TestIds, BannerAdSize} from 'react-native-google-mobile-ads';
 
+const { width } = Dimensions.get('window');
 
-const {width} = Dimensions.get('window');
-
-const ProductsListing = ({navigation, route}) => {
+const ProductsListing = ({ navigation, route }) => {
   const [title, setTitle] = useState('');
   const titleProps = route.params;
   const [userName, setUserName] = useState('');
@@ -72,9 +73,9 @@ const ProductsListing = ({navigation, route}) => {
       const userData = await getUserInfo();
       if (userData) {
         setLoggedIn(true);
-        const {userName, profilePicture, _id} = userData.user;
+        const { userName, profilePicture, _id } = userData.user;
         const fullAddress = userData?.user?.location?.fullAddress;
-        const {latitude, longitude} = userData?.user?.location;
+        const { latitude, longitude } = userData?.user?.location;
         setUserId(_id);
         getUpdatedUser(_id);
         setUserName(userName);
@@ -86,7 +87,7 @@ const ProductsListing = ({navigation, route}) => {
       } else {
         setLoggedIn(false);
         const defaultLocation = await fetchUserCoords();
-        const {latitude, longitude} = defaultLocation;
+        const { latitude, longitude } = defaultLocation;
         setUserLatitude(latitude);
         setUserLongitude(longitude);
         fetchCategoryData(index, category, latitude, longitude, page);
@@ -103,7 +104,7 @@ const ProductsListing = ({navigation, route}) => {
           Geolocation.getCurrentPosition(
             position => resolve(position),
             error => reject(error),
-            {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
           );
         });
       };
@@ -122,15 +123,15 @@ const ProductsListing = ({navigation, route}) => {
   };
 
   const Vehicles = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Vehicles'},
-    {id: 1, itemName: 'Car', image: images.car, categoryName: 'Vehicles'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Vehicles' },
+    { id: 1, itemName: 'Car', image: images.car, categoryName: 'Vehicles' },
     {
       id: 2,
       itemName: 'Ambulance',
       image: images.ambulance,
       categoryName: 'Vehicles',
     },
-    {id: 3, itemName: 'Truck', image: images.truck, categoryName: 'Vehicles'},
+    { id: 3, itemName: 'Truck', image: images.truck, categoryName: 'Vehicles' },
     {
       id: 4,
       itemName: 'Tractor',
@@ -143,9 +144,9 @@ const ProductsListing = ({navigation, route}) => {
       image: images.farm_machine,
       categoryName: 'Vehicles',
     },
-    {id: 6, itemName: 'JCB', image: images.JCB, categoryName: 'Vehicles'},
-    {id: 7, itemName: 'Bus', image: images.bus, categoryName: 'Vehicles'},
-    {id: 8, itemName: 'Crain', image: images.crain, categoryName: 'Vehicles'},
+    { id: 6, itemName: 'JCB', image: images.JCB, categoryName: 'Vehicles' },
+    { id: 7, itemName: 'Bus', image: images.bus, categoryName: 'Vehicles' },
+    { id: 8, itemName: 'Crain', image: images.crain, categoryName: 'Vehicles' },
     {
       id: 9,
       itemName: 'Other Vehicle',
@@ -154,7 +155,7 @@ const ProductsListing = ({navigation, route}) => {
     },
   ];
   const VehiclesRent = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Vehicle for Rent'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Vehicle for Rent' },
     {
       id: 1,
       itemName: 'Car',
@@ -212,7 +213,7 @@ const ProductsListing = ({navigation, route}) => {
   ];
 
   const Property = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Property'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Property' },
     {
       id: 1,
       itemName: 'Residential',
@@ -225,11 +226,11 @@ const ProductsListing = ({navigation, route}) => {
       image: images.shop,
       categoryName: 'Property',
     },
-    {id: 3, itemName: 'Land', image: images.land, categoryName: 'Property'},
+    { id: 3, itemName: 'Land', image: images.land, categoryName: 'Property' },
   ];
 
   const PropertiesRent = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Property for Rent'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Property for Rent' },
     {
       id: 1,
       itemName: 'Residential',
@@ -251,21 +252,21 @@ const ProductsListing = ({navigation, route}) => {
   ];
 
   const Animals = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Animals'},
-    {id: 1, itemName: 'Cow', image: images.cow, categoryName: 'Animals'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Animals' },
+    { id: 1, itemName: 'Cow', image: images.cow, categoryName: 'Animals' },
     {
       id: 2,
       itemName: 'Buffalo',
       image: images.buffalo,
       categoryName: 'Animals',
     },
-    {id: 3, itemName: 'Bull', image: images.bull, categoryName: 'Animals'},
-    {id: 4, itemName: 'Sheep', image: images.sheep, categoryName: 'Animals'},
-    {id: 5, itemName: 'Cat', image: images.cat, categoryName: 'Animals'},
-    {id: 6, itemName: 'Goat', image: images.goat, categoryName: 'Animals'},
-    {id: 7, itemName: 'Dog', image: images.dog, categoryName: 'Animals'},
-    {id: 8, itemName: 'Horse', image: images.horse, categoryName: 'Animals'},
-    {id: 9, itemName: 'Donkey', image: images.donkey, categoryName: 'Animals'},
+    { id: 3, itemName: 'Bull', image: images.bull, categoryName: 'Animals' },
+    { id: 4, itemName: 'Sheep', image: images.sheep, categoryName: 'Animals' },
+    { id: 5, itemName: 'Cat', image: images.cat, categoryName: 'Animals' },
+    { id: 6, itemName: 'Goat', image: images.goat, categoryName: 'Animals' },
+    { id: 7, itemName: 'Dog', image: images.dog, categoryName: 'Animals' },
+    { id: 8, itemName: 'Horse', image: images.horse, categoryName: 'Animals' },
+    { id: 9, itemName: 'Donkey', image: images.donkey, categoryName: 'Animals' },
     {
       id: 10,
       itemName: 'Other Animals',
@@ -275,10 +276,10 @@ const ProductsListing = ({navigation, route}) => {
   ];
 
   const Bikes = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Bikes'},
-    {id: 1, itemName: 'Bike', image: images.bike, categoryName: 'Bikes'},
-    {id: 2, itemName: 'Scooty', image: images.scooty, categoryName: 'Bikes'},
-    {id: 3, itemName: 'Bicycles', image: images.bicycle, categoryName: 'Bikes'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Bikes' },
+    { id: 1, itemName: 'Bike', image: images.bike, categoryName: 'Bikes' },
+    { id: 2, itemName: 'Scooty', image: images.scooty, categoryName: 'Bikes' },
+    { id: 3, itemName: 'Bicycles', image: images.bicycle, categoryName: 'Bikes' },
     {
       id: 4,
       itemName: 'Spare Parts',
@@ -288,9 +289,9 @@ const ProductsListing = ({navigation, route}) => {
   ];
 
   const Electronics = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Electronics'},
-    {id: 1, itemName: 'AC', image: images.ac, categoryName: 'Electronics'},
-    {id: 2, itemName: 'TV', image: images.tv, categoryName: 'Electronics'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Electronics' },
+    { id: 1, itemName: 'AC', image: images.ac, categoryName: 'Electronics' },
+    { id: 2, itemName: 'TV', image: images.tv, categoryName: 'Electronics' },
     {
       id: 3,
       itemName: 'Fridge',
@@ -342,9 +343,9 @@ const ProductsListing = ({navigation, route}) => {
   ];
 
   const Mobile = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Mobiles'},
-    {id: 1, itemName: 'Mobile', image: images.mobile, categoryName: 'Mobiles'},
-    {id: 2, itemName: 'Tablet', image: images.tablet, categoryName: 'Mobiles'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Mobiles' },
+    { id: 1, itemName: 'Mobile', image: images.mobile, categoryName: 'Mobiles' },
+    { id: 2, itemName: 'Tablet', image: images.tablet, categoryName: 'Mobiles' },
     {
       id: 3,
       itemName: 'Accessories',
@@ -354,7 +355,7 @@ const ProductsListing = ({navigation, route}) => {
   ];
 
   const Poultry = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Poultry & Birds'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Poultry & Birds' },
     {
       id: 1,
       itemName: 'Chicken',
@@ -378,8 +379,8 @@ const ProductsListing = ({navigation, route}) => {
   // categories with not sub categories but type
 
   const Jobs = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Jobs'},
-    {id: 1, itemName: 'Farm Labour', image: icons.farmer, categoryName: 'Jobs'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Jobs' },
+    { id: 1, itemName: 'Farm Labour', image: icons.farmer, categoryName: 'Jobs' },
     {
       id: 2,
       itemName: 'Factory Woker',
@@ -392,17 +393,17 @@ const ProductsListing = ({navigation, route}) => {
       image: icons.building_construction,
       categoryName: 'Jobs',
     },
-    {id: 4, itemName: 'Maid', image: icons.maid, categoryName: 'Jobs'},
-    {id: 5, itemName: 'Driver', image: icons.driver, categoryName: 'Jobs'},
-    {id: 6, itemName: 'Security', image: icons.security, categoryName: 'Jobs'},
-    {id: 7, itemName: 'Cook', image: icons.cook, categoryName: 'Jobs'},
+    { id: 4, itemName: 'Maid', image: icons.maid, categoryName: 'Jobs' },
+    { id: 5, itemName: 'Driver', image: icons.driver, categoryName: 'Jobs' },
+    { id: 6, itemName: 'Security', image: icons.security, categoryName: 'Jobs' },
+    { id: 7, itemName: 'Cook', image: icons.cook, categoryName: 'Jobs' },
     {
       id: 8,
       itemName: 'Supervisor',
       image: icons.supervisor,
       categoryName: 'Jobs',
     },
-    {id: 9, itemName: 'Teacher', image: icons.teacher, categoryName: 'Jobs'},
+    { id: 9, itemName: 'Teacher', image: icons.teacher, categoryName: 'Jobs' },
     {
       id: 10,
       itemName: 'Data Entry',
@@ -415,7 +416,7 @@ const ProductsListing = ({navigation, route}) => {
       image: icons.sales_marketing,
       categoryName: 'Jobs',
     },
-    {id: 12, itemName: 'BPO', image: icons.bpo, categoryName: 'Jobs'},
+    { id: 12, itemName: 'BPO', image: icons.bpo, categoryName: 'Jobs' },
     {
       id: 13,
       itemName: 'Office Assistant',
@@ -440,7 +441,7 @@ const ProductsListing = ({navigation, route}) => {
       image: icons.developer,
       categoryName: 'Jobs',
     },
-    {id: 17, itemName: 'Designer', image: icons.designer, categoryName: 'Jobs'},
+    { id: 17, itemName: 'Designer', image: icons.designer, categoryName: 'Jobs' },
     {
       id: 18,
       itemName: 'Hotel & Restaurant',
@@ -450,7 +451,7 @@ const ProductsListing = ({navigation, route}) => {
   ];
 
   const Matrimonial = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Matrimonial'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Matrimonial' },
     {
       id: 1,
       itemName: 'Groom',
@@ -466,7 +467,7 @@ const ProductsListing = ({navigation, route}) => {
   ];
 
   const Furniture = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Furniture'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Furniture' },
     {
       id: 1,
       itemName: 'Bed & Wardrobe',
@@ -500,7 +501,7 @@ const ProductsListing = ({navigation, route}) => {
   ];
 
   const FarmMachines = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Farm Machine'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Farm Machine' },
     {
       id: 1,
       itemName: 'Threshers',
@@ -564,7 +565,7 @@ const ProductsListing = ({navigation, route}) => {
   ];
 
   const Services = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Services'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Services' },
     {
       id: 1,
       itemName: 'Education & Classes',
@@ -616,7 +617,7 @@ const ProductsListing = ({navigation, route}) => {
   ];
 
   const Fashion = [
-    {id: 0, itemName: 'All', all: true, categoryName: 'Fashion'},
+    { id: 0, itemName: 'All', all: true, categoryName: 'Fashion' },
     {
       id: 1,
       itemName: 'Mens',
@@ -660,7 +661,7 @@ const ProductsListing = ({navigation, route}) => {
     try {
       // Construct the URL with the current page
       const url = `api/v1/listing/fetch/category/${categoryName}?page=${currentPage}&limit=20&userLatitude=${latitude}&userLongitude=${longitude}`;
-      const {response, status} = await get(url);
+      const { response, status } = await get(url);
       if (status === 200) {
         const responseData = response.response;
         // Get new items that are not duplicates
@@ -732,7 +733,7 @@ const ProductsListing = ({navigation, route}) => {
       const url = `api/v1/listing/fetch/${categoryName}/${encodeURIComponent(
         productType,
       )}?page=${currentPage}&limit=20&userLatitude=${latitude}&userLongitude=${longitude}`;
-      const {response, status} = await get(url);
+      const { response, status } = await get(url);
       if (status === 200) {
         const responseData = response.response;
         const activeItems = responseData.items.filter(
@@ -789,7 +790,7 @@ const ProductsListing = ({navigation, route}) => {
 
   const likeItem = async (itemId, userId, idType) => {
     if (userId) {
-      setLoadingStates(prevState => ({...prevState, [itemId]: true}));
+      setLoadingStates(prevState => ({ ...prevState, [itemId]: true }));
       try {
         const body = {
           userId,
@@ -797,7 +798,7 @@ const ProductsListing = ({navigation, route}) => {
           itemIdType: idType,
         };
         const url = `api/v1/user/item/like-item`;
-        const {response, status} = await post(url, body, true);
+        const { response, status } = await post(url, body, true);
         if (status === 200) {
           setLikedStates(prevState => ({
             ...prevState,
@@ -810,7 +811,7 @@ const ProductsListing = ({navigation, route}) => {
       } catch (error) {
         console.log(`error while liking the item ${error}`);
       } finally {
-        setLoadingStates(prevState => ({...prevState, [itemId]: false}));
+        setLoadingStates(prevState => ({ ...prevState, [itemId]: false }));
       }
     } else {
       ToastAndroid.showWithGravityAndOffset(
@@ -830,7 +831,7 @@ const ProductsListing = ({navigation, route}) => {
       const body = {
         _id: userId,
       };
-      const {response, status} = await post(url, body, true);
+      const { response, status } = await post(url, body, true);
       if (status === 200) {
         const responseData = response.response;
         // const likedItemIds = responseData.likedItems.map(item => item._id);
@@ -856,7 +857,7 @@ const ProductsListing = ({navigation, route}) => {
     }
   };
 
-  const renderCategoryItemBox = ({item}) => {
+  const renderCategoryItemBox = ({ item }) => {
     return (
       <CategoriesItemBox
         itemName={item.itemName}
@@ -877,6 +878,7 @@ const ProductsListing = ({navigation, route}) => {
               page,
             );
           } else {
+            logEvent('subcategory_selected', { category_name: item.categoryName, subcategory_name: item.itemName });
             setCategoryVisible(false);
             setSubCategoryVisible(true);
             setBoxId(item.id);
@@ -902,7 +904,7 @@ const ProductsListing = ({navigation, route}) => {
   const modifiedData = [...itemsArray];
   const adInterval = 6;
   for (let i = adInterval; i < modifiedData.length; i += adInterval + 1) {
-    modifiedData.splice(i, 0, {type: 'bannerAd'});
+    modifiedData.splice(i, 0, { type: 'bannerAd' });
   }
 
 
@@ -913,17 +915,17 @@ const ProductsListing = ({navigation, route}) => {
     i < modifiedSubCategory.length;
     i += subCategoryIntervalue + 1
   ) {
-    modifiedSubCategory.splice(i, 0, {type: 'bannerAd'});
+    modifiedSubCategory.splice(i, 0, { type: 'bannerAd' });
   }
 
-  const renderAdsCard = ({item}) => {
+  const renderAdsCard = ({ item }) => {
     if (item.type === 'bannerAd') {
       return (
-        <View style={{width: '100%'}}>
+        <View style={{ width: '100%' }}>
           <BannerAd
             size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
-            unitId={`ca-app-pub-9372794286829313/2098479522`}
-            // unitId={adUnitId}
+            unitId={admobProductslistingBanner1}
+          // unitId={adUnitId}
           />
         </View>
       );
@@ -937,11 +939,11 @@ const ProductsListing = ({navigation, route}) => {
     const imageFormats = ['jpg', 'jpeg', 'png'];
     const firstImage = itemData.media
       ? itemData.media.find(mediaUrl =>
-          imageFormats.some(format => mediaUrl.endsWith(format)),
-        )
+        imageFormats.some(format => mediaUrl.endsWith(format)),
+      )
       : itemData[0].media.find(mediaUrl =>
-          imageFormats.some(format => mediaUrl.endsWith(format)),
-        );
+        imageFormats.some(format => mediaUrl.endsWith(format)),
+      );
     return (
       <AdsCard
         parentId={parentId}
@@ -966,13 +968,13 @@ const ProductsListing = ({navigation, route}) => {
     );
   };
 
-  const renderSubCategory = ({item}) => {
+  const renderSubCategory = ({ item }) => {
     if (item.type === 'bannerAd') {
       return (
-        <View style={{width: '100%'}}>
+        <View style={{ width: '100%' }}>
           <BannerAd
             size={BannerAdSize.INLINE_ADAPTIVE_BANNER}
-            unitId={`ca-app-pub-9372794286829313/1555554041`}
+            unitId={admobProductslistingBanner2}
           />
         </View>
       );
@@ -986,11 +988,11 @@ const ProductsListing = ({navigation, route}) => {
     const imageFormats = ['jpg', 'jpeg', 'png'];
     const firstImage = itemData?.media
       ? itemData?.media?.find(mediaUrl =>
-          imageFormats.some(format => mediaUrl.endsWith(format)),
-        )
+        imageFormats.some(format => mediaUrl.endsWith(format)),
+      )
       : itemData[0]?.media?.find(mediaUrl =>
-          imageFormats.some(format => mediaUrl.endsWith(format)),
-        );
+        imageFormats.some(format => mediaUrl.endsWith(format)),
+      );
     return (
       <AdsCard
         parentId={parentId}
@@ -1035,7 +1037,7 @@ const ProductsListing = ({navigation, route}) => {
 
 
   return (
-    <SafeAreaView style={[{flex: 1}, styles.pdh16]}>
+    <SafeAreaView style={[{ flex: 1 }, styles.pdh16]}>
       <TitleHeader title={title} onBackPress={() => navigation.pop()} />
       <View
         style={[
@@ -1046,7 +1048,7 @@ const ProductsListing = ({navigation, route}) => {
             opacity: 0.2,
           },
         ]}></View>
-      <View style={[{height: 100, width: '100%'}, styles.mt8]}>
+      <View style={[{ height: 100, width: '100%' }, styles.mt8]}>
         {title === 'Vehicle for Sale' && renderHorizontalFlatList(Vehicles)}
         {title === 'Vehicle for Rent' && renderHorizontalFlatList(VehiclesRent)}
         {title === 'Property for Sale' && renderHorizontalFlatList(Property)}
@@ -1112,8 +1114,8 @@ const ProductsListing = ({navigation, route}) => {
               showsVerticalScrollIndicator={false}
               // data={flatSubcategory}
               data={modifiedSubCategory}
-              renderItem={({item}) => {
-                return renderSubCategory({item});
+              renderItem={({ item }) => {
+                return renderSubCategory({ item });
               }}
               keyExtractor={item => item._id}
               refreshControl={
@@ -1153,7 +1155,7 @@ const ProductsListing = ({navigation, route}) => {
           <ActivityIndicator
             size={'large'}
             color={colors.darkGrey}
-            style={[{marginTop: 200}]}
+            style={[{ marginTop: 200 }]}
           />
         )}
         {subCategoryLoading &&
@@ -1162,13 +1164,13 @@ const ProductsListing = ({navigation, route}) => {
             <ActivityIndicator
               size={'large'}
               color={colors.darkGrey}
-              style={[{marginTop: 200}]}
+              style={[{ marginTop: 200 }]}
             />
           )}
         {!loading && !subCategoryLoading && itemsArray.length === 0 && (
           <Text
             style={[
-              {marginTop: 200, textAlign: 'center', color: colors.grey800},
+              { marginTop: 200, textAlign: 'center', color: colors.grey800 },
               styles.ts18,
             ]}>
             No Items Available

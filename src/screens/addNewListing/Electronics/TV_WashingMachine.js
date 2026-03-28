@@ -16,11 +16,23 @@ import {
 import styles from '../../../assets/styles';
 import colors from '../../../assets/colors';
 import {put} from '../../../utils/requestBuilder';
+import {logEvent} from '../../../utils/analytics';
 
 const TV_WashingMachine = ({navigation, route}) => {
   const washingMachineTypes = ['Top Load', 'Front Load'];
   const {itemName, categoryName, forEdit, itemData, parentId, productType} =
     route.params;
+
+  useEffect(() => {
+    if (!forEdit) {
+      logEvent('listing_step_reached', {
+        step: 'form_filling',
+        category: categoryName,
+        subcategory: itemName,
+      });
+    }
+  }, []);
+
   const [brand, setBrand] = useState('');
   const [tvModel, setTvModel] = useState('');
   const [washingMachineType, setWashingMachineType] = useState('');

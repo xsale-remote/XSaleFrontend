@@ -3,47 +3,19 @@ import {
   View,
   TouchableOpacity,
   Text,
-  SafeAreaView,
   Image,
   Pressable,
   Linking,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styles from '../../assets/styles';
 import icons from '../../assets/icons';
 import { useNavigation } from '@react-navigation/native';
-import images from '../../assets/images';
 import colors from '../../assets/colors';
-import {
-  BannerAd,
-  TestIds,
-  BannerAdSize,
-  InterstitialAd,
-  AdEventType,
-} from 'react-native-google-mobile-ads';
-import { getUserInfo } from '../../utils/function';
 
 const ChatScreenHeader = ({ style, profilePic, name, phoneNumber }) => {
   const { height, width } = Dimensions.get('window');
   const navigation = useNavigation();
-  const [userData, setUserData] = useState("")
-
-  const getUser = async () => {
-    try {
-      const userData = await getUserInfo();
-      if (!userData) {
-        setIsLoggedIn(false);
-      } else {
-        setUserData(userData);
-      }
-    } catch (error) {
-      console.log(`error while fetching user details in view ad info ${error}`);
-    }
-  };
-
-  useEffect(() => {
-    getUser()
-  }, [])
 
 
   const handleCallPress = () => {

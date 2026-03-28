@@ -14,8 +14,8 @@ android {
         applicationId "com.Xsale"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 32
-        versionName "1.6.9"
+        versionCode 33
+        versionName "1.7.0"
     }
 
     signingConfigs {
@@ -34,6 +34,10 @@ android {
                 keyPassword MYAPP_UPLOAD_KEY_PASSWORD
             }
         }
+    }
+
+    kotlinOptions {
+        freeCompilerArgs += ["-Xskip-metadata-version-check"]
     }
 
     buildTypes {

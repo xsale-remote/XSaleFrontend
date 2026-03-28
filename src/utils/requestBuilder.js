@@ -1,4 +1,4 @@
-import {base_url} from './env';
+import { base_url } from './env';
 import EncryptedStorage from 'react-native-encrypted-storage';
 
 import axios from 'axios';
@@ -18,24 +18,26 @@ export const get = async (url, useToken = false) => {
       }
     }
 
-    const {data} = await axios.get(`${base_url}${url}`, {headers});
-    return {status: data.statusCode, response: data.response};
+    const { data } = await axios.get(`${base_url}${url}`, { headers });
+    return { status: data.statusCode, response: data.response };
   } catch (error) {
     const status = error.response?.status || 500;
     const response = error.response?.data?.response || 'An error occurred';
-    return {status, response};
+    return { status, response };
   }
 };
 
 export const patch = async (url, body, token = true) => {
   try {
     let headers = new Headers();
-    headers.append('x-encrypted-key', tenantId);
     headers.append('Content-Type', 'application/json');
     if (token == true) {
-      let authToken = await EncryptedStorage.getItem('userInfo');
-      authToken = JSON.parse(authToken).token;
-      headers.append('Authorization', `Bearer ${authToken}`);
+      const userInfo = JSON.parse(await EncryptedStorage.getItem('userData'));
+      if (userInfo && userInfo.token) {
+        headers.append('Authorization', `Bearer ${userInfo.token}`);
+      } else {
+        throw new Error('User token not found');
+      }
     }
 
     let requestOptions = {
@@ -48,12 +50,12 @@ export const patch = async (url, body, token = true) => {
     if (response.status == 200) {
       let json = await response.json();
 
-      return {response: json, status: response.status};
+      return { response: json, status: response.status };
     } else {
-      return {status: response.status, response};
+      return { status: response.status, response };
     }
   } catch (error) {
-    console.log("Post request builder error: " , error);
+    console.log("Post request builder error: ", error);
   }
 };
 
@@ -63,31 +65,27 @@ export const post = async (url, body, useToken = false) => {
       'Content-Type': 'application/json',
       'X-Platform': "mobile",
     };
-
     if (useToken) {
       const userInfo = JSON.parse(await EncryptedStorage.getItem('userData'));
       if (userInfo && userInfo.token) {
         const userToken = userInfo.token;
         headers.Authorization = `Bearer ${userToken}`;
-        console.log(useToken);
       } else {
         throw new Error('User token not found');
       }
     }
 
-    const {data} = await axios.post(`${base_url}${url}`, body, {headers});
+    const { data } = await axios.post(`${base_url}${url}`, body, { headers });
 
     return {
       status: data.statusCode,
       response: data.response,
     };
   } catch (error) {
-    console.error('Error sending data:', error);
-
     const status = error.response?.status || 500;
     const response = error.response?.data?.response || 'An error occurred';
 
-    return {status, response};
+    return { status, response };
   }
 };
 
@@ -107,7 +105,7 @@ export const put = async (url, body, useToken = true) => {
         throw new Error('User token not found');
       }
     }
-    const {data} = await axios.put(`${base_url}${url}`, body, {headers});
+    const { data } = await axios.put(`${base_url}${url}`, body, { headers });
     return {
       status: data.statusCode,
       response: data.response,
@@ -118,7 +116,7 @@ export const put = async (url, body, useToken = true) => {
     const status = error.response?.status || 500;
     const response = error.response?.data?.response || 'An error occurred';
 
-    return {status, response};
+    return { status, response };
   }
 };
 
@@ -146,16 +144,16 @@ export const deleteApi = async (url, body, useToken = true) => {
 
     if (response.status === 200) {
       const json = response.data;
-      return {status: response.status, response: json};
+      return { status: response.status, response: json };
     } else {
-      return {status: response.status, response: response.data};
+      return { status: response.status, response: response.data };
     }
   } catch (error) {
     console.log('Error:', error);
 
     const status = error.response?.status || 500;
     const response = error.response?.data?.response || 'An error occurred';
-    return {status, response};
+    return { status, response };
   }
 };
 
@@ -171,7 +169,7 @@ export const uploadMediaToServer = async mediaArray => {
   });
 
   try {
-    const {data} = await axios.post(
+    const { data } = await axios.post(
       `${base_url}api/v1/user/profile/upload`,
       formData,
       {
@@ -181,7 +179,7 @@ export const uploadMediaToServer = async mediaArray => {
       },
     );
 
-    return {status: data.statusCode, response: data.response};
+    return { status: data.statusCode, response: data.response };
   } catch (error) {
     console.error('Error uploading media:', {
       message: error.message,

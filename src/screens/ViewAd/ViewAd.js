@@ -19,6 +19,7 @@ import colors from '../../assets/colors';
 import styles from '../../assets/styles';
 import icons from '../../assets/icons';
 import { Button, RateUsModal, PayUWebViewModal } from '../../component/shared';
+import { CommonActions } from '@react-navigation/native';
 import { SellerProfile } from '../../component/viewAd.js';
 import { post } from '../../utils/requestBuilder.js';
 import Video from 'react-native-video';
@@ -26,20 +27,16 @@ import { ProductUploadModal } from '../../component/Home';
 import {
   BannerAd,
   BannerAdSize,
-  TestIds,
   RewardedAd,
   RewardedAdEventType,
 } from 'react-native-google-mobile-ads';
 import { formatPriceIndian } from '../../utils/function.js';
-import { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } from '../../utils/env';
-import RazorpayCheckout from 'react-native-razorpay';
 import { getUserInfo } from '../../utils/function.js';
 import analytics from '@react-native-firebase/analytics';
-import { useNavigation } from '@react-navigation/native';
+import { admobViewadRewarded, admobViewadBanner1, admobViewadBanner2 } from '../../utils/env.js';
+import { logEvent } from '../../utils/analytics';
 
 const { height, width } = Dimensions.get('window');
-
-
 
 const RewardModal = ({
   visible,
@@ -225,6 +222,7 @@ const ViewAd = ({ navigation, route }) => {
   const [showRateModal, setShowRateModal] = useState(false);
   const [userName, setUserName] = useState('');
   const [userNumber, setUserNumber] = useState('');
+  const [sellerIds, setSellerIds] = useState([])
 
   //
   const [showRewardModal, setShowRewardModal] = useState(false);
@@ -272,11 +270,34 @@ const ViewAd = ({ navigation, route }) => {
     setItemName(itemDetails.itemName);
   }, []);
 
+  useEffect(() => {
+    logEvent('listing_step_reached', {
+      step: 'preview',
+      category: categoryName,
+      subcategory: itemName,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (adUploaded) {
+      logEvent('listing_submitted', {
+        category: categoryName,
+        subcategory: itemName,
+        phone_number: `ph_${userNumber}`,
+        user_name: userName,
+      });
+    }
+  }, [adUploaded]);
+
   const getUserData = async () => {
     try {
       const userData = await getUserInfo();
       setUserName(userData.user.userName);
-      setUserNumber(userData.user.phoneNumber);
+      setUserNumber(String(userData.user.phoneNumber));
+      setSellerIds({
+        _id: userData.user._id,
+        publicId: userData.user.publicId,
+      });
     } catch (error) {
       console.log(`error while fetching user data ${error}`);
     }
@@ -2349,6 +2370,10 @@ const ViewAd = ({ navigation, route }) => {
 
   // 💰 Start PayU payment directly
   const initiatePayUPayment = async () => {
+    logEvent('payment_initiated', {
+      category: categoryName,
+      subcategory: itemName,
+    });
     setIsLoading(true);
     try {
       const body = {
@@ -2377,9 +2402,25 @@ const ViewAd = ({ navigation, route }) => {
         } else {
           await createItem(); // for free listings
         }
+      } else {
+        logEvent('listing_payment_failed', {
+          category: categoryName,
+          subcategory: itemName,
+          phone_number: `ph_${userNumber}`,
+          user_name: userName,
+          reason: 'payment_api_error',
+        });
+        Alert.alert("Error", "Payment initiation failed.");
       }
     } catch (error) {
       console.error("Error initiating PayU payment:", error);
+      logEvent('listing_payment_failed', {
+        category: categoryName,
+        subcategory: itemName,
+        phone_number: `ph_${userNumber}`,
+        user_name: userName,
+        reason: 'payment_api_error',
+      });
       Alert.alert("Error", "Payment initiation failed.");
     } finally {
       setIsLoading(false);
@@ -2414,6 +2455,13 @@ const ViewAd = ({ navigation, route }) => {
         Alert.alert("Payment successful", "But upload failed. Please retry.");
       }
     } else if (status === "failure") {
+      logEvent('listing_payment_failed', {
+        category: categoryName,
+        subcategory: itemName,
+        phone_number: `ph_${userNumber}`,
+        user_name: userName,
+        reason: 'payu_failed',
+      });
       const rewardData = currentResponseData;
       if (rewardData?.isReward) {
         setRewardData({
@@ -2429,9 +2477,8 @@ const ViewAd = ({ navigation, route }) => {
     }
   };
 
-  // ✅ Step 6: Rewarded ad logic
   const showRewardedAd = () => {
-    const rewardedAdUnitId = "ca-app-pub-9372794286829313/2160297504";
+    const rewardedAdUnitId = admobViewadRewarded;
     const rewarded = RewardedAd.createForAdRequest(rewardedAdUnitId, {
       requestNonPersonalizedAdsOnly: true,
     });
@@ -2481,7 +2528,16 @@ const ViewAd = ({ navigation, route }) => {
       <PayUWebViewModal
         visible={showPayUModal}
         payuPayload={payuPayload}
-        onClose={() => setShowPayUModal(false)}
+        onClose={() => {
+          logEvent('listing_payment_failed', {
+            category: categoryName,
+            subcategory: itemName,
+            phone_number: `ph_${userNumber}`,
+            user_name: userName,
+            reason: 'user_cancelled',
+          });
+          setShowPayUModal(false);
+        }}
         onResult={handlePayUResult}
       />
 
@@ -2511,7 +2567,7 @@ const ViewAd = ({ navigation, route }) => {
       {showRateModal && (
         <RateUsModal
           visible={showRateModal}
-          onClose={() => navigation.replace('Home')}
+          onClose={() => navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'MainTabs' }] }))}
         />
       )}
       <ScrollView
@@ -2609,7 +2665,7 @@ const ViewAd = ({ navigation, route }) => {
             alignSelf: 'stretch',
           }}>
             <BannerAd
-              unitId={`ca-app-pub-9372794286829313/3411561192`}
+              unitId={admobViewadBanner1}
               size={BannerAdSize.MEDIUM_RECTANGLE}
               onAdFailedToLoad={error => {
                 console.log('Ad failed to load:', error);
@@ -2766,7 +2822,7 @@ const ViewAd = ({ navigation, route }) => {
           }}>
             <BannerAd
               size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-              unitId={'ca-app-pub-9372794286829313/2903257633'}
+              unitId={admobViewadBanner2}
               onAdFailedToLoad={error => {
                 console.log('Ad failed to load:', error);
               }}
@@ -2783,7 +2839,7 @@ const ViewAd = ({ navigation, route }) => {
             <SellerProfile
               style={[styles.mt12, styles.mb20]}
               name={itemDetails.userName}
-              customerId={itemDetails.userId}
+              seller={sellerIds} 
               userImage={profilePicture}
             />
             <Button

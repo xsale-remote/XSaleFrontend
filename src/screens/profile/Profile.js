@@ -13,7 +13,6 @@ import {
   Share,
   Linking,
 } from 'react-native';
-import { BottomNavigation } from '../../component/shared';
 import styles from '../../assets/styles';
 import colors from '../../assets/colors';
 import icons from '../../assets/icons';
@@ -22,6 +21,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import { Button } from '../../component/shared';
 import { getUserInfo } from '../../utils/function';
 import { deleteApi, post } from '../../utils/requestBuilder';
+import { logEvent } from '../../utils/analytics';
 import { CommonActions } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/native';
 import { BannerAd, TestIds, BannerAdSize } from 'react-native-google-mobile-ads';
@@ -321,6 +321,7 @@ const Profile = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       getUserData();
+      logEvent('profile_opened');
     }, []),
   );
 
@@ -357,6 +358,7 @@ const Profile = ({ navigation }) => {
         };
         const { response, status } = await post(url, body);
         if (status === 200) {
+          logEvent('suggestion_submitted');
           setSuggestion('');
           setSuggestionSubmitting(false);
           setSuggesstionModal(false);
@@ -376,6 +378,7 @@ const Profile = ({ navigation }) => {
     }
   };
   const logoutUser = async () => {
+    logEvent('logout');
     try {
       await EncryptedStorage.removeItem('userData');
       setShowLogoutModal(false);
@@ -397,6 +400,7 @@ const Profile = ({ navigation }) => {
       const url = `api/v1/user/delete-user`;
       const { response, status } = await deleteApi(url);
       if (status === 200) {
+        logEvent('account_deleted');
         ToastAndroid.showWithGravityAndOffset(
           'Successfully deleted the user',
           ToastAndroid.LONG,
@@ -407,7 +411,7 @@ const Profile = ({ navigation }) => {
       }
       await EncryptedStorage.removeItem('userData');
       setShowDeleteModal(false);
-      navigation.replace('Home');
+      navigation.reset({ index: 0, routes: [{ name: 'MobileNumber' }] });
     } catch (error) {
       console.log(`error while deleting the user ${error}`);
     }
@@ -442,6 +446,7 @@ const Profile = ({ navigation }) => {
   ];
 
   const shareContent = async () => {
+    logEvent('invite_friends_clicked');
     try {
       const result = await Share.share({
         message:
@@ -463,6 +468,7 @@ const Profile = ({ navigation }) => {
   };
 
   const rateUs = () => {
+    logEvent('rate_us_clicked');
     const storeUrl = 'https://play.google.com/store/apps/details?id=com.Xsale';
     Linking.openURL(storeUrl).catch(err =>
       console.error("Couldn't load page", err),
@@ -658,7 +664,6 @@ const Profile = ({ navigation }) => {
 
 
       </View>
-      <BottomNavigation />
     </SafeAreaView>
   );
 };

@@ -13,7 +13,7 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import {Button, BottomNavigation} from '../../component/shared';
+import {Button} from '../../component/shared';
 import styles from '../../assets/styles';
 import colors from '../../assets/colors';
 import {PremiumOption, MyAdsCard} from '../../component/myAds';
@@ -21,6 +21,7 @@ import {deleteApi, post, put} from '../../utils/requestBuilder';
 import {getUserInfo} from '../../utils/function';
 import {AdsCard} from '../../component/shared';
 import {useFocusEffect} from '@react-navigation/native';
+import {logEvent} from '../../utils/analytics';
 
 const MyAds = ({navigation, route}) => {
   const [selectedCategory, setSelectedCategory] = useState('Ads');
@@ -156,7 +157,7 @@ const MyAds = ({navigation, route}) => {
   };
 
 
-  const likeItem = async (itemId, userId, idType) => {
+  const likeItem = async (itemId, userId, itemData) => {
     if (userId) {
       setLoadingStates(prevState => ({...prevState, [itemId]: true}));
       try {
@@ -167,6 +168,14 @@ const MyAds = ({navigation, route}) => {
         const url = `api/v1/user/item/like-item`;
         const {response, status} = await post(url, body, true);
         if (status === 200) {
+          const adInfo = itemData?.[0] || itemData;
+          const isCurrentlyLiked = likedStates[itemId] || false;
+          logEvent('item_like', {
+            category: adInfo?.categoryName || '',
+            subcategory: adInfo?.productType || '',
+            item_name: adInfo?.displayName || '',
+            action: isCurrentlyLiked ? 'unlike' : 'like',
+          });
           setLikedStates(prevState => ({
             ...prevState,
             [itemId]: !prevState[itemId],
@@ -194,7 +203,7 @@ const MyAds = ({navigation, route}) => {
     const parentId = item._id;
     const itemData = item.item;
     const isLikeLoading = loadingStates[parentId];
-    const isLiked = likedStates[parentId] || false;
+    const isLiked = parentId in likedStates ? likedStates[parentId] : true;
 
     // Filter media array to find the first image
     const imageFormats = ['jpg', 'jpeg', 'png'];
@@ -221,9 +230,9 @@ const MyAds = ({navigation, route}) => {
             forHome: true,
           });
         }}
-        onDislike={() => likeItem(parentId, userId)}
+        onDislike={() => likeItem(parentId, userId, itemData)}
         isLikeLoading={isLikeLoading}
-        isLiked={true}
+        isLiked={isLiked}
         firstImageUri={firstImage}
         forFavourite={true}
         distance={itemData[0].distance}
@@ -277,7 +286,7 @@ const MyAds = ({navigation, route}) => {
     );
   };
 
-  const handleSelectFavourite = async (latitude, longitude) => {
+  const handleSelectFavourite = async (userId, latitude, longitude) => {
     setIsLoading(true);
     setSelectedSubCategory('Favourite');
     try {
@@ -288,8 +297,11 @@ const MyAds = ({navigation, route}) => {
       };
       const {response, status} = await post(url, body, true);
       if (status === 200) {
-        const responseData = response.response.items;
-        setFavouriteItems(responseData.reverse())
+        const responseData = response.response?.items || response.response || [];
+        setFavouriteItems([...responseData].reverse());
+        const initialLiked = {};
+        responseData.forEach(item => { initialLiked[item._id] = true; });
+        setLikedStates(prev => ({...prev, ...initialLiked}));
         // if (latitude !== null && longitude !== null) {
         //   const sortedItems = await sortItemsByProximity(
         //     responseData,
@@ -328,7 +340,7 @@ const MyAds = ({navigation, route}) => {
         ]}
       />
       {selectedCategory === 'Ads' && (
-        <View style={[{flex : 1, marginBottom : 40}]}>
+        <View style={[{ flex: 1 }]}>
           <View
             style={[
               {
@@ -352,7 +364,7 @@ const MyAds = ({navigation, route}) => {
             />
             <OptionButton
               label={'Favourite'}
-              onPress={() => handleSelectFavourite(userLatitude, userLongitude)}
+              onPress={() => handleSelectFavourite(userId, userLatitude, userLongitude)}
               animation={favouriteButtonAnim}
             />
           </View>
@@ -448,7 +460,7 @@ const MyAds = ({navigation, route}) => {
                         <RefreshControl
                           refreshing={isLoading}
                           onRefresh={() =>
-                            handleSelectFavourite(userLatitude, userLongitude)
+                            handleSelectFavourite(userId, userLatitude, userLongitude)
                           }
                           colors={[colors.mintGreen]}
                         />
@@ -472,18 +484,7 @@ const MyAds = ({navigation, route}) => {
         </View>
       )}
 
-      {/* {selectedCategory === 'Buy Premium' && (
-        <View
-          style={[{flex: 1, justifyContent: 'center', alignItems: 'center'}]}>
-          <Text
-            style={[styles.ts18, {textAlign: 'center', color: colors.black}]}>
-            All ads are free to upload!! enjoy the benefit
-          </Text>
-        </View>
-      )} */}
 
-
-      <BottomNavigation />
     </SafeAreaView>
   );
 };

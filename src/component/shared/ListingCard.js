@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, Text, TouchableOpacity} from 'react-native';
+import {View, Text, TouchableOpacity, ActivityIndicator, Image} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import colors from '../../assets/colors';
 import styles from '../../assets/styles';
@@ -14,6 +14,7 @@ const ListingCard = ({
   onPress,
   onFavoritePress,
   isLiked,
+  isLikeLoading,
   featured = false,
 }) => {
   const [imageError, setImageError] = useState(false);
@@ -85,20 +86,23 @@ const ListingCard = ({
             </Text>
             <TouchableOpacity
               onPress={onFavoritePress}
-              style={[{marginTop: -4}]}
+              style={[{marginTop: -4, width: 32, height: 32, justifyContent: 'center', alignItems: 'center'}]}
               hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
-              <FastImage
-                source={isLiked ? icons.red_heart : icons.heart}
-                style={[
-                  styles.icon32,
-                  {
-                    alignSelf: 'center',
-                    tintColor: isLiked ? undefined : colors.black,
-                    marginTop: isLiked ? 0 : 2,
-                  },
-                ]}
-                resizeMode={FastImage.resizeMode.contain}
-              />
+              {isLikeLoading ? (
+                <ActivityIndicator size="small" color={colors.black} />
+              ) : (
+                <Image
+                  source={isLiked ? icons.red_heart : icons.heart}
+                  style={[
+                    styles.icon32,
+                    {
+                      alignSelf: 'center',
+                      tintColor: isLiked ? undefined : colors.black,
+                      resizeMode: 'contain',
+                    },
+                  ]}
+                />
+              )}
             </TouchableOpacity>
           </View>
 

@@ -13,12 +13,23 @@ import colors from '../../../assets/colors';
 import styles from '../../../assets/styles';
 import DatePicker from 'react-native-date-picker';
 import {put} from '../../../utils/requestBuilder';
+import {logEvent} from '../../../utils/analytics';
 
 const CowBuffalo = ({navigation, route}) => {
   const {itemName, categoryName, forEdit, itemData, parentId, productType} =
     route.params;
     const colorScheme = useColorScheme();
-    
+
+  useEffect(() => {
+    if (!forEdit) {
+      logEvent('listing_step_reached', {
+        step: 'form_filling',
+        category: categoryName,
+        subcategory: itemName,
+      });
+    }
+  }, []);
+
   const [breed, setBreed] = useState('');
   const [currentMilk, setCurrentMilk] = useState('');
   const [totalMilk, setTotalMilk] = useState('');

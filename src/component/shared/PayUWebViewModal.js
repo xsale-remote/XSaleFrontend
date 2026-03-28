@@ -58,7 +58,6 @@ const PayUWebViewModal = ({ visible, payuPayload, onClose, onResult }) => {
     if (url.startsWith(surl)) {
       console.log("✅ Payment success redirect detected:", url);
       onResult("success");
-      onClose();
       return;
     }
 
@@ -66,7 +65,6 @@ const PayUWebViewModal = ({ visible, payuPayload, onClose, onResult }) => {
     if (url.startsWith(furl)) {
       console.log("❌ Payment failure redirect detected:", url);
       onResult("failure");
-      onClose();
       return;
     }
   };

@@ -16,6 +16,7 @@ import icons from '../../assets/icons';
 import {GOOGLE_MAP_KEY} from '../../utils/env';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 import {put} from '../../utils/requestBuilder';
+import { logEvent } from '../../utils/analytics';
 import {getUserInfo} from '../../utils/function';
 import EncryptedStorage from 'react-native-encrypted-storage';
 
@@ -130,6 +131,7 @@ const ChangeLocation = ({navigation, route}) => {
         const url = `api/v1/user/update/user/location`;
         const {response, status} = await put(url, body, true);
         if (status === 200) {
+          logEvent('location_changed');
           try {
             const jsonString = JSON.stringify(response.response);
             await EncryptedStorage.setItem('userData', jsonString);

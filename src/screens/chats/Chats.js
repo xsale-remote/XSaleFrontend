@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {
-  BottomNavigation,
   TitleHeader,
   SearchInput,
 } from '../../component/shared';
@@ -18,6 +17,7 @@ import {get} from '../../utils/requestBuilder';
 import colors from '../../assets/colors';
 import {getUserInfo} from '../../utils/function';
 import {useFocusEffect} from '@react-navigation/native';
+import {logEvent} from '../../utils/analytics';
 
 const Chats = ({navigation}) => {
   const button = [
@@ -26,7 +26,6 @@ const Chats = ({navigation}) => {
     {id: 3, label: 'Sell'},
   ];
 
-  const [socket] = useState(null); 
   const [messages, setMessages] = useState([]);
   const [myId, setMyId] = useState(null);
   const [interactedUsers, setInteractedUsers] = useState([]);
@@ -51,21 +50,8 @@ const Chats = ({navigation}) => {
   );
 
   useEffect(() => {
-    if (socket) {
-      socket.on('new_message', message => {
-        setMessages(prevMessages => [...prevMessages, message]);
-        console.log(`New message received from the backend: ${message}`);
-      });
-    }
-    return () => {
-      if (socket) {
-        socket.off('new_message');
-      }
-    };
-  }, [socket]);
-
-  useEffect(() => {
     getUser();
+    logEvent('chat_list_opened');
   }, []);
 
   const onRefresh = () => {
@@ -106,30 +92,17 @@ const Chats = ({navigation}) => {
               ? item.itemId.item[0]
               : item.itemId?.item;
 
-            if (!itemData) {
-              return; 
-            }
-
             const { displayName, askingPrice, location, media } = itemData || {};
             const { _id: itemId } = item.itemId || {};
             const itemDisplayPicture = media?.find(uri => !uri.endsWith('.mp4'));
 
-            const phoneNumber =
-              userId === item.senderId._id
-                ? item.receiverId.phoneNumber
-                : item.senderId.phoneNumber;
-            const userName =
-              userId === item.senderId._id
-                ? item.receiverId.userName
-                : item.senderId.userName;
-            const profilePicture =
-              userId === item.senderId._id
-                ? item.receiverId.profilePicture
-                : item.senderId.profilePicture;
-            const FCMToken =
-              userId === item.senderId._id
-                ? item.receiverId.FCMToken
-                : item.senderId.FCMToken;
+            const isSender = userId === item.senderId?._id;
+            const otherUser = isSender ? item.receiverId : item.senderId;
+
+            const phoneNumber = otherUser?.phoneNumber || '';
+            const userName = otherUser?.userName || 'User';
+            const profilePicture = otherUser?.profilePicture || '';
+            const FCMToken = otherUser?.FCMToken || '';
 
             const data = {
               userName,
@@ -157,7 +130,6 @@ const Chats = ({navigation}) => {
           setIsLoading(false);
         } else {
           setIsLoading(false);
-          console.log(response, 'no chats exist');
         }
       } else {
         setIsLoading(false);
@@ -172,6 +144,9 @@ const Chats = ({navigation}) => {
 
   const handleSearch = text => {
     setSearchInput(text);
+    if (text.trim().length > 0 && searchInput.trim().length === 0) {
+      logEvent('chat_search_used');
+    }
   };
 
   const renderChatCard = ({item}) => {
@@ -201,11 +176,11 @@ const Chats = ({navigation}) => {
     <SafeAreaView style={[styles.pdh16, {height: '100%'}]}>
       <TitleHeader
         title={'Messages'}
-        onBackPress={() => navigation.navigate('Home')}
+        onBackPress={() => navigation.navigate('MainTabs')}
       />
       <SearchInput value={searchInput} onChange={handleSearch} />
 
-      <View style={[styles.mt16, {marginBottom: 50, flex: 1}]}>
+      <View style={[styles.mt16, { flex: 1 }]}>
         {isLoading ? (
           <ActivityIndicator
             size={'large'}
@@ -258,7 +233,6 @@ const Chats = ({navigation}) => {
         )}
       </View>
 
-      <BottomNavigation />
     </SafeAreaView>
   );
 };

@@ -16,10 +16,22 @@ import {
   DropDown,
 } from '../../../component/shared';
 import {put} from '../../../utils/requestBuilder';
+import {logEvent} from '../../../utils/analytics';
 
 const PropertySale = ({navigation, route}) => {
   const {itemName, categoryName, forEdit, itemData, parentId, productType} =
     route.params;
+
+  useEffect(() => {
+    if (!forEdit) {
+      logEvent('listing_step_reached', {
+        step: 'form_filling',
+        category: categoryName,
+        subcategory: itemName,
+      });
+    }
+  }, []);
+
   const residentialTypes = ['Flat', 'House', 'Farm House'];
   const commercialType = ['Shop', 'Office', 'Other commercial property'];
   const furnishingOptions = ['Furnished', 'Semi Furnished', 'Unfurnished'];

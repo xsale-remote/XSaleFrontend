@@ -4,6 +4,7 @@ import icons from '../../assets/icons';
 import styles from '../../assets/styles';
 import colors from '../../assets/colors';
 import {useNavigation} from '@react-navigation/native';
+import { logEvent } from '../../utils/analytics';
 
 const CategoriesList = () => {
   const Navigation = useNavigation();
@@ -27,6 +28,7 @@ const CategoriesList = () => {
     return (
       <Pressable
         onPress={() => {
+          logEvent('category_selected', { category_name: item.name, source: 'all_categories' });
           if (item.name === 'Vehicle' || item.name === 'Property') {
             Navigation.navigate('SelectOption', item.name);
           } else {

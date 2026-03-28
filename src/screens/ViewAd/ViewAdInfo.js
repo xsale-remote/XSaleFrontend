@@ -26,12 +26,13 @@ import { SellerProfile } from '../../component/viewAd.js';
 import { getUserInfo } from '../../utils/function.js';
 import {
   BannerAd,
-  TestIds,
   BannerAdSize,
   InterstitialAd,
   AdEventType,
 } from 'react-native-google-mobile-ads';
 import { formatPriceIndian } from '../../utils/function.js';
+import { admobViewadinfoInterstitial, admobViewadinfoBanner1, admobViewadinfoBanner2 } from '../../utils/env.js';
+import { logEvent } from '../../utils/analytics';
 
 const { height, width } = Dimensions.get('window');
 
@@ -73,6 +74,14 @@ const ViewAdInfo = ({ navigation, route }) => {
     } catch (error) {
       console.log(`error while fetching user details in view ad info ${error}`);
     }
+  };
+
+  const logMediaViewed = () => {
+    logEvent('item_media_viewed', {
+      category: categoryName || '',
+      subcategory: itemDetails?.productType || '',
+      item_name: displayName || '',
+    });
   };
 
   const formatDate = isoDate => {
@@ -130,6 +139,11 @@ const ViewAdInfo = ({ navigation, route }) => {
         setItemDetails(item);
         setUserDetails(user);
         setCategoryName(responseData?.item.categoryName);
+        logEvent('view_item', {
+          category: item.categoryName || '',
+          subcategory: item.productType || '',
+          item_name: item.displayName || '',
+        });
 
         const filteredDetails = Object.fromEntries(
           Object.entries(item).filter(
@@ -173,8 +187,9 @@ const ViewAdInfo = ({ navigation, route }) => {
             { width: widthRef.current, height: height * 0.27 },
           ]}
           onPress={() => {
+            logMediaViewed();
             const interstitialAdUnitId =
-              'ca-app-pub-9372794286829313/2109975439';
+              admobViewadinfoInterstitial;
             const interstitial =
               InterstitialAd.createForAdRequest(interstitialAdUnitId);
 
@@ -227,8 +242,9 @@ const ViewAdInfo = ({ navigation, route }) => {
             { width: widthRef.current, height: height * 0.27 },
           ]}
           onPress={() => {
+            logMediaViewed();
             const interstitialAdUnitId =
-              'ca-app-pub-9372794286829313/2109975439';
+              admobViewadinfoInterstitial;
             const interstitial =
               InterstitialAd.createForAdRequest(interstitialAdUnitId);
 
@@ -336,6 +352,11 @@ const ViewAdInfo = ({ navigation, route }) => {
           50,
         );
       } else {
+        logEvent('seller_chat_initiated', {
+          category: categoryName || '',
+          subcategory: itemDetails?.productType || '',
+          item_name: displayName || '',
+        });
         const url = `api/v1/messages/message/hasMessaged`;
         const body = { userId1: userData.user._id, userId2: userDetails._id };
         const { response, status } = await post(url, body, true);
@@ -382,8 +403,7 @@ const ViewAdInfo = ({ navigation, route }) => {
     setChatLoading(false);
   };
 
-  const handleCall = phoneNumber => {
-    const phoneUrl = `tel:${phoneNumber}`;
+  const handleCall = async phoneNumber => {
     if (!userData) {
       ToastAndroid.showWithGravityAndOffset(
         'You are not logged in, please login first',
@@ -392,12 +412,28 @@ const ViewAdInfo = ({ navigation, route }) => {
         25,
         50,
       );
-    } else {
-      Linking.canOpenURL(phoneUrl)
-        .then(supported => {
-          if (supported) Linking.openURL(phoneUrl);
-        })
-        .catch(err => console.error('Error opening phone app', err));
+      return;
+    }
+    logEvent('seller_called', {
+      category: categoryName || '',
+      subcategory: itemDetails?.productType || '',
+      item_name: displayName || '',
+    });
+    const cleanNumber = String(phoneNumber).replace(/[^0-9+]/g, '');
+    try {
+      await Linking.openURL(`tel:${cleanNumber}`);
+    } catch {
+      try {
+        await Linking.openURL(`tel:+91${cleanNumber}`);
+      } catch {
+        ToastAndroid.showWithGravityAndOffset(
+          `Call ${cleanNumber}`,
+          ToastAndroid.LONG,
+          ToastAndroid.BOTTOM,
+          25,
+          50,
+        );
+      }
     }
   };
   return (
@@ -423,6 +459,13 @@ const ViewAdInfo = ({ navigation, route }) => {
             <View style={[styles.fdRow, styles.mt4]}>
               <TouchableOpacity
                 onPress={() => {
+                  const action = heartColor === icons.red_heart ? 'unlike' : 'like';
+                  logEvent('item_like', {
+                    category: categoryName || '',
+                    subcategory: itemDetails?.productType || '',
+                    item_name: displayName || '',
+                    action,
+                  });
                   likeFunction(parentId, userId);
                   if (heartColor === icons.red_heart) {
                     setHeartColor(icons.heart);
@@ -541,7 +584,7 @@ const ViewAdInfo = ({ navigation, route }) => {
                 }}>
                   <BannerAd
                     size={BannerAdSize.MEDIUM_RECTANGLE}
-                    unitId="ca-app-pub-9372794286829313/9854241697"
+                    unitId={admobViewadinfoBanner1}
                     style={{ width: '100%' }}
                     onAdFailedToLoad={error => console.log('Ad failed to load:', error)}
                     onAdLoaded={() => console.log('Ad loaded successfully')}
@@ -607,7 +650,7 @@ const ViewAdInfo = ({ navigation, route }) => {
               }}>
                 <BannerAd
                   size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-                  unitId={'ca-app-pub-9372794286829313/7614063803'}
+                  unitId={admobViewadinfoBanner2}
                   style={{ width: '100%' }}
                   onAdFailedToLoad={error => console.log('Ad failed:', error)}
                   onAdLoaded={() => console.log('Ad loaded')}
@@ -718,7 +761,10 @@ const ViewAdInfo = ({ navigation, route }) => {
               <SellerProfile
                 style={styles.mt12}
                 name={userDetails?.userName}
-                customerId={userDetails?._id}
+                seller={{
+                  _id: userDetails?._id,
+                  publicId: userDetails?.publicId,
+                }}
                 userImage={userDetails?.profilePicture}
               />
             </View>

@@ -16,10 +16,22 @@ import {
 } from '../../../component/shared';
 import colors from '../../../assets/colors';
 import {put} from '../../../utils/requestBuilder';
+import {logEvent} from '../../../utils/analytics';
 
 const Accessories = ({navigation, route}) => {
   const {itemName, categoryName, forEdit, itemData, parentId, productType} =
     route.params;
+
+  useEffect(() => {
+    if (!forEdit) {
+      logEvent('listing_step_reached', {
+        step: 'form_filling',
+        category: categoryName,
+        subcategory: itemName,
+      });
+    }
+  }, []);
+
   const accessoriesTypes = [
     'Smart Watch',
     'Headphone',

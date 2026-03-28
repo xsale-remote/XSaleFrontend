@@ -10,6 +10,7 @@ import {TitleHeader, TitleInput, Button} from '../../../component/shared';
 import styles from '../../../assets/styles';
 import colors from '../../../assets/colors';
 import {put} from '../../../utils/requestBuilder';
+import {logEvent} from '../../../utils/analytics';
 
 const Job = ({navigation, route}) => {
   const {
@@ -21,6 +22,17 @@ const Job = ({navigation, route}) => {
     parentId,
     productType,
   } = route.params;
+
+  useEffect(() => {
+    if (!forEdit) {
+      logEvent('listing_step_reached', {
+        step: 'form_filling',
+        category: categoryName,
+        subcategory: itemName,
+      });
+    }
+  }, []);
+
   const [jobLocation, setJobLocation] = useState('');
   const [salaryRange, setSalaryRange] = useState('');
   const [jobDescription, setJobDescription] = useState('');

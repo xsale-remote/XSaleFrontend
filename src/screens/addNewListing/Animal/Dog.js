@@ -16,10 +16,22 @@ import {
 import colors from '../../../assets/colors';
 import styles from '../../../assets/styles';
 import {put} from '../../../utils/requestBuilder';
+import {logEvent} from '../../../utils/analytics';
 
 const Dog = ({navigation, route}) => {
   const {itemName, categoryName, forEdit, itemData, parentId, productType} =
     route.params;
+
+  useEffect(() => {
+    if (!forEdit) {
+      logEvent('listing_step_reached', {
+        step: 'form_filling',
+        category: categoryName,
+        subcategory: itemName,
+      });
+    }
+  }, []);
+
   const vaccinationOption = ['No Vaccination', 'DHPP'];
   const [breed, setBreed] = useState('');
   const [gender, setGender] = useState('');

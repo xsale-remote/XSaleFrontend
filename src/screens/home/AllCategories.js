@@ -1,16 +1,17 @@
-import {SafeAreaView, View, Text} from 'react-native';
+import { SafeAreaView, View, Text } from 'react-native';
 import React from 'react';
-import {TitleHeader} from '../../component/shared';
+import { TitleHeader } from '../../component/shared';
 import styles from '../../assets/styles';
 import icons from '../../assets/icons';
-import {CategoriesList} from '../../component/Home';
-import {BannerAd, TestIds, BannerAdSize} from 'react-native-google-mobile-ads';
+import { CategoriesList } from '../../component/Home';
+import { BannerAd, TestIds, BannerAdSize } from 'react-native-google-mobile-ads';
+import { admobAllcategoriesBanner } from '../../utils/env';
 
-const AllCategories = ({navigation}) => {
+const AllCategories = ({ navigation }) => {
   return (
-    <SafeAreaView style={[styles.pdh16, {flex : 1}]}>
+    <SafeAreaView style={[styles.pdh16, { flex: 1 }]}>
       <TitleHeader title={'Categories'} onBackPress={() => navigation.pop()} />
-      <SafeAreaView style={[{height: '90%', width: '100%'}]}>
+      <SafeAreaView style={[{ height: '90%', width: '100%' }]}>
         <View
           style={[
             {
@@ -31,7 +32,7 @@ const AllCategories = ({navigation}) => {
           }}>
           <BannerAd
             size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-            unitId={'ca-app-pub-9372794286829313/8100668711'}
+            unitId={admobAllcategoriesBanner}
             onAdFailedToLoad={error => {
               console.log('Ad failed to load:', error);
             }}

@@ -17,6 +17,7 @@ import icons from '../../assets/icons';
 import {post, get} from '../../utils/requestBuilder';
 import moment from 'moment';
 import { getUserInfo } from '../../utils/function';
+import { logEvent } from '../../utils/analytics';
 
 const renderMessageBox = ({item, myId, previousItem}) => {
   const showDate =
@@ -74,6 +75,7 @@ const ChatScreen = props => {
   const flatListRef = useRef(null);
 
   useEffect(() => {
+    logEvent('chat_opened');
     setNewConversationId(conversationId);
     if (!isNewChat) {
       const otherUserIdFromConversation = conversation.find(
@@ -109,22 +111,24 @@ const ChatScreen = props => {
 
   const sendMessage = async () => {
     try {
+      const receiverId = otherUserId === '' ? sellerId : otherUserId;
       const body = {
         senderId: myId,
-        receiverId: otherUserId === '' ? sellerId : otherUserId,
+        receiverId,
         content: {
           senderId: myId,
-          receiverId: otherUserId === '' ? sellerId : otherUserId,
+          receiverId,
           message: message.trim(),
         },
         itemId: itemId,
-        FCMToken : otherUserFCMToken , 
+        FCMToken : otherUserFCMToken ,
         senderName : userData.user.userName
       };
 
       const url = `api/v1/messages/sendMessage`;
       const {response, status} = await post(url, body, true);
       if (status === 200) {
+        logEvent('message_sent');
         fetchConversation(response.response.conversationId);
         setNewConversationId(response.response.conversationId);
         setMessageArray(response.response);

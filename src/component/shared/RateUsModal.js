@@ -44,7 +44,7 @@ const RateUsModal = ({visible, onClose}) => {
               styles.ts20,
               styles.fw700,
               {
-                color: colors.primary,
+                color: colors.mintGreen,
                 marginBottom: 16,
                 textAlign: 'center',
               },
@@ -77,18 +77,17 @@ const RateUsModal = ({visible, onClose}) => {
               onPress={onRateNowPress}
             />
 
-            <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
+            <TouchableOpacity onPress={onClose} activeOpacity={0.7} style={{ width: '100%' }}>
               <Text
                 style={[
                   styles.ts16,
                   {
-                    color: colors.primary,
+                    color: colors.darkGrey,
                     textAlign: 'center',
                     fontWeight: '600',
-                    textDecorationLine: 'underline',
                   },
                 ]}>
-                Remind Me Later
+                Go to Home
               </Text>
             </TouchableOpacity>
           </View>

@@ -11,10 +11,21 @@ import styles from '../../../assets/styles';
 import colors from '../../../assets/colors';
 import {TitleHeader, Button, TitleInput} from '../../../component/shared';
 import {put} from '../../../utils/requestBuilder';
+import {logEvent} from '../../../utils/analytics';
 
 const Bull = ({navigation, route}) => {
   const {itemName, categoryName, forEdit, itemData, parentId, productType} =
     route.params;
+
+  useEffect(() => {
+    if (!forEdit) {
+      logEvent('listing_step_reached', {
+        step: 'form_filling',
+        category: categoryName,
+        subcategory: itemName,
+      });
+    }
+  }, []);
 
   const [bullBreed, setBullBreed] = useState('');
   const [bullAge, setBullAge] = useState('');

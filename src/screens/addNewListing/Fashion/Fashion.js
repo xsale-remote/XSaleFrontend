@@ -11,10 +11,22 @@ import styles from '../../../assets/styles';
 import {Button, TitleHeader, TitleInput} from '../../../component/shared';
 import colors from '../../../assets/colors';
 import {put} from '../../../utils/requestBuilder';
+import {logEvent} from '../../../utils/analytics';
 
 const Fashion = ({navigation, route}) => {
   const {categoryName, itemName, forEdit, itemData, parentId, productType} =
     route.params;
+
+  useEffect(() => {
+    if (!forEdit) {
+      logEvent('listing_step_reached', {
+        step: 'form_filling',
+        category: categoryName,
+        subcategory: itemName,
+      });
+    }
+  }, []);
+
   const [clothing, setClothing] = useState('');
   const [additionalInformation, setAdditionalInformation] = useState('');
   const [askingPrice, setAskingPrice] = useState('');

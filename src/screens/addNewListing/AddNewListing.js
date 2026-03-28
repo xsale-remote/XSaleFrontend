@@ -1,10 +1,11 @@
 import {View, Text, SafeAreaView, ScrollView, FlatList} from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {TitleHeader} from '../../component/shared';
 import {CategoriesBox} from '../../component/addNewListing';
 import styles from '../../assets/styles';
 import colors from '../../assets/colors';
 import images from '../../assets/images';
+import { logEvent } from '../../utils/analytics';
 
 const AddNewListing = ({navigation}) => {
   const listingCategory = [

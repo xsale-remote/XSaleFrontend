@@ -7,18 +7,28 @@ import {
   ActivityIndicator,
   ToastAndroid,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {Button, TitleHeader} from '../../component/shared';
+import React, { useEffect, useState } from 'react';
+import { Button, TitleHeader } from '../../component/shared';
 import styles from '../../assets/styles';
 import colors from '../../assets/colors';
-import {MediaBox} from '../../component/addNewListing';
-import {launchImageLibrary} from 'react-native-image-picker';
-import {post} from '../../utils/requestBuilder';
-import {BannerAd, TestIds, BannerAdSize} from 'react-native-google-mobile-ads';
+import { MediaBox } from '../../component/addNewListing';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { post } from '../../utils/requestBuilder';
+import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
+import { admobMediaBanner } from '../../utils/env';
+import { logEvent } from '../../utils/analytics';
 
-const Media = ({navigation, route}) => {
+const Media = ({ navigation, route }) => {
   const [mediaArray, setMediaArray] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    logEvent('listing_step_reached', {
+      step: 'media_upload',
+      category: route.params?.categoryName || '',
+      subcategory: route.params?.itemName || '',
+    });
+  }, []);
 
   const handleMediaSelection = async () => {
     const options = {
@@ -41,7 +51,7 @@ const Media = ({navigation, route}) => {
         setIsUploading(true);
 
         for (const asset of assets) {
-          const {uri, fileName, type} = asset;
+          const { uri, fileName, type } = asset;
 
           try {
             const presignedResponse = await post(
@@ -54,7 +64,7 @@ const Media = ({navigation, route}) => {
             );
 
             if (presignedResponse.status === 200) {
-              const {response: presignedUrl} = presignedResponse.response;
+              const { response: presignedUrl } = presignedResponse.response;
 
               const fileBlob = await fetch(uri).then(res => res.blob());
 
@@ -77,12 +87,15 @@ const Media = ({navigation, route}) => {
                 setMediaArray(prev => [...prev, newMedia]);
               } else {
                 console.error('Failed to upload file to S3', uploadResponse);
+                logEvent('media_upload_failed', { category: route.params?.categoryName || '', error: 's3_upload_failed' });
               }
             } else {
               console.error('Failed to get pre-signed URL', presignedResponse);
+              logEvent('media_upload_failed', { category: route.params?.categoryName || '', error: 'presigned_url_failed' });
             }
           } catch (error) {
             console.error('Error during file upload', error);
+            logEvent('media_upload_failed', { category: route.params?.categoryName || '', error: 'network_error' });
             ToastAndroid.showWithGravityAndOffset(
               'Failed to upload media. Please try again.',
               ToastAndroid.LONG,
@@ -127,30 +140,30 @@ const Media = ({navigation, route}) => {
   };
 
   return (
-    <SafeAreaView style={[{flex: 1}, styles.pdh16]}>
+    <SafeAreaView style={[{ flex: 1 }, styles.pdh16]}>
       <TitleHeader
         title={'Add New Listing'}
         onBackPress={() => navigation.pop()}
       />
       <View
         style={[
-          {width: '110%', borderWidth: 1, alignSelf: 'center', opacity: 0.2},
+          { width: '110%', borderWidth: 1, alignSelf: 'center', opacity: 0.2 },
         ]}
       />
       <ScrollView
         style={[styles.pdt12]}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{flexGrow: 1}}>
-        <Text style={[styles.ts19, {color: colors.black}]}>
+        contentContainerStyle={{ flexGrow: 1 }}>
+        <Text style={[styles.ts19, { color: colors.black }]}>
           Uploads your Item's photo or video
         </Text>
         <Text
-          style={[styles.mt8, styles.ts15, styles.mb8, {color: colors.black}]}>
+          style={[styles.mt8, styles.ts15, styles.mb8, { color: colors.black }]}>
           {'(Please use clear photos and videos for good impressions)'}
         </Text>
         <Button
           label={'Add Media'}
-          style={[{width: '50%', alignSelf: 'center'}, styles.mb20]}
+          style={[{ width: '50%', alignSelf: 'center' }, styles.mb20]}
           onPress={handleMediaSelection}
         />
         {isUploading && (
@@ -161,10 +174,10 @@ const Media = ({navigation, route}) => {
           />
         )}
         {mediaArray.length > 0 && !isUploading && (
-          <View style={{flex: 1}}>
+          <View style={{ flex: 1 }}>
             <FlatList
               data={mediaArray}
-              renderItem={({item}) => (
+              renderItem={({ item }) => (
                 <MediaBox
                   mediaUri={item.uri}
                   mediaType={item.type}
@@ -174,22 +187,22 @@ const Media = ({navigation, route}) => {
               )}
               keyExtractor={item => item.uri || Math.random().toString()}
               numColumns={2}
-              contentContainerStyle={{paddingBottom: 20}} // Add padding to ensure content doesn't touch the ad
+              contentContainerStyle={{ paddingBottom: 20 }}
             />
           </View>
         )}
         {mediaArray.length > 0 && !isUploading && (
           <Button
             label={'Continue'}
-            style={{marginBottom: 10, marginTop: 30 }}
+            style={{ marginBottom: 10, marginTop: 30 }}
             onPress={handleContinue}
           />
         )}
       </ScrollView>
-      <View style={{width: '100%'}}>
+      <View style={{ width: '100%' }}>
         <BannerAd
           size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          unitId={'ca-app-pub-9372794286829313/9005653637'}
+          unitId={admobMediaBanner}
           onAdFailedToLoad={error => {
             console.log('Ad failed to load:', error);
           }}

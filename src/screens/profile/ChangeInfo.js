@@ -20,7 +20,7 @@ import { logEvent } from '../../utils/analytics';
 import {getUserInfo} from '../../utils/function';
 import EncryptedStorage from 'react-native-encrypted-storage';
 
-const ChageInfo = ({navigation}) => {
+const ChangeInfo = ({navigation}) => {
   const {height} = Dimensions.get('window');
   const [uploadModalVisible, setUploadModalVisible] = useState(false);
   const [profilePictureURL, setProfilePictureURL] = useState('');
@@ -318,4 +318,4 @@ const ChageInfo = ({navigation}) => {
   );
 };
 
-export default ChageInfo;
+export default ChangeInfo;

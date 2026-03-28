@@ -18,11 +18,10 @@ import messaging from '@react-native-firebase/messaging';
 import {
   BannerAd,
   BannerAdSize,
-  RewardedAd,
-  RewardedAdEventType,
 } from 'react-native-google-mobile-ads';
-import {admobMobilenumberRewarded, admobMobilenumberBanner} from "../../utils/env"
+import { admobMobilenumberBanner } from "../../utils/env"
 import { logEvent } from '../../utils/analytics';
+import { CommonActions } from '@react-navigation/native';
 
 const MobileNumber = ({ navigation, route }) => {
   const [mobileNumber, setMobileNumber] = useState('');
@@ -54,52 +53,6 @@ const MobileNumber = ({ navigation, route }) => {
     setNumberError(false);
     setLoading(true);
     logEvent('auth_phone_entered');
-
-    await new Promise(resolve => setTimeout(resolve, 50));
-
-    const rewardedAdUnitId = admobMobilenumberRewarded;
-    const rewarded = RewardedAd.createForAdRequest(rewardedAdUnitId, {
-      requestNonPersonalizedAdsOnly: true,
-    });
-
-    let navigationHandled = false;
-    const safeNavigate = (screen, params = {}) => {
-      if (!navigationHandled) {
-        navigationHandled = true;
-        navigation.navigate(screen, params);
-      }
-    };
-
-    const showRewardedAd = onComplete => {
-      let timeout;
-      const unsubscribe = rewarded.addAdEventsListener(async ({ type }) => {
-        if (type === RewardedAdEventType.LOADED) {
-          rewarded.show();
-        }
-
-        if (type === RewardedAdEventType.EARNED_REWARD) {
-          clearTimeout(timeout);
-          unsubscribe();
-          onComplete();
-        }
-
-        if (
-          type === RewardedAdEventType.ERROR ||
-          type === RewardedAdEventType.CLOSED
-        ) {
-          clearTimeout(timeout);
-          unsubscribe();
-          onComplete();
-        }
-      });
-
-      rewarded.load();
-      timeout = setTimeout(() => {
-        console.log('⚠️ Ad timeout, proceeding without ad...');
-        unsubscribe();
-        onComplete();
-      }, 6000);
-    };
 
     try {
       const url = 'api/v1/user/check-user';
@@ -134,11 +87,8 @@ const MobileNumber = ({ navigation, route }) => {
             50,
           );
 
-          showRewardedAd(() => {
-            safeNavigate('MainTabs');
-            setLoading(false);
-          });
-          safeNavigate('MainTabs');
+          navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'MainTabs' }] }));
+          setLoading(false);
         } else {
           ToastAndroid.show(
             'Login failed, please try again',
@@ -147,17 +97,12 @@ const MobileNumber = ({ navigation, route }) => {
           setLoading(false);
         }
       } else {
-        showRewardedAd(() => {
-          safeNavigate('Location', { mobileNumber });
-          setLoading(false);
-        });
-        safeNavigate('Location', { mobileNumber });
+        navigation.navigate('Location', { mobileNumber });
+        setLoading(false);
       }
     } catch (error) {
-      console.log('Error during login/signup:', error);
       ToastAndroid.show('Something went wrong', ToastAndroid.SHORT);
       setLoading(false);
-      safeNavigate('MainTabs');
     }
   };
 
@@ -237,41 +182,7 @@ const MobileNumber = ({ navigation, route }) => {
               textStyle={{ color: colors.black }}
               onPress={() => {
                 logEvent('auth_skipped');
-                const rewardedAdUnitId =
-                  admobMobilenumberRewarded;
-                const rewarded = RewardedAd.createForAdRequest(
-                  rewardedAdUnitId,
-                  {
-                    requestNonPersonalizedAdsOnly: true,
-                  },
-                );
-                const unsubscribe = rewarded.addAdEventsListener(
-                  async ({ type }) => {
-                    // When ad is loaded, show it
-                    if (type === RewardedAdEventType.LOADED) {
-                      rewarded.show();
-                    }
-
-                    // When user earns the reward (ad completed)
-                    if (type === RewardedAdEventType.EARNED_REWARD) {
-                      unsubscribe();
-                      navigation.navigate('MainTabs');
-                    }
-
-                    // When ad fails to load or is closed early — still navigate
-                    if (
-                      type === RewardedAdEventType.ERROR ||
-                      type === RewardedAdEventType.CLOSED
-                    ) {
-                      unsubscribe();
-                      navigation.navigate('MainTabs');
-                    }
-                  },
-                );
-
-                // Start loading the ad
-                rewarded.load();
-                navigation.navigate('MainTabs');
+                navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'MainTabs' }] }));
               }}
               disable={loading}
             />

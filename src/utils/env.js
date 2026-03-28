@@ -22,6 +22,7 @@ import {
   ADMOB_PRODUCTSLISTING_BANNER_2,
   ADMOB_ALLCATEGORIES_BANNER,
   ADMOB_HOME_BANNER,
+  ADMOB_HOME_INTERSTITIAL,
 } from '../config/env-config';
 
 export const base_url = API_BASE_URL;
@@ -47,3 +48,4 @@ export const admobProductslistingBanner1 = ADMOB_PRODUCTSLISTING_BANNER_1;
 export const admobProductslistingBanner2 = ADMOB_PRODUCTSLISTING_BANNER_2;
 export const admobAllcategoriesBanner = ADMOB_ALLCATEGORIES_BANNER;
 export const admobHomeBanner = ADMOB_HOME_BANNER;
+export const admobHomeInterstitial = ADMOB_HOME_INTERSTITIAL;

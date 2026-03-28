@@ -6,7 +6,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import { enableScreens } from 'react-native-screens';
-import { MobileAds, AppOpenAd, AdEventType } from 'react-native-google-mobile-ads';
+import { MobileAds, AppOpenAd, AdEventType, InterstitialAd } from 'react-native-google-mobile-ads';
+import { admobHomeInterstitial } from './src/utils/env';
 import SplashScreen from 'react-native-splash-screen';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import DeviceInfo from 'react-native-device-info';
@@ -114,6 +115,24 @@ const App = () => {
         // Show app immediately
         setIsReady(true);
         SplashScreen.hide();
+
+        // Show interstitial every 3rd app open for logged-in users
+        if (userInfo) {
+          const raw = await AsyncStorage.getItem('app_open_count');
+          const count = (parseInt(raw) || 0) + 1;
+          await AsyncStorage.setItem('app_open_count', String(count));
+          console.log('[Interstitial] raw:', raw, '| count:', count, '| count % 3:', count % 3, '| will show ad:', count % 3 === 0);
+          if (count % 3 === 0) {
+            const interstitial = InterstitialAd.createForAdRequest(admobHomeInterstitial);
+            let shown = false;
+            const safeClose = () => { if (!shown) { shown = true; } };
+            const timeout = setTimeout(safeClose, 6000);
+            interstitial.addAdEventListener(AdEventType.LOADED, () => { console.log('[Interstitial] Ad loaded, showing...'); interstitial.show(); });
+            interstitial.addAdEventListener(AdEventType.CLOSED, () => { console.log('[Interstitial] Ad closed'); clearTimeout(timeout); safeClose(); });
+            interstitial.addAdEventListener(AdEventType.ERROR, (error) => { console.log('[Interstitial] Ad error:', error); clearTimeout(timeout); safeClose(); });
+            interstitial.load();
+          }
+        }
 
         // All background tasks after splash is gone
         Settings.initializeSDK();

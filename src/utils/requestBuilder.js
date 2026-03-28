@@ -32,9 +32,12 @@ export const patch = async (url, body, token = true) => {
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
     if (token == true) {
-      let authToken = await EncryptedStorage.getItem('userInfo');
-      authToken = JSON.parse(authToken).token;
-      headers.append('Authorization', `Bearer ${authToken}`);
+      const userInfo = JSON.parse(await EncryptedStorage.getItem('userData'));
+      if (userInfo && userInfo.token) {
+        headers.append('Authorization', `Bearer ${userInfo.token}`);
+      } else {
+        throw new Error('User token not found');
+      }
     }
 
     let requestOptions = {

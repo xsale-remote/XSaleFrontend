@@ -411,7 +411,7 @@ const Profile = ({ navigation }) => {
       }
       await EncryptedStorage.removeItem('userData');
       setShowDeleteModal(false);
-      navigation.replace('MainTabs');
+      navigation.reset({ index: 0, routes: [{ name: 'MobileNumber' }] });
     } catch (error) {
       console.log(`error while deleting the user ${error}`);
     }

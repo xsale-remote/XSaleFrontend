@@ -11,9 +11,9 @@
     "start": "react-native start",
     "start:prod": "node src/utils/generate-env.js prod && react-native start",
     "test": "jest",
-    "apk": "node src/utils/generate-env.js prod && cd android && ./gradlew assembleRelease && cd .. && explorer android\\app\\build\\outputs\\apk\\release\\",
-    "apk:dev": "node src/utils/generate-env.js dev && cd android && ./gradlew assembleDebug && cd .. && start android\\app\\build\\outputs\\apk\\debug\\",
-    "bundle": "node src/utils/generate-env.js prod && cd android && ./gradlew bundleRelease && cd .."
+    "apk": "node src/utils/generate-env.js prod && cd android && gradlew.bat assembleRelease && cd .. && explorer android\\app\\build\\outputs\\apk\\release\\",
+    "apk:dev": "node src/utils/generate-env.js dev && cd android && gradlew.bat assembleDebug && cd .. && explorer android\\app\\build\\outputs\\apk\\debug\\",
+    "bundle": "node src/utils/generate-env.js prod && cd android && gradlew.bat bundleRelease && cd .."
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.23.1",
